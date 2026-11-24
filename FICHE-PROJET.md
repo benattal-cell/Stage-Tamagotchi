@@ -131,7 +131,9 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Elle grandit tous les 3 jours joués (bébé, ado, adulte), en bien ou en mal, et on peut la rattraper | Fait |
 | Panneau administrateur pour tester | Fait |
 | Interface pour téléphone, installable sur l'écran d'accueil | Fait |
-| Boutique et les 6 autres décors | À faire |
+| Boutique : les 7 décors et 9 accessoires à acheter avec ses pièces | Fait |
+| Atelier : couleur, oreilles, yeux, dents, chapeau, lunettes, tour de cou | Fait |
+| La créature parle (bulles), aime les caresses (cœurs), fête les bonnes journées (confettis) | Fait |
 | Quêtes bonus et cadeaux hebdomadaires | À faire |
 | Export de l'appli Santé | À faire |
 | Comptes, créatures des copains, classement | À faire |
@@ -142,6 +144,25 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 - **Bonne ou mauvaise forme** : on regarde la moyenne des 3 dernières journées. En dessous de 300 points, elle passe en mauvais état ; dès que la moyenne remonte, elle redevient belle. Le bébé est toujours en forme.
 - **Son état du jour**, dans cet ordre : plus de 5 h d'écran → gros mal de tête ; moins de 7 h de sommeil → fatiguée ; entre 3 et 5 h d'écran → petit mal de tête ; moins de 10 000 pas → pas contente ; sinon en forme.
 - **Les données restent dans le navigateur** du joueur : rien n'est envoyé au serveur pour l'instant.
+
+### L'atelier et la boutique
+
+- **L'atelier est gratuit** : 10 couleurs, 5 formes d'oreilles, 5 formes d'yeux, 5 dentitions. On peut changer quand on veut.
+- **La boutique est payante**, avec les pièces gagnées : les 7 décors (aux prix décidés pendant l'atelier) et 9 accessoires.
+
+| Accessoire | Prix |
+|---|---|
+| Bonnet à pompon | 80 pièces |
+| Nœud papillon | 90 pièces |
+| Lunettes rondes | 100 pièces |
+| Casquette | 120 pièces |
+| Écharpe | 140 pièces |
+| Lunettes de soleil | 180 pièces |
+| Chapeau haut-de-forme | 250 pièces |
+| Collier doré | 300 pièces |
+| Couronne | 600 pièces |
+
+Ces prix sont une proposition : une journée parfaite rapporte 90 pièces, donc le bonnet se gagne en un jour et la couronne en une semaine. Le chef de projet peut les changer.
 
 ### Le panneau administrateur
 

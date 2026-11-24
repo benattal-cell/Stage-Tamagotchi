@@ -19,6 +19,7 @@
   --night: #1E2233;
   --panel: rgba(30, 34, 51, .92);
   --line: #3B4160;
+  --panel-solid: #2A2F47;
   --ink: #F2F0FA;
   --muted: #C9CDE6;
   --coin: #F7C948;
@@ -203,8 +204,55 @@ button, input { touch-action: manipulation; }
 .stepper .num { flex: 1; width: auto; min-width: 0; min-height: 56px; text-align: center; font-family: var(--display); font-size: 1.5rem; }
 .chip, .ghost { min-height: 48px; }
 
+/* ---------- Le menu du bas, l'atelier et la boutique ---------- */
+.bottombar { flex-direction: column; align-items: stretch; flex-wrap: nowrap; }
+.nav { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 8px; }
+.navb {
+  position: relative; min-height: 60px; border: 0; border-radius: 18px; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: var(--panel); color: var(--ink); font-family: var(--display); font-weight: 800; font-size: .95rem; line-height: 1.1;
+  box-shadow: 0 5px 0 #14172A, 0 10px 18px rgba(0,0,0,.3); transition: transform .08s, box-shadow .08s;
+}
+.navb.main { background: var(--coin); color: var(--dark-ink); box-shadow: 0 5px 0 var(--coin-deep), 0 10px 18px rgba(0,0,0,.3); }
+.navb:active { transform: translateY(4px); box-shadow: 0 1px 0 #14172A; }
+.navb svg { width: 24px; height: 24px; }
+.navb:not(:active) svg { animation: bob 2.6s ease-in-out infinite; }
+.navb:nth-child(2) svg { animation-delay: .4s; } .navb:nth-child(3) svg { animation-delay: .8s; }
+@keyframes bob { 50% { transform: translateY(-3px) rotate(-4deg); } }
+#shopDot:not([hidden]) { position: absolute; top: 6px; right: 12px; width: 14px; height: 14px; border-radius: 50%; background: #FF6B6B; border: 2px solid var(--night); animation: pulse 1.2s ease-in-out infinite; }
+.pill.pop { animation: pop .35s ease-out; }
+@keyframes pop { 40% { transform: scale(1.18); } }
+.sheetwrap:not([hidden]) { position: absolute; inset: 0; z-index: 8; display: flex; align-items: flex-end; pointer-events: none; }
+.sheet {
+  pointer-events: auto; width: 100%; box-sizing: border-box; max-height: 56%; overflow-y: auto; background: var(--night); border-top: 2px solid var(--line);
+  border-radius: 26px 26px 0 0; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 18px max(16px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -12px 30px rgba(0,0,0,.4); animation: sheet .3s ease-out both;
+}
+.sheet > * { flex: none; }
+.sheet .item { background: var(--panel-solid); }
+.sheethead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.sheethead h2 { font-size: 1.6rem; font-weight: 800; }
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; min-height: 44px; padding: 6px 14px; border-radius: 999px; border: 2px solid var(--line); background: transparent; color: var(--muted); font-weight: 800; font-size: .95rem; }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--dark-ink); border-color: var(--ink); }
+.opts { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; min-height: 116px; }
+.item { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--night); border-radius: 16px; padding: 10px 12px; box-sizing: border-box; }
+.item .nm { font-weight: 800; min-width: 0; } .item .sub { display: block; font-size: .85rem; font-weight: 700; color: var(--muted); }
+.buy { flex: none; min-height: 44px; padding: 6px 14px; border-radius: 12px; border: 0; background: var(--coin); color: var(--dark-ink); font-weight: 800; font-size: .95rem; box-shadow: 0 4px 0 var(--coin-deep); }
+.buy:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--coin-deep); }
+.buy:disabled { background: var(--line); color: var(--muted); box-shadow: none; }
+.buy.on { background: var(--mint); box-shadow: 0 4px 0 #3FA890; }
+/* La bulle de parole de la créature */
+#bubble:not([hidden]) {
+  position: absolute; z-index: 4; transform: translate(-50%, -100%); max-width: 220px; pointer-events: none;
+  background: #FFF8E7; color: var(--dark-ink); font-weight: 800; font-size: .95rem; line-height: 1.25; text-align: center;
+  padding: 8px 14px; border-radius: 16px; box-shadow: 0 6px 14px rgba(0,0,0,.35); animation: pop .3s ease-out;
+}
+#bubble::after { content: ""; position: absolute; left: 50%; bottom: -8px; width: 16px; height: 16px; background: #FFF8E7; transform: translateX(-50%) rotate(45deg); border-radius: 3px; }
+
 @media (prefers-reduced-motion: reduce) {
-  #custom .card, .veil .card { animation: none; } .ui:not([hidden]), #open { animation: none; } }
+  .navb svg, #shopDot, .pill.pop, #bubble { animation: none !important; }
+  #custom .card, .veil .card, .sheet { animation: none; } .ui:not([hidden]), #open { animation: none; } }
 </style>
 </head>
 <body>
@@ -228,8 +276,12 @@ button, input { touch-action: manipulation; }
           <div class="g"><span>Pas</span><div class="track"><i id="bSteps"></i></div><span class="gv" id="gSteps"></span><span class="gk" id="kSteps"></span></div>
           <div class="g"><span>Écran</span><div class="track"><i id="bScreen"></i></div><span class="gv" id="gScreen"></span><span class="gk" id="kScreen"></span></div>
         </div>
-        <button type="button" class="big" id="enter">Entrer ma journée</button>
       </div>
+      <nav class="nav" aria-label="Menu">
+        <button type="button" class="navb main" id="enter"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M8 13l3 3 5-6"/></svg><span id="enterLab">Ma journée</span></button>
+        <button type="button" class="navb" id="navLook"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l4 3 4-3 5 4-3 3-2-1v10H8V10l-2 1-3-3z"/></svg><span>Atelier</span></button>
+        <button type="button" class="navb" id="navShop"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Boutique</span><i id="shopDot" hidden></i></button>
+      </nav>
       <span class="hint">Glisse pour la faire tourner · touche-la</span>
     </div>
   </div>
@@ -237,7 +289,7 @@ button, input { touch-action: manipulation; }
   <div class="ui" id="custom" hidden>
     <form class="card" id="adopt" novalidate>
       <h2>Elle est à toi !</h2>
-      <p>Donne-lui un nom et choisis sa couleur.</p>
+      <p>Donne-lui un nom et une couleur. Tu pourras changer tout le reste dans l'Atelier.</p>
       <div class="field">
         <label for="name">Son nom</label>
         <input id="name" name="name" type="text" maxlength="12" autocomplete="off" placeholder="Écris son nom">
@@ -343,6 +395,7 @@ button, input { touch-action: manipulation; }
             <button type="button" class="ghost" id="aGood">Bonne journée + jour suivant</button>
             <button type="button" class="ghost" id="aBadDay">Mauvaise journée + jour suivant</button>
             <button type="button" class="ghost" id="aNext">Jour suivant sans rien entrer</button>
+            <button type="button" class="ghost" id="aCoins">+ 500 pièces</button>
           </div>
         </div>
         <div class="row"><button type="button" class="ghost danger" id="aReset">Tout effacer et recommencer</button></div>
@@ -351,6 +404,21 @@ button, input { touch-action: manipulation; }
     </div>
   </div>
 
+  <div class="sheetwrap" id="look" hidden>
+    <div class="sheet" role="dialog" aria-labelledby="lookTitle">
+      <div class="sheethead"><h2 id="lookTitle">Atelier</h2><button type="button" class="ghost" id="lookClose">Terminé</button></div>
+      <div class="tabs" id="lookTabs" role="tablist" aria-label="Ce que tu veux changer"></div>
+      <div class="opts" id="lookOpts"></div>
+    </div>
+  </div>
+  <div class="sheetwrap" id="shop" hidden>
+    <div class="sheet" role="dialog" aria-labelledby="shopTitle">
+      <div class="sheethead"><h2 id="shopTitle">Boutique</h2><span class="pill" id="shopCoins"></span><button type="button" class="ghost" id="shopClose">Terminé</button></div>
+      <div class="tabs" id="shopTabs" role="tablist" aria-label="Rayons de la boutique"></div>
+      <div class="opts" id="shopList"></div>
+    </div>
+  </div>
+  <div id="bubble" hidden></div>
   <div id="toast" role="status" aria-live="polite" hidden></div>
 
   <div id="fallback" hidden>La 3D ne peut pas s'afficher sur cet appareil.</div>
@@ -382,7 +450,7 @@ button, input { touch-action: manipulation; }
   scene.fog = new THREE.Fog(0x2B2F52, 12, 28);
   var camera = new THREE.PerspectiveCamera(38, 1.6, 0.1, 100);
 
-  scene.add(new THREE.HemisphereLight(0xC4CCFF, 0x3A3558, 0.5));
+  var hemi = new THREE.HemisphereLight(0xC4CCFF, 0x3A3558, 0.5); scene.add(hemi);
   var sun = new THREE.DirectionalLight(0xFFF1CF, 0.7);
   sun.position.set(4, 7, 5);
   sun.castShadow = true;
@@ -427,12 +495,15 @@ button, input { touch-action: manipulation; }
   var brick = new THREE.CanvasTexture(c);
   brick.wrapS = brick.wrapT = THREE.RepeatWrapping; brick.repeat.set(13, 2);
   brick.encoding = THREE.sRGBEncoding;
-  mesh(new THREE.BoxGeometry(80, 4.6, 0.4), mat(0xffffff, { map: brick }), 0, 2.3, -3.2);
-  mesh(new THREE.BoxGeometry(80, 0.2, 0.6), mat(0x4A4470), 0, 4.7, -3.2);
+  var wallMat = mat(0xffffff, { map: brick });
+  var wall = mesh(new THREE.BoxGeometry(80, 4.6, 0.4), wallMat, 0, 2.3, -3.2);
+  var ledge = mesh(new THREE.BoxGeometry(80, 0.2, 0.6), mat(0x4A4470), 0, 4.7, -3.2);
 
   var moon = new THREE.Mesh(new THREE.SphereGeometry(1.1, 24, 16), new THREE.MeshBasicMaterial({ color: 0xF3E9C6, fog: false }));
   moon.position.set(6.5, 8.2, -14); scene.add(moon);
 
+  var HOME = { x: 0.5, z: 0.7 }, flame = null, fireLight = null;
+  var _k0 = scene.children.length;      /* tout ce qui est créé à partir d'ici appartient au décor « poubelles » */
   var binMat = mat(0x4E5A6E, { roughness: 0.6, metalness: 0.3 });
   var lidMat = mat(0x65738C, { roughness: 0.6, metalness: 0.3 });
   mesh(new THREE.CylinderGeometry(0.62, 0.52, 1.5, 24), binMat, 2.7, 0.75, -1.9);
@@ -445,6 +516,112 @@ button, input { touch-action: manipulation; }
   mesh(new THREE.SphereGeometry(0.5, 20, 16), bagMat, -4.6, 0.36, -1.6).scale.set(1.2, 0.75, 1);
   mesh(new THREE.CylinderGeometry(0.58, 0.5, 1.4, 24), binMat, -5.9, 0.7, -2.0);
   mesh(new THREE.CylinderGeometry(0.64, 0.64, 0.12, 24), lidMat, -5.9, 1.46, -2.0);
+
+  /* ---------- Les 7 décors de la boutique ----------
+     Chaque décor est un groupe d'objets qu'on montre ou qu'on cache, plus des couleurs de ciel, de sol et de lumière. */
+  var D = [0, 1, 2, 3, 4, 5, 6].map(function () { var gr = new THREE.Group(); gr.visible = false; scene.add(gr); return gr; });
+  scene.children.slice(_k0).forEach(function (o) { if (D.indexOf(o) < 0) D[0].add(o); });
+  function B(w, h, d, col, x, y, z, par, opt) { return mesh(new THREE.BoxGeometry(w, h, d), mat(col, opt), x, y, z, par); }
+  function C(rt, rb, h, col, x, y, z, par, opt) { return mesh(new THREE.CylinderGeometry(rt, rb, h, 20), mat(col, opt), x, y, z, par); }
+  function S(r, col, x, y, z, par, opt) { return mesh(new THREE.SphereGeometry(r, 20, 14), mat(col, opt), x, y, z, par); }
+  function glow(r, col, x, y, z, par) { var m = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), new THREE.MeshBasicMaterial({ color: col })); m.position.set(x, y, z); par.add(m); return m; }
+  var GOLD = { metalness: 0.6, roughness: 0.35 };
+  (function () {
+    var g, i, o;
+    /* 2. La ruelle aménagée : une cabane en carton, un tapis, une guirlande */
+    g = D[1];
+    B(1.9, 1.3, 1.4, 0xB98A56, 2.7, 0.65, -2.2, g); B(0.7, 0.9, 0.05, 0x3A2A1C, 2.7, 0.45, -1.49, g);
+    B(1.3, 0.06, 1.6, 0xA47645, 2.22, 1.62, -2.2, g).rotation.z = 0.6; B(1.3, 0.06, 1.6, 0xA47645, 3.18, 1.62, -2.2, g).rotation.z = -0.6;
+    C(1.5, 1.5, 0.03, 0x8E4A5E, HOME.x, 0.015, HOME.z, g).castShadow = false;
+    C(0.22, 0.18, 0.3, 0xB5553C, -0.9, 0.15, -1.6, g); S(0.3, 0x5FA052, -0.9, 0.5, -1.6, g);
+    for (i = 0; i < 9; i++) glow(0.09, [0xF7C948, 0xFF6B6B, 0x7FE8CF, 0x9B7EDE][i % 4], -3.2 + i * 0.8, 3.6 - Math.sin(i / 8 * Math.PI) * 0.5, -2.95, g);
+    /* 3. La cabane dans l'arbre */
+    g = D[2];
+    C(0.75, 0.9, 7, 0x6B4A2E, -3.1, 3.5, -2.5, g);
+    [[-3.1, 5.3, -2.3, 1.6], [-1.6, 5.6, -2.6, 1.3], [-4.3, 5, -2.4, 1.4], [3.4, 5.6, -2.6, 1.4]].forEach(function (q) { S(q[3], 0x4F9B4A, q[0], q[1], q[2], g); });
+    [0.9, 1.8, 2.7, 3.6].forEach(function (y) { B(80, 0.04, 0.02, 0x8A5E38, 0, y, -2.98, g); });
+    B(1.5, 1.3, 0.12, 0x6B4A2E, 1.3, 2.5, -2.98, g); B(1.2, 1, 0.14, 0xBFE8FF, 1.3, 2.5, -2.98, g, { emissive: 0x4A7A99 });
+    B(0.06, 1, 0.16, 0x6B4A2E, 1.3, 2.5, -2.98, g); B(1.2, 0.06, 0.16, 0x6B4A2E, 1.3, 2.5, -2.98, g);
+    C(1.5, 1.5, 0.03, 0xD9A441, HOME.x, 0.015, HOME.z, g).castShadow = false;
+    glow(0.14, 0xFFD27A, -0.6, 3.3, -2.6, g); C(0.02, 0.02, 1.2, 0x3A2A1C, -0.6, 4, -2.6, g);
+    /* 4. La caravane */
+    g = D[3];
+    B(3, 1.5, 1.5, 0xF4EAD5, 1.9, 1.35, -2.4, g); B(3.02, 0.25, 1.52, 0x3FA7A0, 1.9, 1.05, -2.4, g);
+    C(0.75, 0.75, 1.5, 0xF4EAD5, 0.4, 1.35, -2.4, g).rotation.x = Math.PI / 2; C(0.75, 0.75, 1.5, 0xF4EAD5, 3.4, 1.35, -2.4, g).rotation.x = Math.PI / 2;
+    B(0.9, 0.55, 0.06, 0x35506B, 1.3, 1.7, -1.63, g); B(0.6, 1.1, 0.06, 0xE2725B, 2.6, 1.2, -1.63, g);
+    C(0.35, 0.35, 0.2, 0x2A2A30, 1, 0.35, -1.7, g).rotation.x = Math.PI / 2; C(0.35, 0.35, 0.2, 0x2A2A30, 2.8, 0.35, -1.7, g).rotation.x = Math.PI / 2;
+    S(7, 0x5E9A52, -7, -4.6, -10, g); S(8, 0x6FAE5E, 6, -5.6, -12, g);
+    C(0.07, 0.07, 0.7, 0x5A3A22, -0.8, 0.08, -1.4, g).rotation.z = Math.PI / 2; o = C(0.07, 0.07, 0.7, 0x5A3A22, -0.8, 0.08, -1.4, g); o.rotation.z = Math.PI / 2; o.rotation.y = 1.2;
+    o = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.55, 10), new THREE.MeshBasicMaterial({ color: 0xFF9A3C })); o.position.set(-0.8, 0.4, -1.4); g.add(o); flame = o;
+    o = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.34, 10), new THREE.MeshBasicMaterial({ color: 0xFFD25A })); o.position.set(-0.8, 0.32, -1.4); g.add(o);
+    fireLight = new THREE.PointLight(0xFF9A3C, 0.9, 7); fireLight.position.set(-0.8, 0.7, -1.2); g.add(fireLight);
+    /* 5. La chambre cosy */
+    g = D[4];
+    B(80, 0.25, 0.05, 0xFFFFFF, 0, 0.125, -2.97, g);
+    B(2.6, 0.4, 1.5, 0x8A5A3A, 2.4, 0.3, -2.3, g); B(2.5, 0.3, 1.4, 0xF6F1E7, 2.4, 0.62, -2.3, g); B(1.6, 0.34, 1.44, 0x6C8EBF, 2.85, 0.63, -2.3, g);
+    B(0.7, 0.2, 1, 0xFFFFFF, 1.5, 0.85, -2.3, g); B(0.15, 1.3, 1.5, 0x8A5A3A, 1.05, 0.75, -2.3, g);
+    B(1.6, 1.4, 0.12, 0xFFFFFF, -0.4, 2.6, -2.98, g); B(1.35, 1.15, 0.14, 0x27305A, -0.4, 2.6, -2.98, g); glow(0.18, 0xF3E9C6, -0.1, 2.85, -2.88, g);
+    B(0.3, 1.7, 0.1, 0xE27396, -1.3, 2.55, -2.9, g); B(0.3, 1.7, 0.1, 0xE27396, 0.5, 2.55, -2.9, g);
+    C(1.6, 1.6, 0.03, 0xE27396, HOME.x, 0.015, HOME.z, g).castShadow = false;
+    C(0.05, 0.05, 1.5, 0x44403C, -0.9, 0.75, -2.4, g); C(0.3, 0.3, 0.05, 0x44403C, -0.9, 0.03, -2.4, g);
+    o = new THREE.Mesh(new THREE.ConeGeometry(0.38, 0.42, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0xFFE2A0, side: THREE.DoubleSide })); o.position.set(-0.9, 1.65, -2.4); g.add(o);
+    o = new THREE.PointLight(0xFFD9A0, 0.6, 7); o.position.set(-0.9, 1.6, -2); g.add(o);
+    B(1.4, 0.08, 0.3, 0x8A5A3A, 2.6, 2.7, -2.9, g);
+    [0xE2725B, 0x3FA7A0, 0xF7C948, 0x9B7EDE].forEach(function (col, n) { B(0.13, 0.42, 0.25, col, 2.2 + n * 0.17, 2.95, -2.9, g); });
+    /* 6. La villa avec piscine */
+    g = D[5];
+    B(8, 3.4, 0.3, 0xFFFFFF, 1.5, 1.7, -3.9, g); B(3, 1.8, 0.32, 0x35607F, 2.2, 1.6, -3.89, g); B(8.6, 0.25, 1.2, 0xE2725B, 1.5, 3.5, -3.6, g);
+    B(4.4, 0.12, 2.4, 0xFFFFFF, 1.6, 0.06, -1.9, g); B(4, 0.14, 2, 0x39B8E8, 1.6, 0.07, -1.9, g, { roughness: 0.2, emissive: 0x0A4A6A });
+    o = C(0.16, 0.22, 3.6, 0x9A7B4F, -2.6, 1.8, -2.3, g); o.rotation.z = 0.1;
+    for (i = 0; i < 6; i++) { o = S(1, 0x3F9B4F, -2.78 + Math.cos(i * 1.05) * 0.8, 3.5, -2.3 + Math.sin(i * 1.05) * 0.8, g); o.scale.set(1, 0.1, 0.36); o.rotation.set(0, -i * 1.05, -0.32); }
+    S(0.3, 0xFF6B6B, -0.7, 0.3, -1, g);
+    /* 7. Le palace doré */
+    g = D[6];
+    [-3.2, -1.2, 2.2, 4.2].forEach(function (x) { C(0.3, 0.3, 4.6, 0xE8C55A, x, 2.3, -2.7, g, GOLD); B(0.8, 0.25, 0.8, 0xE8C55A, x, 0.125, -2.7, g, GOLD); B(0.8, 0.25, 0.8, 0xE8C55A, x, 4.5, -2.7, g, GOLD); });
+    [-2.2, 3.2].forEach(function (x) { B(1.5, 2.6, 0.05, 0xE9D08A, x, 2.2, -2.97, g); });
+    B(2.4, 0.03, 9, 0x9B1B30, HOME.x, 0.015, 0.5, g).castShadow = false; B(0.12, 0.035, 9, 0xE8C55A, HOME.x - 1.2, 0.02, 0.5, g, GOLD); B(0.12, 0.035, 9, 0xE8C55A, HOME.x + 1.2, 0.02, 0.5, g, GOLD);
+    B(1.3, 0.5, 1, 0x9B1B30, HOME.x, 0.55, -2.4, g); B(1.5, 2.4, 0.25, 0xE8C55A, HOME.x, 1.5, -2.85, g, GOLD); B(1.1, 1.6, 0.1, 0x9B1B30, HOME.x, 1.6, -2.7, g);
+    B(0.2, 0.5, 1, 0xE8C55A, HOME.x - 0.75, 0.85, -2.4, g, GOLD); B(0.2, 0.5, 1, 0xE8C55A, HOME.x + 0.75, 0.85, -2.4, g, GOLD);
+    o = mesh(new THREE.TorusGeometry(0.8, 0.06, 10, 28), mat(0xE8C55A, GOLD), HOME.x, 4.3, -0.8, g); o.rotation.x = Math.PI / 2;
+    for (i = 0; i < 6; i++) glow(0.1, 0xFFE9A8, HOME.x + Math.cos(i * 1.047) * 0.8, 4.42, -0.8 + Math.sin(i * 1.047) * 0.8, g);
+    o = new THREE.PointLight(0xFFE2A0, 0.8, 10); o.position.set(HOME.x, 4, -0.6); g.add(o);
+  })();
+  var DECORS = [
+    { name: 'Les poubelles', price: 0, amb: 'night', sky: 0x2B2F52, floor: 0x3F3A5C, wall: 0xFFFFFF, brick: true, hemi: 0.5, sun: 0.7, sunC: 0xFFF1CF, groups: [0] },
+    { name: 'La ruelle aménagée', price: 150, amb: 'night', sky: 0x2A2C55, floor: 0x45405F, wall: 0xFFFFFF, brick: true, hemi: 0.6, sun: 0.7, sunC: 0xFFE2B0, groups: [0, 1] },
+    { name: 'La cabane dans l\'arbre', price: 400, amb: 'day', sky: 0x8FD3F4, floor: 0x9A6B3F, wall: 0xA87446, hemi: 0.5, sun: 0.7, sunC: 0xFFF4E0, groups: [2] },
+    { name: 'La caravane', price: 800, amb: 'day', sky: 0xF6A66A, floor: 0x6FA35B, wall: null, hemi: 0.5, sun: 0.75, sunC: 0xFFD9A0, groups: [3] },
+    { name: 'La chambre cosy', price: 1500, amb: 'in', sky: 0x3B2F4A, floor: 0xB07A4A, wall: 0xD9B48F, hemi: 0.5, sun: 0.5, sunC: 0xFFE7C2, groups: [4] },
+    { name: 'La villa avec piscine', price: 2500, amb: 'day', sky: 0x7EC8F2, floor: 0xCFC6AE, wall: null, hemi: 0.45, sun: 0.75, sunC: 0xFFF8E8, groups: [5] },
+    { name: 'Le palace doré', price: 4000, amb: 'in', sky: 0x4A1F2E, floor: 0xCFC3A6, wall: 0xD9C68E, hemi: 0.5, sun: 0.6, sunC: 0xFFE9A8, groups: [6] }
+  ];
+  /* La vie du ciel : étoiles qui scintillent et lucioles la nuit, nuages le jour */
+  var starsG = [0, 1, 2].map(function () {
+    var arr = []; for (var n = 0; n < 26; n++) arr.push((Math.random() - 0.5) * 30, 5.6 + Math.random() * 7, -16);
+    var geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+    var pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.14, transparent: true, fog: false })); scene.add(pts); return pts;
+  });
+  var flies = new THREE.Group(); scene.add(flies);
+  for (var fl = 0; fl < 7; fl++) { var fo = glow(0.045, 0xFFF3A0, 0, 0, 0, flies); fo.userData = { x: (Math.random() - 0.5) * 6, y: 0.8 + Math.random() * 2.2, z: -2 + Math.random() * 3, a: Math.random() * 6, s: 0.3 + Math.random() * 0.4 }; }
+  var clouds = new THREE.Group(); scene.add(clouds);
+  var cloudMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, fog: false });
+  for (var cl = 0; cl < 4; cl++) {
+    var cg = new THREE.Group(); cg.position.set(-12 + cl * 7, 7 + (cl % 2) * 1.6, -15); cg.userData.v = 0.15 + cl * 0.05;
+    [[0, 0, 1.2], [1.1, 0.1, 0.9], [-1.1, 0, 0.8]].forEach(function (q) { var cm = new THREE.Mesh(new THREE.SphereGeometry(q[2], 14, 10), cloudMat); cm.position.set(q[0], q[1], 0); cm.scale.y = 0.6; cg.add(cm); });
+    clouds.add(cg);
+  }
+  var decorNow = -1;
+  function applyDecor(n) {
+    var d = DECORS[n]; decorNow = n;
+    D.forEach(function (gr, k) { gr.visible = d.groups.indexOf(k) >= 0; });
+    scene.background.setHex(d.sky); scene.fog.color.setHex(d.sky); floor.material.color.setHex(d.floor);
+    wall.visible = ledge.visible = d.wall != null;
+    if (d.wall != null) { wallMat.color.setHex(d.wall); var tex = d.brick ? brick : null; if (wallMat.map !== tex) { wallMat.map = tex; wallMat.needsUpdate = true; } ledge.material.color.setHex(d.brick ? 0x4A4470 : d.wall); }
+    hemi.intensity = d.hemi; hemi.color.setHex(d.amb === 'night' ? 0xC4CCFF : 0xDDE9FF); hemi.groundColor.setHex(d.floor);
+    sun.intensity = d.sun; sun.color.setHex(d.sunC); lamp.intensity = d.amb === 'night' ? 0.7 : 0;
+    starsG.forEach(function (o) { o.visible = d.amb === 'night'; }); flies.visible = d.amb === 'night'; clouds.visible = d.amb === 'day';
+    moon.visible = d.amb !== 'in'; moon.material.color.setHex(d.amb === 'day' ? 0xFFE680 : 0xF3E9C6);
+  }
 
   /* Le carton, avec deux rabats qui s'ouvrent sur leurs charnières */
   var BOX = { x: -2.3, z: -0.5 };
@@ -470,18 +647,34 @@ button, input { touch-action: manipulation; }
     { label: 'Orange vif', fur: 0xF08A4B, dark: 0xC2652B },
     { label: 'Rose bonbon', fur: 0xE27396, dark: 0xB44F72 },
     { label: 'Violet prune', fur: 0x9B7EDE, dark: 0x7558B8 },
-    { label: 'Jaune moutarde', fur: 0xE3B341, dark: 0xB58A1F }
+    { label: 'Jaune moutarde', fur: 0xE3B341, dark: 0xB58A1F },
+    { label: 'Rouge tomate', fur: 0xD9534F, dark: 0xA83632 },
+    { label: 'Turquoise', fur: 0x3FB8AF, dark: 0x2A8A83 },
+    { label: 'Crème', fur: 0xEFE3C8, dark: 0xC9B48A },
+    { label: 'Gris souris', fur: 0x9AA0B4, dark: 0x6E7389 }
   ];
   var furMat = mat(palette[0].fur), darkMat = mat(palette[0].dark);
   var white = mat(0xFFF8E7, { roughness: 0.4 }), black = mat(0x1B1D2B, { roughness: 0.3 });
 
-  var HOME = { x: 0.5, z: 0.7 };
   var pet = new THREE.Group(); pet.position.set(HOME.x, 0, HOME.z); scene.add(pet);
   var bodyG = new THREE.Group(); pet.add(bodyG);
   var body = mesh(new THREE.SphereGeometry(1, 48, 36), furMat, 0, 1.2, 0, bodyG);
   body.scale.set(1, 1.12, 0.92);
-  var earL = mesh(new THREE.ConeGeometry(0.28, 0.85, 20), furMat, -0.5, 2.28, 0, bodyG); earL.rotation.z = 0.35;
-  var earR = mesh(new THREE.ConeGeometry(0.26, 0.7, 20), furMat, 0.62, 2.15, 0, bodyG); earR.rotation.z = -0.7;
+  /* Les oreilles tournent autour de leur base. Leur forme se choisit dans l'atelier. */
+  var earL = new THREE.Group(), earR = new THREE.Group();
+  earL.position.set(-0.354, 1.88, 0); earR.position.set(0.395, 1.88, 0); earL.rotation.z = 0.35; earR.rotation.z = -0.7; bodyG.add(earL); bodyG.add(earR);
+  var bone = mat(0xF3E9D2, { roughness: 0.6 });
+  function empty(gr) { while (gr.children.length) gr.remove(gr.children[0]); }
+  function buildEars(kind) {
+    [earL, earR].forEach(function (e, n) {
+      empty(e);
+      if (kind === 'rondes') mesh(new THREE.SphereGeometry(0.34, 20, 16), furMat, 0, 0.26, 0, e).scale.set(1, 1, 0.55);
+      else if (kind === 'longues') { mesh(new THREE.CylinderGeometry(0.17, 0.13, 1.3, 16), furMat, 0, 0.65, 0, e); mesh(new THREE.SphereGeometry(0.17, 16, 12), furMat, 0, 1.3, 0, e); }
+      else if (kind === 'cornes') mesh(new THREE.ConeGeometry(0.15, 0.55, 14), bone, 0, 0.27, 0, e);
+      else if (kind === 'antennes') { mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.8, 8), darkMat, 0, 0.4, 0, e); mesh(new THREE.SphereGeometry(0.13, 14, 10), mat(0xF7C948, { emissive: 0x6A5210 }), 0, 0.85, 0, e); }
+      else mesh(new THREE.ConeGeometry(n ? 0.26 : 0.28, n ? 0.7 : 0.85, 20), furMat, 0, n ? 0.35 : 0.425, 0, e);
+    });
+  }
 
   function arm(side) {
     var p = new THREE.Group(); p.position.set(side * 0.84, 1.32, 0.15); bodyG.add(p);
@@ -499,12 +692,19 @@ button, input { touch-action: manipulation; }
     e.userData.r = r;
     return e;
   }
-  var eyeL = eye(-0.34, 1.5, 0.76, 0.34), eyeR = eye(0.38, 1.58, 0.78, 0.22);
   var mouth = mesh(new THREE.SphereGeometry(0.5, 28, 16), black, 0, 0.98, 0.8, bodyG); mouth.scale.set(1.1, 0.3, 0.42);
   var teeth = new THREE.Group(); bodyG.add(teeth);
-  mesh(new THREE.BoxGeometry(0.16, 0.2, 0.08), white, -0.25, 1.06, 0.98, teeth);
-  mesh(new THREE.BoxGeometry(0.2, 0.25, 0.08), white, 0, 1.09, 1.0, teeth);
-  mesh(new THREE.BoxGeometry(0.14, 0.16, 0.08), white, 0.24, 1.05, 0.98, teeth);
+  function buildTeeth(kind) {
+    empty(teeth);
+    if (kind === 'crocs') [-0.24, 0.24].forEach(function (x) { mesh(new THREE.ConeGeometry(0.09, 0.32, 10), white, x, 1.1, 0.98, teeth); });
+    else if (kind === 'une') mesh(new THREE.BoxGeometry(0.26, 0.3, 0.08), white, 0.05, 1.1, 1.0, teeth);
+    else if (kind === 'sourire') for (var n = -2; n <= 2; n++) mesh(new THREE.BoxGeometry(0.13, 0.16, 0.07), white, n * 0.15, 1.05, 1.0 - Math.abs(n) * 0.035, teeth);
+    else if (kind === 'trois') {
+      mesh(new THREE.BoxGeometry(0.16, 0.2, 0.08), white, -0.25, 1.06, 0.98, teeth);
+      mesh(new THREE.BoxGeometry(0.2, 0.25, 0.08), white, 0, 1.09, 1.0, teeth);
+      mesh(new THREE.BoxGeometry(0.14, 0.16, 0.08), white, 0.24, 1.05, 0.98, teeth);
+    }
+  }
   var patch = mesh(new THREE.BoxGeometry(0.42, 0.42, 0.05), darkMat, 0.45, 0.6, 0.67, bodyG);
   patch.rotation.set(0.5, 0.45, 0.2);
 
@@ -557,9 +757,62 @@ button, input { touch-action: manipulation; }
   });
   var rag = new THREE.Group(); bodyG.add(rag); rag.visible = false;
   var bagMatE = mat(0x4A3D5C);
-  [[-0.34, 1.5, 0.76, 0.34], [0.38, 1.58, 0.78, 0.22]].forEach(function (q) {
-    var eb = mesh(new THREE.SphereGeometry(q[3], 20, 12), bagMatE, q[0], q[1] - q[3] * 0.62, q[2] + 0.03, rag); eb.scale.set(0.95, 0.42, 0.75); eb.castShadow = false;
-  });
+  /* Les yeux : chaque forme est une liste de [x, y, z, taille] */
+  var EYES = {
+    bizarres: [[-0.34, 1.5, 0.76, 0.34], [0.38, 1.58, 0.78, 0.22]],
+    ronds: [[-0.36, 1.52, 0.77, 0.27], [0.36, 1.52, 0.77, 0.27]],
+    cyclope: [[0, 1.55, 0.84, 0.42]],
+    trois: [[-0.4, 1.46, 0.74, 0.21], [0.4, 1.46, 0.74, 0.21], [0, 1.82, 0.72, 0.21]],
+    petits: [[-0.3, 1.5, 0.84, 0.14], [0.3, 1.5, 0.84, 0.14]]
+  };
+  var eyes = [], eyeBags = new THREE.Group(); rag.add(eyeBags);
+  function buildEyes(kind) {
+    eyes.forEach(function (e) { bodyG.remove(e); }); eyes = []; empty(eyeBags);
+    (EYES[kind] || EYES.bizarres).forEach(function (q) {
+      eyes.push(eye(q[0], q[1], q[2], q[3]));
+      var eb = mesh(new THREE.SphereGeometry(q[3], 20, 12), bagMatE, q[0], q[1] - q[3] * 0.62, q[2] + 0.03, eyeBags); eb.scale.set(0.95, 0.42, 0.75); eb.castShadow = false;
+    });
+  }
+  /* Les accessoires de la boutique : chapeau, lunettes, tour de cou */
+  var acc = new THREE.Group(); bodyG.add(acc);
+  function buildAcc(look) {
+    empty(acc);
+    var h = new THREE.Group(), o, n; acc.add(h);
+    if (look.hat === 'bonnet') {
+      o = mesh(new THREE.SphereGeometry(0.74, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xD64545), 0, 1.95, 0, h); o.scale.set(1, 0.72, 0.94);
+      o = mesh(new THREE.TorusGeometry(0.73, 0.09, 10, 28), mat(0xFFFFFF), 0, 1.97, 0, h); o.rotation.x = Math.PI / 2; o.scale.y = 0.94;
+      mesh(new THREE.SphereGeometry(0.16, 14, 10), mat(0xFFFFFF), 0, 2.52, 0, h);
+    } else if (look.hat === 'casquette') {
+      o = mesh(new THREE.SphereGeometry(0.73, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(0x3B6FD9), 0, 1.98, 0, h); o.scale.set(1, 0.6, 0.94);
+      o = mesh(new THREE.BoxGeometry(0.95, 0.05, 0.55), mat(0x2A4FA0), 0, 2.02, 0.85, h); o.rotation.x = 0.18;
+    } else if (look.hat === 'hdf') {
+      mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.06, 24), mat(0x1B1D2B), 0, 2.24, 0, h);
+      mesh(new THREE.CylinderGeometry(0.4, 0.42, 0.6, 24), mat(0x1B1D2B), 0, 2.56, 0, h);
+      mesh(new THREE.CylinderGeometry(0.43, 0.43, 0.12, 24), mat(0xD64545), 0, 2.34, 0, h);
+      h.rotation.z = -0.14;
+    } else if (look.hat === 'couronne') {
+      mesh(new THREE.CylinderGeometry(0.45, 0.4, 0.25, 24, 1, true), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35, side: THREE.DoubleSide }), 0, 2.36, 0, h);
+      for (n = 0; n < 6; n++) mesh(new THREE.ConeGeometry(0.09, 0.24, 4), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), Math.cos(n * 1.047) * 0.44, 2.58, Math.sin(n * 1.047) * 0.44, h);
+      [0xD64545, 0x3B6FD9, 0x3FA7A0].forEach(function (col, k) { mesh(new THREE.SphereGeometry(0.05, 10, 8), mat(col, { roughness: 0.2 }), (k - 1) * 0.2, 2.36, 0.4, h); });
+    }
+    var ey = EYES[look.eyes] || EYES.bizarres;
+    if (look.glasses) ey.forEach(function (q) {
+      if (look.glasses === 'soleil') { o = mesh(new THREE.CylinderGeometry(q[3] * 1.05, q[3] * 1.05, 0.05, 24), mat(0x14151E, { roughness: 0.15 }), q[0], q[1], q[2] + q[3] + 0.02, acc); o.rotation.x = Math.PI / 2; }
+      else mesh(new THREE.TorusGeometry(q[3] * 0.98, 0.035, 8, 28), mat(0x1B1D2B, { roughness: 0.4 }), q[0], q[1], q[2] + q[3] * 0.5, acc);
+    });
+    if (look.glasses && ey.length > 1) mesh(new THREE.BoxGeometry(Math.abs(ey[1][0] - ey[0][0]) - ey[0][3] - ey[1][3] + 0.1, 0.045, 0.045), mat(0x1B1D2B), (ey[0][0] + ey[0][3] + ey[1][0] - ey[1][3]) / 2, (ey[0][1] + ey[1][1]) / 2, 0.96, acc);
+    if (look.neck === 'noeud') {
+      o = mesh(new THREE.ConeGeometry(0.2, 0.32, 12), mat(0xD64545), -0.17, 0.68, 0.9, acc); o.rotation.z = -Math.PI / 2;
+      o = mesh(new THREE.ConeGeometry(0.2, 0.32, 12), mat(0xD64545), 0.17, 0.68, 0.9, acc); o.rotation.z = Math.PI / 2;
+      mesh(new THREE.SphereGeometry(0.09, 12, 10), mat(0xA83232), 0, 0.68, 0.92, acc);
+    } else if (look.neck === 'echarpe') {
+      o = mesh(new THREE.TorusGeometry(0.9, 0.13, 10, 30), mat(0xE2725B), 0, 0.66, 0, acc); o.rotation.x = Math.PI / 2; o.scale.y = 0.92;
+      o = mesh(new THREE.BoxGeometry(0.24, 0.6, 0.1), mat(0xE2725B), 0.45, 0.38, 0.84, acc); o.rotation.z = -0.15;
+    } else if (look.neck === 'collier') {
+      o = mesh(new THREE.TorusGeometry(0.9, 0.04, 8, 30), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), 0, 0.7, 0, acc); o.rotation.x = Math.PI / 2; o.scale.y = 0.92;
+      o = mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 16), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), 0, 0.6, 0.86, acc); o.rotation.x = Math.PI / 2;
+    }
+  }
   [[0.8, 0.35, 0.5, 0.3], [-0.75, -0.15, 0.62, 0.34], [0.35, 0.75, 0.55, 0.26]].forEach(function (q, n) {
     var rp = stick(new THREE.Mesh(new THREE.BoxGeometry(q[3], q[3] * 0.85, 0.05), darkMat), onBody(q[0], q[1], q[2], 0));
     rp.rotateZ(0.3 + n); stitchRing(rp, q[3], q[3] * 0.85); bodyG.remove(rp); rag.add(rp);
@@ -591,17 +844,26 @@ button, input { touch-action: manipulation; }
   var phase = 'loading', mood = 'forme', acheLv = 1, colorIndex = 0;
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
-  var G = { name: '', color: 0, entries: {}, dayOffset: 0 };
+  var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null };
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0 }; }
+  var G = freshG();
   function load() {
     try {
       var o = JSON.parse(localStorage.getItem(SAVE) || 'null'); if (!o || !o.name) return false;
       G.name = String(o.name).slice(0, 12); G.color = Math.max(0, Math.min(palette.length - 1, o.color | 0));
       G.entries = (o.entries && typeof o.entries === 'object') ? o.entries : {}; G.dayOffset = o.dayOffset | 0;
+      var lk = (o.look && typeof o.look === 'object') ? o.look : {};
+      Object.keys(LOOK0).forEach(function (k) { G.look[k] = (typeof lk[k] === 'string') ? lk[k] : LOOK0[k]; });
+      G.owned = Array.isArray(o.owned) ? o.owned.filter(function (x) { return typeof x === 'string'; }) : [];
+      G.decors = Array.isArray(o.decors) ? o.decors.filter(function (x) { return x === (x | 0) && x >= 0 && x < DECORS.length; }) : [0];
+      if (G.decors.indexOf(0) < 0) G.decors.push(0);
+      G.decor = G.decors.indexOf(o.decor | 0) >= 0 ? (o.decor | 0) : 0;
+      G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       return true;
     } catch (e) { return false; }
   }
   function saveG() { try { localStorage.setItem(SAVE, JSON.stringify(G)); } catch (e) {} }
-  function wipe() { G = { name: '', color: 0, entries: {}, dayOffset: 0 }; try { localStorage.removeItem(SAVE); } catch (e) {} }
+  function wipe() { G = freshG(); try { localStorage.removeItem(SAVE); } catch (e) {} }
 
   /* ---------- Les règles de gestion : c'est ici que sont écrites les règles décidées pendant l'atelier ---------- */
   var PTS = [0, 100, 300], LVL = ['Pas bien', 'Correct', 'Idéal'];      /* niveau 0, 1 ou 2 */
@@ -634,6 +896,7 @@ button, input { touch-action: manipulation; }
       else if (ref.screen > 3) { m = 'tete'; lv = 1; }        /* entre 3 et 5 h d'écran : petit mal de tête */
       else if (sc.l[1] === 0) m = 'triste';                   /* moins de 10 000 pas : pas contente */
     }
+    coins += G.bonus - G.spent;                                       /* ce qu'on a gagné, moins ce qu'on a dépensé à la boutique */
     return { n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv };
   }
 
@@ -649,8 +912,9 @@ button, input { touch-action: manipulation; }
   function paint() {
     furMat.color.setHex(palette[colorIndex].fur); darkMat.color.setHex(palette[colorIndex].dark);
     if (badNow) { furMat.color.lerp(grey, 0.55); darkMat.color.lerp(grey, 0.55); }
-    rag.visible = badNow; tuft.children.forEach(function (o, i) { o.visible = stageNow === 2 || (stageNow === 1 && i === 0); });
+    rag.visible = badNow; tuft.children.forEach(function (o, i) { o.visible = !G.look.hat && (stageNow === 2 || (stageNow === 1 && i === 0)); });
   }
+  function dress() { buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth); buildAcc(G.look); paint(); }
   var toastT = null;
   function toast(msg) { $('toast').textContent = msg; $('toast').hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { $('toast').hidden = true; }, 3200); }
   function gauge(id, bar, txt, lv, pct) {
@@ -664,7 +928,8 @@ button, input { touch-action: manipulation; }
     var st = forceStage == null ? c.stage : forceStage, bd = forceBad == null ? c.bad : forceBad;
     $('hudName').textContent = G.name;
     $('hudStage').textContent = STAGE[st].name + (st < 2 ? ' · grandit dans ' + (3 - c.n % 3) + (3 - c.n % 3 > 1 ? ' jours' : ' jour') : '') + (bd ? ' · en mauvais état' : '');
-    $('hudCoins').textContent = c.coins + (c.coins > 1 ? ' pièces' : ' pièce');
+    coinGoal = c.coins; todayDone = !!t;
+    $('shopDot').hidden = !canBuySomething(c.coins);
     $('hudStreak').textContent = 'Série : ' + c.streak + (c.streak > 1 ? ' jours' : ' jour');
     if (t) {
       var sc = score(t);
@@ -672,11 +937,11 @@ button, input { touch-action: manipulation; }
       gauge('gSleep', 'bSleep', hm(t.sleep), sc.l[0], Math.min(100, t.sleep / 10 * 100));
       gauge('gSteps', 'bSteps', t.steps.toLocaleString('fr-FR'), sc.l[1], Math.min(100, t.steps / 15000 * 100));
       gauge('gScreen', 'bScreen', hm(t.screen), sc.l[2], Math.min(100, t.screen / 6 * 100));
-      $('enter').textContent = 'Modifier ma journée';
+      $('enterLab').textContent = 'Modifier';
     } else {
       $('dayPts').textContent = 'Pas encore remplie';
       gauge('gSleep', 'bSleep', '–', null, 0); gauge('gSteps', 'bSteps', '–', null, 0); gauge('gScreen', 'bScreen', '–', null, 0);
-      $('enter').textContent = 'Entrer ma journée';
+      $('enterLab').textContent = 'Ma journée';
     }
     stage.setAttribute('aria-label', G.name + ', ta créature en peluche, dans la ruelle aux poubelles');
     if (st !== stageNow || bd !== badNow) {
@@ -687,10 +952,10 @@ button, input { touch-action: manipulation; }
     }
     return false;
   }
-  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; stageNow = 0; badNow = false; pending = null; forceMood = forceStage = forceBad = null; paint(); show('title'); musicSync(); }
+  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; stageNow = 0; badNow = false; pending = null; forceMood = forceStage = forceBad = null; closeSheets(); $('bubble').hidden = true; dress(); applyDecor(0); show('title'); musicSync(); }
   function goCustom() { phase = 'custom'; show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
   function goPlay(name) {
-    phase = 'play'; flapT = 1; show('hud'); musicSync(); refresh(false);
+    phase = 'play'; flapT = 1; show('hud'); musicSync(); dress(); applyDecor(G.decor); coinShown = -1; refresh(false); nextSay = clock.getElapsedTime() + 4;
   }
   function openBox() {
     if (phase !== 'title') return;
@@ -714,7 +979,7 @@ button, input { touch-action: manipulation; }
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    G.name = name; G.color = colorIndex; G.entries = {}; G.dayOffset = 0; saveG();
+    G = freshG(); G.name = name; G.color = colorIndex; saveG();
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
@@ -747,10 +1012,17 @@ button, input { touch-action: manipulation; }
   var spin = 0, lookX = 0, lookY = 0, down = null;
   var ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
   function rel(ev) { var r = stage.getBoundingClientRect(); return { x: (ev.clientX - r.left) / r.width, y: (ev.clientY - r.top) / r.height }; }
-  stage.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, moved: 0 }; });
+  function hitPet(ev) { var p = rel(ev); ptr.set(p.x * 2 - 1, -(p.y * 2 - 1)); ray.setFromCamera(ptr, camera); return ray.intersectObject(pet, true).length > 0; }
+  stage.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, y: ev.clientY, moved: 0, acc: 0, onPet: phase === 'play' && hitPet(ev) }; });
   window.addEventListener('pointermove', function (ev) {
     var p = rel(ev); lookX = Math.max(-0.5, Math.min(0.5, p.x - 0.5)); lookY = Math.max(-0.5, Math.min(0.5, p.y - 0.5));
-    if (down) { var dx = ev.clientX - down.x; down.moved += Math.abs(dx); if (phase === 'play') spin += dx * 0.012; down.x = ev.clientX; }
+    if (down) {
+      var dx = ev.clientX - down.x, dy = ev.clientY - down.y, dist = Math.abs(dx) + Math.abs(dy); down.moved += dist; down.x = ev.clientX; down.y = ev.clientY;
+      if (down.onPet) {                       /* le doigt est parti de la créature : c'est une caresse */
+        down.acc += dist;
+        if (down.acc > 26) { down.acc = 0; heart(); petUntil = clock.getElapsedTime() + 0.6; if (Math.random() < 0.25) sfx('purr', 0.7); try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {} }
+      } else if (phase === 'play') spin += dx * 0.012;   /* sinon, on la fait tourner */
+    }
   });
   window.addEventListener('pointerup', function (ev) {
     if (down && down.moved < 6) {
@@ -760,7 +1032,7 @@ button, input { touch-action: manipulation; }
         ray.setFromCamera(ptr, camera);
         if (ray.intersectObject(pet, true).length) {
           try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}      /* une petite vibration sous le doigt, sur les téléphones qui le permettent */
-          var pick = Math.random();
+          heart(); var pick = Math.random();
           start(mood === 'tete' ? 'wiggle' : mood === 'fatigue' ? (pick < 0.5 ? 'jump' : 'wiggle') : (pick < 0.4 ? 'jump' : pick < 0.7 ? 'spin' : 'wiggle'));
         }
       }
@@ -774,8 +1046,8 @@ button, input { touch-action: manipulation; }
     var narrow = aspect < 1, p, l;
     if (phase === 'loading' || phase === 'title') { l = [BOX.x, narrow ? 0.9 : 0.75, BOX.z]; p = [BOX.x + 0.9, 2.3, narrow ? 8.5 : 5.6]; }
     else if (phase === 'intro') { l = [-0.7, 1.3, 0]; p = [-0.5, 2.5, narrow ? 12 : 8.2]; }
-    else if (phase === 'custom') {
-      if (narrow) { l = [HOME.x, 0.1, HOME.z]; p = [HOME.x, 1.5, 9.5]; }
+    else if (phase === 'custom' || focusCam) {
+      if (narrow) { l = [HOME.x, focusCam ? -0.35 : 0.1, HOME.z]; p = [HOME.x, 1.5, focusCam ? 11.5 : 9.5]; }
       else { l = [HOME.x + 1.25, 1.2, HOME.z]; p = [HOME.x + 1.4, 2.0, 6.6]; }
     }
     else if (narrow) { l = [HOME.x, 0.45, HOME.z]; p = [HOME.x, 2.3, 11.2]; }      /* le panneau du bas cache le sol : on vise plus bas pour la remonter */
@@ -791,6 +1063,43 @@ button, input { touch-action: manipulation; }
   resize();
 
   var stageK = STAGE[0].k, earK = STAGE[0].ear;
+  var v3 = new THREE.Vector3(), petUntil = 0, nextSay = 1e9, todayDone = false, coinShown = -1, coinGoal = 0, focusCam = false;
+
+  /* ---------- De la vie : cœurs, confettis, bulles de parole ---------- */
+  var hc = document.createElement('canvas'); hc.width = hc.height = 64;
+  var hg = hc.getContext('2d'); hg.fillStyle = '#FF6B8B'; hg.beginPath(); hg.moveTo(32, 56); hg.bezierCurveTo(4, 36, 6, 10, 22, 10); hg.bezierCurveTo(28, 10, 32, 15, 32, 20); hg.bezierCurveTo(32, 15, 36, 10, 42, 10); hg.bezierCurveTo(58, 10, 60, 36, 32, 56); hg.fill();
+  var heartTex = new THREE.CanvasTexture(hc), hearts = [];
+  for (var hn = 0; hn < 10; hn++) { var hs = noRay(new THREE.Sprite(new THREE.SpriteMaterial({ map: heartTex, transparent: true, depthWrite: false }))); hs.userData = { life: 1 }; hs.visible = false; scene.add(hs); hearts.push(hs); }
+  function heart() {
+    var o = null; hearts.forEach(function (x) { if (!o && x.userData.life >= 1) o = x; }); if (!o) return;
+    o.userData = { life: 0, a: Math.random() * 6, x: pet.position.x + (Math.random() - 0.5) * 1.2 * stageK, y: pet.position.y + (1.6 + Math.random() * 0.9) * stageK, z: pet.position.z + 0.9 * stageK }; o.visible = true;
+  }
+  var confetti = [], confGeo = new THREE.PlaneGeometry(0.13, 0.13);
+  for (var cn = 0; cn < 40; cn++) {
+    var cf = noRay(new THREE.Mesh(confGeo, new THREE.MeshBasicMaterial({ color: [0xF7C948, 0xFF6B8B, 0x7FE8CF, 0x9B7EDE, 0x6C8EBF][cn % 5], side: THREE.DoubleSide, transparent: true })));
+    cf.userData = { life: 1 }; cf.visible = false; scene.add(cf); confetti.push(cf);
+  }
+  function party() {
+    if (reduce) return;
+    confetti.forEach(function (o) {
+      o.userData = { life: 0, vx: (Math.random() - 0.5) * 4, vy: 3 + Math.random() * 3.5, vz: (Math.random() - 0.5) * 2.5, r: (Math.random() - 0.5) * 14 };
+      o.position.set(pet.position.x, pet.position.y + 1.4 * stageK, pet.position.z + 0.3); o.visible = true;
+    });
+  }
+  var SAY = {
+    forme: ['Je suis en pleine forme !', 'On va marcher ?', 'Tu me fais un câlin ?', 'Quelle belle journée !', 'J\'ai trop bien dormi !'],
+    fatigue: ['J\'ai sommeil…', 'On se couche tôt ce soir ?', 'Mes yeux se ferment…'],
+    tete: ['Aïe, ma tête…', 'Trop d\'écran…', 'On pose le téléphone ?'],
+    triste: ['On n\'a pas beaucoup bougé…', 'Tu viens marcher avec moi ?'],
+    ask: ['Tu me racontes ta journée ?', 'Alors, cette journée ?']
+  };
+  var sayT = null;
+  function say(txt, dur) {
+    if (phase !== 'play') return;
+    $('bubble').hidden = true; void $('bubble').offsetWidth; $('bubble').textContent = txt; $('bubble').hidden = false;
+    clearTimeout(sayT); sayT = setTimeout(function () { $('bubble').hidden = true; }, dur || 3400);
+  }
+  function chatter() { var list = (!todayDone && Math.random() < 0.5) ? SAY.ask : (SAY[mood] || SAY.forme); say(list[Math.floor(Math.random() * list.length)]); }
   var last = 0, lean = 0, open = 1, droop = 0, aLs = 0.3, aRs = 0.3, mouthO = 0, earLag = 0, prevY = 0, starK = 0, zK = 0;
 
   function frame() {
@@ -823,6 +1132,9 @@ button, input { touch-action: manipulation; }
       var bt = t % 4.2; if (bt < 0.12 || (bt > 0.3 && bt < 0.4)) eyeT *= 0.08;
       if (!act && !down && !hidden && phase !== 'intro' && t > nextAuto) autoAct();
     } else if (ache) { aL = 2.75; aR = 2.75; eyeT = 0.32; }
+
+    if (playing && t < petUntil) { eyeT = Math.min(eyeT, 0.12); mouthT = 0.45; tilt += Math.sin(t * 9) * 0.05; aL = aR = 0.9; }   /* elle ferme les yeux de plaisir */
+    if (playing && !reduce && !act && t > nextSay) { nextSay = t + 11 + Math.random() * 9; chatter(); }
 
     /* 2. L'action en cours, qui passe par-dessus */
     var boxShake = 0, boxHop = 0;
@@ -903,8 +1215,8 @@ button, input { touch-action: manipulation; }
     footR.position.y = 0.16 + Math.max(0, -Math.sin(t * 2.2 * sp)) * step;
 
     armL.rotation.z = -aLs; armR.rotation.z = aRs;
-    eyeL.scale.y = open; eyeR.scale.y = open;
-    [eyeL, eyeR].forEach(function (e) {
+    eyes.forEach(function (e) {
+      e.scale.y = open;
       var r = e.userData.r, p = e.userData.pupil;
       p.position.x += (lookX * r * 0.7 - p.position.x) * f;
       p.position.y += (-r * 0.05 - lookY * r * 0.6 - p.position.y) * f;
@@ -936,12 +1248,36 @@ button, input { touch-action: manipulation; }
       d.material.opacity = Math.max(0, (1 - o.life) * 0.6);
     });
 
+    /* La vie du décor */
+    starsG.forEach(function (o, n) { o.material.opacity = reduce ? 0.8 : 0.35 + 0.65 * Math.abs(Math.sin(t * (0.5 + n * 0.23) + n * 2)); });
+    flies.children.forEach(function (o) { var q = o.userData; o.position.set(q.x + Math.sin(t * q.s + q.a) * 0.8, q.y + Math.sin(t * q.s * 1.7 + q.a) * 0.35, q.z + Math.cos(t * q.s + q.a) * 0.6); o.scale.setScalar(0.6 + 0.6 * Math.abs(Math.sin(t * 1.3 + q.a))); });
+    if (!reduce) clouds.children.forEach(function (o) { o.position.x += o.userData.v * dt; if (o.position.x > 15) o.position.x = -15; });
+    if (flame) { var fk = reduce ? 1 : 0.85 + Math.sin(t * 13) * 0.1 + Math.sin(t * 7.3) * 0.08; flame.scale.set(fk, fk * 1.1, fk); fireLight.intensity = 0.9 * fk; }
+    hearts.forEach(function (o) {
+      var q = o.userData; if (q.life >= 1) { o.visible = false; return; }
+      q.life += dt / 1.1; o.position.set(q.x + Math.sin(q.life * 6 + q.a) * 0.12, q.y + q.life * 1.3, q.z); o.scale.setScalar(0.22 + Math.sin(Math.min(1, q.life * 3) * Math.PI / 2) * 0.2); o.material.opacity = 1 - q.life * q.life;
+    });
+    confetti.forEach(function (o) {
+      var q = o.userData; if (q.life >= 1) { o.visible = false; return; }
+      q.life += dt / 2; q.vy -= 5.5 * dt; o.position.x += q.vx * dt; o.position.y = Math.max(0.03, o.position.y + q.vy * dt); o.position.z += q.vz * dt;
+      o.rotation.x += q.r * dt; o.rotation.y += q.r * 0.7 * dt; o.material.opacity = Math.min(1, (1 - q.life) * 3);
+    });
+    if (coinShown !== coinGoal) {
+      coinShown = coinShown < 0 ? coinGoal : coinShown + Math.sign(coinGoal - coinShown) * Math.max(1, Math.ceil(Math.abs(coinGoal - coinShown) * 0.12));
+      var ct = coinShown + (coinShown > 1 ? ' pièces' : ' pièce'); $('hudCoins').textContent = ct; $('shopCoins').textContent = ct;
+    }
+
     var goal = camGoal(), cf = camReady && !reduce ? 1 - Math.pow(0.03, dt) : 1; camReady = true;
     camP.x += (goal.p[0] - camP.x) * cf; camP.y += (goal.p[1] - camP.y) * cf; camP.z += (goal.p[2] - camP.z) * cf;
     camL.x += (goal.l[0] - camL.x) * cf; camL.y += (goal.l[1] - camL.y) * cf; camL.z += (goal.l[2] - camL.z) * cf;
     camera.position.copy(camP); camera.lookAt(camL);
 
     renderer.render(scene, camera);
+    if (!$('bubble').hidden) {                /* la bulle suit la tête de la créature */
+      v3.set(pet.position.x, pet.position.y + (2.75 + (G.look.hat ? 0.45 : 0)) * sc * stageK, pet.position.z).project(camera);
+      var bw = stage.clientWidth, bx = (v3.x * 0.5 + 0.5) * bw, by = (-v3.y * 0.5 + 0.5) * stage.clientHeight;
+      $('bubble').style.left = Math.max(118, Math.min(bw - 118, bx)) + 'px'; $('bubble').style.top = Math.max(124, by) + 'px';
+    }
     requestAnimationFrame(frame);
   }
   frame();
@@ -1066,6 +1402,8 @@ button, input { touch-action: manipulation; }
     yawn:    function (k, at) { voice(600, 620, 0.35, 0.45 * k, at + 0.45, O, A); voice(620, 260, 0.9, 0.55 * k, at + 0.8, A, O); hiss(900, 500, 0.8, 0.07 * k, at + 0.9); },
     sigh:    function (k, at) { voice(430, 270, 0.7, 0.4 * k, at + 0.15, O, U); hiss(900, 400, 0.7, 0.08 * k, at + 0.2); },
     evolve:  function (k, at) { hiss(500, 6000, 0.9, 0.5 * k, at, 3); [523, 659, 784, 1047, 1319].forEach(function (fq, n) { blip(fq, fq, 0.18, 'triangle', 0.24 * k, at + 0.2 + n * 0.12); }); },
+    purr:    function (k, at) { voice(300, 350, 0.22, 0.3 * k, at, U, O); voice(350, 310, 0.22, 0.3 * k, at + 0.2, O, U); },
+    cash:    function (k, at) { blip(1319, 1319, 0.09, 'triangle', 0.25 * k, at); blip(1760, 1760, 0.25, 'triangle', 0.25 * k, at + 0.08); hiss(5000, 9000, 0.12, 0.12 * k, at, 3); },
     /* l'interface */
     tick:    function (k, at) { blip(1300, 900, 0.035, 'sine', 0.22 * k, at); blip(2600, 2000, 0.02, 'triangle', 0.07 * k, at); },
     fanfare: function (k, at) {
@@ -1077,7 +1415,7 @@ button, input { touch-action: manipulation; }
   function sfx(name, loud, delay) {
     if (!actx || !prefs.sfx || document.hidden || phase === 'loading' || !SFX[name]) return;
     if (actx.state === 'suspended') actx.resume();
-    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve') ? 1 : 0.94 + Math.random() * 0.12;
+    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash') ? 1 : 0.94 + Math.random() * 0.12;
     SFX[name](loud == null ? 1 : loud, actx.currentTime + 0.01 + (delay || 0));
   }
   /* Un navigateur refuse de jouer du son avant que le joueur ait touché la page : on attend son premier geste */
@@ -1132,6 +1470,87 @@ button, input { touch-action: manipulation; }
   $('settings').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSettings(); });
   paintSettings();
 
+  /* ---------- L'atelier : changer l'apparence de la créature, gratuitement ---------- */
+  var SHOP = [
+    { id: 'bonnet', slot: 'hat', name: 'Bonnet à pompon', price: 80 }, { id: 'casquette', slot: 'hat', name: 'Casquette', price: 120 },
+    { id: 'hdf', slot: 'hat', name: 'Chapeau haut-de-forme', price: 250 }, { id: 'couronne', slot: 'hat', name: 'Couronne', price: 600 },
+    { id: 'rondes', slot: 'glasses', name: 'Lunettes rondes', price: 100 }, { id: 'soleil', slot: 'glasses', name: 'Lunettes de soleil', price: 180 },
+    { id: 'noeud', slot: 'neck', name: 'Nœud papillon', price: 90 }, { id: 'echarpe', slot: 'neck', name: 'Écharpe', price: 140 }, { id: 'collier', slot: 'neck', name: 'Collier doré', price: 300 }
+  ];
+  var LOOKS = [
+    { key: 'color', name: 'Couleur' },
+    { key: 'ears', name: 'Oreilles', opts: [['pointues', 'Pointues'], ['rondes', 'Rondes'], ['longues', 'Longues'], ['cornes', 'Cornes'], ['antennes', 'Antennes']] },
+    { key: 'eyes', name: 'Yeux', opts: [['bizarres', 'Dépareillés'], ['ronds', 'Ronds'], ['cyclope', 'Cyclope'], ['trois', 'Trois yeux'], ['petits', 'Tout petits']] },
+    { key: 'teeth', name: 'Dents', opts: [['trois', 'Trois dents'], ['crocs', 'Crocs'], ['une', 'Une grosse dent'], ['sourire', 'Grand sourire'], ['aucune', 'Sans dents']] },
+    { key: 'hat', name: 'Chapeau', slot: true }, { key: 'glasses', name: 'Lunettes', slot: true }, { key: 'neck', name: 'Cou', slot: true }
+  ];
+  var lookTab = 0, shopTab = 0;
+  function canBuySomething(coins) {
+    return SHOP.some(function (it) { return G.owned.indexOf(it.id) < 0 && it.price <= coins; }) || DECORS.some(function (d, n) { return G.decors.indexOf(n) < 0 && d.price <= coins; });
+  }
+  function tabs(box, names, cur, pick) {
+    empty2($(box));
+    names.forEach(function (nm, n) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', n === cur ? 'true' : 'false'); b.textContent = nm;
+      b.addEventListener('click', function () { sfx('tick'); pick(n); }); $(box).appendChild(b);
+    });
+  }
+  function empty2(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+  function chipOpt(box, label, on, fn) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = label; b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.addEventListener('click', fn); box.appendChild(b);
+  }
+  function changed() { saveG(); dress(); start('wiggle'); paintLook(); }
+  function paintLook() {
+    tabs('lookTabs', LOOKS.map(function (l) { return l.name; }), lookTab, function (n) { lookTab = n; paintLook(); });
+    var box = $('lookOpts'), L = LOOKS[lookTab]; empty2(box);
+    if (L.key === 'color') {
+      palette.forEach(function (p2, n) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'swatch'; b.setAttribute('aria-label', p2.label); b.setAttribute('aria-pressed', n === colorIndex ? 'true' : 'false');
+        b.style.background = '#' + p2.fur.toString(16).padStart(6, '0');
+        b.addEventListener('click', function () { G.color = n; setColor(n); changed(); }); box.appendChild(b);
+      });
+    } else if (L.slot) {
+      var mine = SHOP.filter(function (it) { return it.slot === L.key && G.owned.indexOf(it.id) >= 0; });
+      if (!mine.length) { var pm = document.createElement('p'); pm.className = 'small'; pm.textContent = 'Tu n\'en as pas encore. Va voir la boutique !'; box.appendChild(pm); return; }
+      chipOpt(box, 'Rien', !G.look[L.key], function () { G.look[L.key] = null; changed(); });
+      mine.forEach(function (it) { chipOpt(box, it.name, G.look[L.key] === it.id, function () { G.look[L.key] = it.id; changed(); }); });
+    } else L.opts.forEach(function (o2) { chipOpt(box, o2[1], G.look[L.key] === o2[0], function () { G.look[L.key] = o2[0]; changed(); }); });
+  }
+  /* ---------- La boutique : dépenser ses pièces en décors et en accessoires ---------- */
+  function shopRow(box, name, sub, label, cls, disabled, fn) {
+    var row = document.createElement('div'); row.className = 'item';
+    var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = name;
+    var sb = document.createElement('span'); sb.className = 'sub'; sb.textContent = sub; nm.appendChild(sb);
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'buy' + (cls ? ' ' + cls : ''); b.textContent = label; b.disabled = !!disabled; b.addEventListener('click', fn);
+    row.appendChild(nm); row.appendChild(b); box.appendChild(row);
+  }
+  function pay(price) { G.spent += price; saveG(); sfx('cash'); party(); refresh(false); }
+  function paintShop() {
+    tabs('shopTabs', ['Décors', 'Accessoires'], shopTab, function (n) { shopTab = n; paintShop(); });
+    var box = $('shopList'), coins = calc().coins; empty2(box);
+    if (shopTab === 0) DECORS.forEach(function (d, n) {
+      var have = G.decors.indexOf(n) >= 0;
+      if (have) shopRow(box, d.name, G.decor === n ? 'Installé' : 'Acheté', G.decor === n ? 'Installé' : 'Installer', 'on', G.decor === n, function () { G.decor = n; saveG(); applyDecor(n); sfx('pop'); paintShop(); });
+      else shopRow(box, d.name, d.price <= coins ? d.price + ' pièces' : 'Il te manque ' + (d.price - coins) + ' pièces', 'Acheter · ' + d.price, '', d.price > coins, function () {
+        G.decors.push(n); G.decor = n; pay(d.price); applyDecor(n); say('Trop bien, ma nouvelle maison !'); start('jump'); paintShop();
+      });
+    });
+    else SHOP.forEach(function (it) {
+      var have = G.owned.indexOf(it.id) >= 0, worn = G.look[it.slot] === it.id;
+      if (have) shopRow(box, it.name, worn ? 'Porté' : 'Acheté', worn ? 'Enlever' : 'Porter', 'on', false, function () { G.look[it.slot] = worn ? null : it.id; saveG(); dress(); start('wiggle'); paintShop(); });
+      else shopRow(box, it.name, it.price <= coins ? it.price + ' pièces' : 'Il te manque ' + (it.price - coins) + ' pièces', 'Acheter · ' + it.price, '', it.price > coins, function () {
+        G.owned.push(it.id); G.look[it.slot] = it.id; pay(it.price); dress(); say('Ça me va bien, non ?'); start('spin'); paintShop();
+      });
+    });
+  }
+  function closeSheets() { $('look').hidden = true; $('shop').hidden = true; focusCam = false; }
+  $('navLook').addEventListener('click', function () { sfx('tick'); closeSheets(); paintLook(); $('look').hidden = false; focusCam = true; $('lookClose').focus(); });
+  $('navShop').addEventListener('click', function () { sfx('tick'); closeSheets(); paintShop(); $('shop').hidden = false; focusCam = true; $('shopClose').focus(); });
+  $('lookClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navLook').focus(); });
+  $('shopClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navShop').focus(); });
+  ['look', 'shop'].forEach(function (id) { $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSheets(); }); });
+
   /* ---------- Le formulaire « Ma journée » ----------
      Sur un téléphone, taper des chiffres est pénible : le sommeil et l'écran se règlent avec deux gros boutons − et +. */
   var F = { sleep: 480, screen: 120 }, MAXF = { sleep: 960, screen: 1440 };      /* en minutes */
@@ -1164,7 +1583,7 @@ button, input { touch-action: manipulation; }
   $('steps').addEventListener('input', preview);
   function closeEntry() { holdStop(); $('entry').hidden = true; $('enter').focus(); }
   $('enter').addEventListener('click', function () {
-    sfx('tick');
+    sfx('tick'); closeSheets();
     var t = G.entries[dayKey(0)];
     F.sleep = t ? Math.round(t.sleep * 60) : 480; F.screen = t ? Math.round(t.screen * 60) : 120; $('steps').value = t ? t.steps : '';
     preview(); $('entry').hidden = false; $('sleepPlus').focus();
@@ -1176,8 +1595,8 @@ button, input { touch-action: manipulation; }
     var sc = score(e), grew = refresh(true);
     if (!grew) {
       toast('+' + sc.pts + ' points · +' + Math.floor(sc.pts / 10) + ' pièces');
-      if (sc.pts >= 600) { sfx('fanfare'); start('jump'); } else if (sc.pts < 300) start('sigh'); else start('wave');
-    } else sfx('evolve');
+      if (sc.pts >= 600) { sfx('fanfare'); start('jump'); party(); say('Bravo, super journée !'); } else if (sc.pts < 300) { start('sigh'); say('On fera mieux demain…'); } else { start('wave'); say('Pas mal du tout !'); }
+    } else { sfx('evolve'); party(); }
   }
   $('dayForm').addEventListener('submit', function (ev) {
     ev.preventDefault();
@@ -1221,6 +1640,7 @@ button, input { touch-action: manipulation; }
   function nextDay() { G.dayOffset++; saveG(); refresh(true); paintAdmin(); }
   $('aGood').addEventListener('click', function () { if (!needPlay()) return; closeAdmin(); logDay({ sleep: 8.5, steps: 16000, screen: 2 }); G.dayOffset++; saveG(); setTimeout(function () { refresh(false); }, 2200); });
   $('aBadDay').addEventListener('click', function () { if (!needPlay()) return; closeAdmin(); logDay({ sleep: 5, steps: 3000, screen: 7 }); G.dayOffset++; saveG(); setTimeout(function () { refresh(false); }, 2200); });
+  $('aCoins').addEventListener('click', function () { if (!needPlay()) return; G.bonus += 500; saveG(); sfx('cash'); refresh(false); });
   $('aNext').addEventListener('click', function () { if (!needPlay()) return; sfx('tick'); nextDay(); });
   var resetArmed = false;
   $('aReset').addEventListener('click', function () {

@@ -1866,11 +1866,12 @@ button, input { touch-action: manipulation; }
   /* Les monstres se chargent pendant l'écran de chargement. Si un fichier manque, on continue sans lui. */
   var modelsReady = new Promise(function (done) {
     if (!THREE.GLTFLoader) return done();
+    var MODEL_EXT = '.gltf';                  /* un fichier glTF est du texte JSON : selon l'hébergeur, il porte l'une ou l'autre extension */
     var loader = new THREE.GLTFLoader(), left = SPECIES.length - 1;
     SPECIES.forEach(function (sp) {
       if (sp.id === 'peluche') return;
       function end() { if (--left <= 0) done(); }
-      loader.load('models/' + sp.id + '.gltf', function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
+      loader.load('models/' + sp.id + MODEL_EXT, function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
     });
   });
   if (location.hash === '#reglage') window.__fl = { MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };

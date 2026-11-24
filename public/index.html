@@ -50,14 +50,12 @@ h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 2.2rem
 #fallback:not([hidden]) { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; font-weight: 700; }
 .controls { display: flex; flex-wrap: wrap; gap: 16px; }
 .group { flex: 1 1 300px; min-width: 0; background: var(--panel); border-radius: 18px; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
-.group.wide { flex-basis: 100%; }
 .group h2 { margin: 0; font-family: var(--display); font-size: 1.3rem; line-height: 1.1; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; }
 button { font-family: inherit; cursor: pointer; }
 button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
-.mood, .act { min-height: 44px; padding: 8px 16px; border-radius: 12px; border: 2px solid transparent; background: var(--night); color: var(--ink); font-weight: 800; font-size: 1rem; }
+.mood { min-height: 44px; padding: 8px 16px; border-radius: 12px; border: 2px solid transparent; background: var(--night); color: var(--ink); font-weight: 800; font-size: 1rem; }
 .mood[aria-pressed="true"] { background: var(--coin); color: var(--dark-ink); }
-.act:hover { border-color: var(--coin); }
 .swatch { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--night); padding: 0; outline: 3px solid transparent; outline-offset: 2px; }
 .swatch[aria-pressed="true"] { outline-color: var(--ink); }
 .note { background: var(--panel); border-radius: 18px; padding: 16px 20px; color: var(--muted); max-width: 70ch; }
@@ -79,17 +77,6 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
   </div>
 
   <div class="controls">
-    <div class="group wide">
-      <h2>Ses animations</h2>
-      <div class="row" id="acts">
-        <button type="button" class="act" id="act-intro" data-act="intro">Sortir du carton</button>
-        <button type="button" class="act" id="act-jump" data-act="jump">Sauter</button>
-        <button type="button" class="act" id="act-spin" data-act="spin">Pirouette</button>
-        <button type="button" class="act" id="act-wave" data-act="wave">Coucou</button>
-        <button type="button" class="act" id="act-wiggle" data-act="wiggle">Chatouille</button>
-        <button type="button" class="act" id="act-yawn" data-act="yawn">Bâiller</button>
-      </div>
-    </div>
     <div class="group">
       <h2>Comment elle va</h2>
       <div class="row" id="moods">
@@ -105,7 +92,7 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
   </div>
 
   <div class="note">
-    <p><strong>C'est un essai, pas l'appli.</strong> La créature est faite de formes simples (des boules, des cônes, des cubes) assemblées par du code. Elle vit toute seule : elle respire, se dandine, cligne des yeux, te suit du regard, fait coucou de temps en temps. Fatiguée, elle bâille et fait des « z ». Avec un mal de tête, elle se tient la tête et voit des étoiles.</p>
+    <p><strong>C'est un essai, pas l'appli.</strong> La créature est faite de formes simples (des boules, des cônes, des cubes) assemblées par du code. Elle vit toute seule, sans qu'on lui demande rien : elle respire, se dandine, cligne des yeux, te suit du regard, et toutes les quelques secondes elle fait coucou, sautille, saute ou fait une pirouette. Fatiguée, elle bâille et fait des « z ». Avec un mal de tête, elle se tient la tête et voit des étoiles.</p>
   </div>
 </div>
 
@@ -321,11 +308,22 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
   var clock = new THREE.Clock();
   var DUR = { intro: 2.1, jump: 0.95, hop: 0.45, spin: 0.85, wiggle: 0.75, wave: 1.5, yawn: 2.3 };
-  var act = null, nextAuto = 6;
+  var act = null, nextAuto = 6, lastAuto = '';
+  /* Ce qu'elle fait toute seule, selon son état. Un mot répété a plus de chances de sortir. */
+  var AUTO = {
+    forme: ['wave', 'wave', 'hop', 'hop', 'jump', 'spin', 'wiggle'],
+    fatigue: ['yawn', 'yawn', 'yawn', 'hop'],
+    tete: ['wiggle', 'hop']
+  };
+  function autoAct() {
+    var list = AUTO[mood], pick;
+    do { pick = list[Math.floor(Math.random() * list.length)]; } while (pick === lastAuto && list.length > 1 && Math.random() < 0.8);
+    lastAuto = pick; start(pick);
+  }
   function start(type) {
     if (act && act.type === 'intro') return;
     act = { type: type, t0: clock.getElapsedTime(), dur: DUR[type] };
-    nextAuto = act.t0 + act.dur + 4 + Math.random() * 4;
+    nextAuto = act.t0 + act.dur + 1.8 + Math.random() * 3;
   }
   var sq = 0, sqV = 0;                       /* ressort d'écrasement : positif = aplatie */
   function bump(v) { sqV += v; }
@@ -350,9 +348,6 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
       start('wiggle');
     });
     sw.appendChild(b);
-  });
-  document.getElementById('acts').addEventListener('click', function (ev) {
-    var b = ev.target.closest('button'); if (b) start(b.dataset.act);
   });
 
   /* Souris et doigt : tourner, regarder, faire réagir */
@@ -413,7 +408,7 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
         eyeT = 0.32 + Math.sin(t * 6) * 0.08;
       }
       var bt = t % 4.2; if (bt < 0.12 || (bt > 0.3 && bt < 0.4)) eyeT *= 0.08;
-      if (!act && t > nextAuto) { if (tired) start('yawn'); else if (!ache) start(Math.random() < 0.6 ? 'wave' : 'hop'); else nextAuto = t + 5; }
+      if (!act && !down && t > nextAuto) autoAct();
     } else if (ache) { aL = 2.75; aR = 2.75; eyeT = 0.32; }
 
     /* 2. L'action en cours, qui passe par-dessus */

@@ -3,109 +3,186 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FormiLife 3D</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@500;700;800&display=swap">
+<title>FormiLife</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap">
 <style>
-/* Layout : une scène 3D large en haut, une rangée de réglages dessous, une note courte à la fin. Un seul univers visuel : la ruelle de nuit. */
+/* Layout : la scène 3D remplit toute la fenêtre, comme un jeu. L'interface flotte par-dessus et change selon l'étape : chargement, titre, personnalisation, jeu. */
 :root {
   color-scheme: dark;
   --night: #1E2233;
-  --panel: #2A2F47;
+  --panel: rgba(30, 34, 51, .92);
+  --line: #3B4160;
   --ink: #F2F0FA;
   --muted: #C9CDE6;
   --coin: #F7C948;
+  --coin-deep: #D9A514;
   --mint: #7FE8CF;
+  --warn: #FFB4A8;
   --dark-ink: #1B1D2B;
   --display: 'Baloo 2', 'Trebuchet MS', sans-serif;
   --body: 'Nunito', system-ui, sans-serif;
 }
 [hidden] { display: none !important; }
-body {
-  margin: 0;
-  background: var(--night);
-  color: var(--ink);
-  font-family: var(--body);
-  font-size: 16px;
-  line-height: 1.5;
-  padding-block: 24px 40px;
+html, body { height: 100%; margin: 0; }
+body { background: var(--night); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.4; overflow: hidden; }
+#app { position: relative; height: 100%; min-height: 520px; overflow: hidden; background: #2B2F52; }
+#stage { position: absolute; inset: 0; touch-action: none; }
+#stage canvas { display: block; width: 100%; height: 100%; }
+.ui {
+  position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column;
+  padding-block: 16px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.page { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
-h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 2.2rem; line-height: 1; }
-.top p { margin: 0; color: var(--muted); font-weight: 700; }
-#stage {
-  position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 10;
-  border-radius: 24px; overflow: hidden; background: #2B2F52;
-  box-shadow: 0 18px 40px rgba(0,0,0,.45); touch-action: pan-y; cursor: grab;
-}
-#stage.drag { cursor: grabbing; }
-#stage canvas { display: block; width: 100%; height: 100%; }
-.hint {
-  position: absolute; left: 16px; bottom: 16px; right: 16px; pointer-events: none;
-  display: flex; justify-content: center;
-}
-.hint span { background: rgba(27,29,43,.85); border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: .95rem; text-align: center; }
-#fallback:not([hidden]) { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; font-weight: 700; }
-.controls { display: flex; flex-wrap: wrap; gap: 16px; }
-.group { flex: 1 1 300px; min-width: 0; background: var(--panel); border-radius: 18px; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
-.group h2 { margin: 0; font-family: var(--display); font-size: 1.3rem; line-height: 1.1; }
-.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.ui > * { pointer-events: auto; }
+.ui:not([hidden]) { animation: rise .45s ease-out both; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 button { font-family: inherit; cursor: pointer; }
-button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
-.mood { min-height: 44px; padding: 8px 16px; border-radius: 12px; border: 2px solid transparent; background: var(--night); color: var(--ink); font-weight: 800; font-size: 1rem; }
-.mood[aria-pressed="true"] { background: var(--coin); color: var(--dark-ink); }
-.swatch { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--night); padding: 0; outline: 3px solid transparent; outline-offset: 2px; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: balance; }
+
+/* Bouton principal : épais, avec une tranche dessous, comme une touche de jeu */
+.big {
+  min-height: 56px; padding: 12px 28px; border: 0; border-radius: 18px;
+  background: var(--coin); color: var(--dark-ink); font-family: var(--display); font-weight: 800; font-size: 1.35rem;
+  box-shadow: 0 6px 0 var(--coin-deep), 0 14px 24px rgba(0,0,0,.35); transition: transform .08s, box-shadow .08s;
+}
+.big:hover { transform: translateY(-1px); }
+.big:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--coin-deep), 0 4px 10px rgba(0,0,0,.35); }
+
+/* 1. Chargement */
+#loading { align-items: center; justify-content: center; gap: 22px; background: var(--night); text-align: center; transition: opacity .5s; }
+#loading.out { opacity: 0; }
+#loading h1 { font-size: clamp(2.8rem, 9vw, 4.6rem); font-weight: 800; }
+.bar { width: min(320px, 80%); height: 16px; border-radius: 8px; background: #2A2F47; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0%; border-radius: 8px; background: var(--coin); transition: width .35s ease-out; }
+#loadmsg { margin: 0; color: var(--muted); font-weight: 700; min-height: 1.4em; }
+
+/* 2. Titre */
+#title { align-items: center; justify-content: space-between; text-align: center; padding-block: 5vh 7vh; }
+#title h1 { font-size: clamp(3rem, 10vw, 5.4rem); font-weight: 800; text-shadow: 0 6px 0 rgba(0,0,0,.35); }
+#title p { margin: 8px 0 0; font-weight: 800; font-size: 1.15rem; color: var(--ink); text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+#open { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.06); } }
+
+/* 3. Personnalisation */
+#custom { justify-content: center; align-items: flex-end; }
+.card {
+  width: min(380px, 100%); background: var(--panel); border: 2px solid var(--line); border-radius: 24px;
+  padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 18px 40px rgba(0,0,0,.45);
+}
+.card h2 { font-size: 1.9rem; font-weight: 800; }
+.card p { margin: 0; color: var(--muted); font-weight: 700; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field label, .field .lab { font-weight: 800; font-size: 1rem; }
+#name {
+  min-height: 52px; border-radius: 14px; border: 2px solid var(--line); background: var(--night); color: var(--ink);
+  font-family: var(--display); font-weight: 700; font-size: 1.4rem; padding: 6px 16px; width: 100%; box-sizing: border-box;
+}
+#name::placeholder { color: #8087AB; }
+#nameErr { color: var(--warn); font-weight: 800; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch { width: 48px; height: 48px; border-radius: 50%; border: 3px solid var(--night); padding: 0; outline: 3px solid transparent; outline-offset: 2px; transition: transform .1s; }
+.swatch:hover { transform: scale(1.1); }
 .swatch[aria-pressed="true"] { outline-color: var(--ink); }
-.note { background: var(--panel); border-radius: 18px; padding: 16px 20px; color: var(--muted); max-width: 70ch; }
-.note strong { color: var(--ink); }
-.note p { margin: 0; }
+
+/* 4. Jeu */
+#hud { justify-content: space-between; }
+.topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.plate { background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 10px 18px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.plate strong { font-family: var(--display); font-weight: 800; font-size: 1.7rem; line-height: 1; overflow-wrap: anywhere; }
+.plate span { color: var(--muted); font-weight: 700; font-size: .95rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill { display: flex; align-items: center; gap: 8px; background: var(--panel); border: 2px solid var(--line); border-radius: 999px; padding: 8px 16px; font-weight: 800; }
+.bottombar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px; }
+.test { background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.test .lab { font-size: .85rem; font-weight: 800; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.chip { min-height: 44px; padding: 6px 14px; border-radius: 12px; border: 2px solid transparent; background: var(--night); color: var(--ink); font-weight: 800; font-size: .95rem; }
+.chip[aria-pressed="true"] { background: var(--coin); color: var(--dark-ink); }
+.hint { background: var(--panel); border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: .95rem; color: var(--muted); }
+#fallback:not([hidden]) { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; font-weight: 700; background: var(--night); }
+
+@media (max-width: 700px) {
+  #custom { justify-content: flex-end; align-items: center; }
+  .card { padding: 16px; gap: 12px; }
+  .card h2 { font-size: 1.5rem; }
+  .hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .ui:not([hidden]), #open { animation: none; } }
 </style>
 </head>
 <body>
 
-<div class="page">
-  <div class="top">
-    <h1>FormiLife</h1>
-    <p>Essai en vraie 3D</p>
-  </div>
+<div id="app">
+  <div id="stage" role="img" aria-label="Une ruelle la nuit, avec des poubelles et un carton abandonné"></div>
 
-  <div id="stage" role="img" aria-label="La créature en 3D devant son carton, dans la ruelle aux poubelles">
-    <div class="hint"><span>Glisse pour la faire tourner · clique sur elle pour la faire réagir</span></div>
-    <div id="fallback" hidden>La 3D ne peut pas s'afficher sur cet appareil.</div>
-  </div>
-
-  <div class="controls">
-    <div class="group">
-      <h2>Comment elle va</h2>
-      <div class="row" id="moods">
-        <button type="button" class="mood" id="mood-forme" data-mood="forme" aria-pressed="true">En forme</button>
-        <button type="button" class="mood" id="mood-fatigue" data-mood="fatigue" aria-pressed="false">Fatiguée</button>
-        <button type="button" class="mood" id="mood-tete" data-mood="tete" aria-pressed="false">Mal de tête</button>
+  <div class="ui" id="hud" hidden>
+    <div class="topbar">
+      <div class="plate"><strong id="hudName"></strong><span>Bébé · jour 1</span></div>
+      <div class="pills">
+        <div class="pill"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#F7C948"/><circle cx="11" cy="11" r="6" fill="none" stroke="#B8860B" stroke-width="2"/></svg><span>0 pièce</span></div>
+        <div class="pill"><svg aria-hidden="true" width="18" height="20" viewBox="0 0 20 22"><path d="M10 1c1 4 6 6 6 12a6 6 0 0 1-12 0c0-2 1-4 2-5 0 2 1 3 2 3 0-4 1-7 2-10z" fill="#FF8A4B"/></svg><span>Série : 0 jour</span></div>
       </div>
     </div>
-    <div class="group">
-      <h2>Sa couleur</h2>
-      <div class="row" id="swatches"></div>
+    <div class="bottombar">
+      <div class="test">
+        <span class="lab">Mode test · son état</span>
+        <div class="row" id="moods">
+          <button type="button" class="chip" id="mood-forme" data-mood="forme" aria-pressed="true">En forme</button>
+          <button type="button" class="chip" id="mood-fatigue" data-mood="fatigue" aria-pressed="false">Fatiguée</button>
+          <button type="button" class="chip" id="mood-tete" data-mood="tete" aria-pressed="false">Mal de tête</button>
+          <button type="button" class="chip" id="restart">Recommencer</button>
+        </div>
+      </div>
+      <span class="hint">Glisse pour la faire tourner · clique sur elle</span>
     </div>
   </div>
 
-  <div class="note">
-    <p><strong>C'est un essai, pas l'appli.</strong> La créature est faite de formes simples (des boules, des cônes, des cubes) assemblées par du code. Elle vit toute seule, sans qu'on lui demande rien : elle respire, se dandine, cligne des yeux, te suit du regard, et toutes les quelques secondes elle fait coucou, sautille, saute ou fait une pirouette. Fatiguée, elle bâille et fait des « z ». Avec un mal de tête, elle se tient la tête et voit des étoiles.</p>
+  <div class="ui" id="custom" hidden>
+    <form class="card" id="adopt" novalidate>
+      <h2>Elle est à toi !</h2>
+      <p>Donne-lui un nom et choisis sa couleur.</p>
+      <div class="field">
+        <label for="name">Son nom</label>
+        <input id="name" name="name" type="text" maxlength="12" autocomplete="off" placeholder="Écris son nom">
+        <span id="nameErr" role="alert" hidden>Il lui faut un nom pour continuer.</span>
+      </div>
+      <div class="field">
+        <span class="lab" id="colLab">Sa couleur</span>
+        <div class="row" id="swatches" role="group" aria-labelledby="colLab"></div>
+      </div>
+      <button type="submit" class="big" id="go">Adopter</button>
+    </form>
   </div>
+
+  <div class="ui" id="title" hidden>
+    <div>
+      <h1>FormiLife</h1>
+      <p>Il y a quelque chose dans ce carton…</p>
+    </div>
+    <button type="button" class="big" id="open">Ouvrir le carton</button>
+  </div>
+
+  <div class="ui" id="loading">
+    <h1>FormiLife</h1>
+    <div class="bar" role="progressbar" aria-label="Chargement" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar"><i id="barfill"></i></div>
+    <p id="loadmsg">Chargement…</p>
+  </div>
+
+  <div id="fallback" hidden>La 3D ne peut pas s'afficher sur cet appareil.</div>
 </div>
 
 <script src="/vendor/three.min.js"></script>
 <script>
 (function () {
-  var stage = document.getElementById('stage');
+  var $ = function (id) { return document.getElementById(id); };
+  var stage = $('stage');
   var renderer;
   try {
     if (!window.THREE) throw new Error('three');
     renderer = new THREE.WebGLRenderer({ antialias: true });
   } catch (e) {
-    document.getElementById('fallback').hidden = false;
+    $('loading').hidden = true; $('fallback').hidden = false;
     return;
   }
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -114,7 +191,7 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputEncoding = THREE.sRGBEncoding;
-  stage.insertBefore(renderer.domElement, stage.firstChild);
+  stage.appendChild(renderer.domElement);
 
   var scene = new THREE.Scene();
   scene.background = new THREE.Color(0x2B2F52);
@@ -149,7 +226,7 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
   function noRay(o) { o.raycast = function () {}; return o; }
 
   /* Décor : sol, mur de briques, poubelles, sacs, lune */
-  var floor = mesh(new THREE.PlaneGeometry(60, 30), mat(0x3F3A5C), 0, 0, 0);
+  var floor = mesh(new THREE.PlaneGeometry(80, 40), mat(0x3F3A5C), 0, 0, 0);
   floor.rotation.x = -Math.PI / 2; floor.castShadow = false;
 
   var c = document.createElement('canvas'); c.width = 512; c.height = 256;
@@ -164,10 +241,10 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
     }
   }
   var brick = new THREE.CanvasTexture(c);
-  brick.wrapS = brick.wrapT = THREE.RepeatWrapping; brick.repeat.set(10, 2);
+  brick.wrapS = brick.wrapT = THREE.RepeatWrapping; brick.repeat.set(13, 2);
   brick.encoding = THREE.sRGBEncoding;
-  mesh(new THREE.BoxGeometry(60, 4.6, 0.4), mat(0xffffff, { map: brick }), 0, 2.3, -3.2);
-  mesh(new THREE.BoxGeometry(60, 0.2, 0.6), mat(0x4A4470), 0, 4.7, -3.2);
+  mesh(new THREE.BoxGeometry(80, 4.6, 0.4), mat(0xffffff, { map: brick }), 0, 2.3, -3.2);
+  mesh(new THREE.BoxGeometry(80, 0.2, 0.6), mat(0x4A4470), 0, 4.7, -3.2);
 
   var moon = new THREE.Mesh(new THREE.SphereGeometry(1.1, 24, 16), new THREE.MeshBasicMaterial({ color: 0xF3E9C6, fog: false }));
   moon.position.set(6.5, 8.2, -14); scene.add(moon);
@@ -182,20 +259,25 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
   var bagMat = mat(0x1F222D, { roughness: 0.5 });
   mesh(new THREE.SphereGeometry(0.55, 20, 16), bagMat, 3.5, 0.4, -0.5).scale.set(1.15, 0.8, 1);
   mesh(new THREE.SphereGeometry(0.5, 20, 16), bagMat, -4.6, 0.36, -1.6).scale.set(1.2, 0.75, 1);
+  mesh(new THREE.CylinderGeometry(0.58, 0.5, 1.4, 24), binMat, -5.9, 0.7, -2.0);
+  mesh(new THREE.CylinderGeometry(0.64, 0.64, 0.12, 24), lidMat, -5.9, 1.46, -2.0);
 
-  /* Le carton */
+  /* Le carton, avec deux rabats qui s'ouvrent sur leurs charnières */
   var BOX = { x: -2.3, z: -0.5 };
   var box = new THREE.Group(); box.position.set(BOX.x, 0, BOX.z); box.rotation.y = 0.35; scene.add(box);
-  var card = mat(0xB98A56), cardIn = mat(0x8C6538), flap = mat(0xA47645);
+  var card = mat(0xB98A56), cardIn = mat(0x8C6538), flapMat = mat(0xA47645);
   mesh(new THREE.BoxGeometry(1.7, 0.05, 1.3), cardIn, 0, 0.03, 0, box);
   mesh(new THREE.BoxGeometry(1.7, 1.1, 0.05), card, 0, 0.55, 0.65, box);
   mesh(new THREE.BoxGeometry(1.7, 1.1, 0.05), cardIn, 0, 0.55, -0.65, box);
   mesh(new THREE.BoxGeometry(0.05, 1.1, 1.3), card, -0.85, 0.55, 0, box);
   mesh(new THREE.BoxGeometry(0.05, 1.1, 1.3), card, 0.85, 0.55, 0, box);
-  var f1 = mesh(new THREE.BoxGeometry(0.6, 0.04, 1.3), flap, -1.1, 1.22, 0, box); f1.rotation.z = -0.5;
-  var f2 = mesh(new THREE.BoxGeometry(0.6, 0.04, 1.3), flap, 1.1, 1.18, 0, box); f2.rotation.z = 0.4;
-  var f3 = mesh(new THREE.BoxGeometry(1.7, 0.04, 0.55), flap, 0, 0.9, 0.88, box); f3.rotation.x = 1.0;
   mesh(new THREE.BoxGeometry(0.22, 1.1, 0.06), mat(0xD8B98A), 0.1, 0.55, 0.66, box);
+  function flapOf(side) {
+    var p = new THREE.Group(); p.position.set(side * 0.85, 1.12, 0); box.add(p);
+    mesh(new THREE.BoxGeometry(0.86, 0.04, 1.3), flapMat, -side * 0.43, 0, 0, p);
+    return p;
+  }
+  var flapL = flapOf(-1), flapR = flapOf(1);
 
   /* La créature */
   var palette = [
@@ -203,7 +285,8 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
     { label: 'Bleu orage', fur: 0x6C8EBF, dark: 0x4C6A96 },
     { label: 'Orange vif', fur: 0xF08A4B, dark: 0xC2652B },
     { label: 'Rose bonbon', fur: 0xE27396, dark: 0xB44F72 },
-    { label: 'Violet prune', fur: 0x9B7EDE, dark: 0x7558B8 }
+    { label: 'Violet prune', fur: 0x9B7EDE, dark: 0x7558B8 },
+    { label: 'Jaune moutarde', fur: 0xE3B341, dark: 0xB58A1F }
   ];
   var furMat = mat(palette[0].fur), darkMat = mat(palette[0].dark);
   var white = mat(0xFFF8E7, { roughness: 0.4 }), black = mat(0x1B1D2B, { roughness: 0.3 });
@@ -305,90 +388,133 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
   }
   function puff(x, z) { dust.forEach(function (d) { d.userData.life = 0; d.userData.ox = x; d.userData.oz = z; d.visible = true; }); }
 
-  /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
-  var clock = new THREE.Clock();
-  var DUR = { intro: 2.1, jump: 0.95, hop: 0.45, spin: 0.85, wiggle: 0.75, wave: 1.5, yawn: 2.3 };
-  var act = null, nextAuto = 6, lastAuto = '';
-  /* Ce qu'elle fait toute seule, selon son état. Un mot répété a plus de chances de sortir. */
-  var AUTO = {
-    forme: ['wave', 'wave', 'hop', 'hop', 'jump', 'spin', 'wiggle'],
-    fatigue: ['yawn', 'yawn', 'yawn', 'hop'],
-    tete: ['wiggle', 'hop']
-  };
-  function autoAct() {
-    var list = AUTO[mood], pick;
-    do { pick = list[Math.floor(Math.random() * list.length)]; } while (pick === lastAuto && list.length > 1 && Math.random() < 0.8);
-    lastAuto = pick; start(pick);
-  }
-  function start(type) {
-    if (act && act.type === 'intro') return;
-    act = { type: type, t0: clock.getElapsedTime(), dur: DUR[type] };
-    nextAuto = act.t0 + act.dur + 1.8 + Math.random() * 3;
-  }
-  var sq = 0, sqV = 0;                       /* ressort d'écrasement : positif = aplatie */
-  function bump(v) { sqV += v; }
-  function ease(u) { return u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; }
+  /* ---------- Les étapes de l'appli : chargement → titre → sortie du carton → personnalisation → jeu ---------- */
+  var phase = 'loading', mood = 'forme', colorIndex = 0;
+  var SAVE = 'formilife.creature';
+  function load() { try { return JSON.parse(localStorage.getItem(SAVE) || 'null'); } catch (e) { return null; } }
+  function save(o) { try { if (o) localStorage.setItem(SAVE, JSON.stringify(o)); else localStorage.removeItem(SAVE); } catch (e) {} }
 
-  /* Réglages : humeur, couleur, boutons d'animation */
-  var mood = 'forme';
-  document.getElementById('moods').addEventListener('click', function (ev) {
-    var b = ev.target.closest('button'); if (!b) return;
-    mood = b.dataset.mood;
-    Array.prototype.forEach.call(this.children, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-  });
-  var sw = document.getElementById('swatches');
+  function show(id) { ['loading', 'title', 'custom', 'hud'].forEach(function (k) { $(k).hidden = k !== id; }); }
+  function setColor(i) {
+    colorIndex = i; furMat.color.setHex(palette[i].fur); darkMat.color.setHex(palette[i].dark);
+    Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
+  }
+  function setMood(m) {
+    mood = m;
+    ['forme', 'fatigue', 'tete'].forEach(function (k) { $('mood-' + k).setAttribute('aria-pressed', k === m ? 'true' : 'false'); });
+  }
+  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; show('title'); }
+  function goCustom() { phase = 'custom'; show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
+  function goPlay(name) {
+    phase = 'play'; flapT = 1; $('hudName').textContent = name; show('hud');
+    stage.setAttribute('aria-label', name + ', ta créature en peluche, dans la ruelle aux poubelles');
+  }
+  function openBox() {
+    if (phase !== 'title') return;
+    phase = 'intro'; show(null); flapT = 1; flapV = 9;
+    if (reduce) { goCustom(); return; }
+    act = { type: 'intro', t0: clock.getElapsedTime(), dur: DUR.intro };
+  }
+
   palette.forEach(function (p, i) {
     var b = document.createElement('button');
     b.type = 'button'; b.className = 'swatch'; b.id = 'swatch-' + i;
     b.setAttribute('aria-label', p.label); b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
     b.style.background = '#' + p.fur.toString(16).padStart(6, '0');
-    b.addEventListener('click', function () {
-      furMat.color.setHex(p.fur); darkMat.color.setHex(p.dark);
-      Array.prototype.forEach.call(sw.children, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-      start('wiggle');
-    });
-    sw.appendChild(b);
+    b.addEventListener('click', function () { setColor(i); start('wiggle'); });
+    $('swatches').appendChild(b);
+  });
+  $('open').addEventListener('click', openBox);
+  $('name').addEventListener('input', function () { $('nameErr').hidden = true; });
+  $('adopt').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var name = $('name').value.trim().slice(0, 12);
+    if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
+    save({ name: name, color: colorIndex });
+    goPlay(name); start('jump');
+  });
+  $('moods').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    if (b.id === 'restart') { save(null); $('name').value = ''; act = null; goTitle(); return; }
+    setMood(b.dataset.mood);
   });
 
-  /* Souris et doigt : tourner, regarder, faire réagir */
+  /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
+  var clock = new THREE.Clock();
+  var DUR = { intro: 2.1, jump: 0.95, hop: 0.45, spin: 0.85, wiggle: 0.75, wave: 1.5, yawn: 2.3 };
+  var act = null, nextAuto = 6, lastAuto = '';
+  var AUTO = {
+    forme: ['wave', 'wave', 'hop', 'hop', 'jump', 'spin', 'wiggle'],
+    fatigue: ['yawn', 'yawn', 'yawn', 'hop'],
+    tete: ['wiggle', 'hop']
+  };
+  function start(type) {
+    if (act && act.type === 'intro') return;
+    act = { type: type, t0: clock.getElapsedTime(), dur: DUR[type] };
+    nextAuto = act.t0 + act.dur + 1.8 + Math.random() * 3;
+  }
+  function autoAct() {
+    var list = phase === 'custom' ? ['wave', 'hop'] : AUTO[mood], pick;
+    do { pick = list[Math.floor(Math.random() * list.length)]; } while (pick === lastAuto && list.length > 1 && Math.random() < 0.8);
+    lastAuto = pick; start(pick);
+  }
+  var sq = 0, sqV = 0, flap = 0, flapV = 0, flapT = 0;
+  function bump(v) { sqV += v; }
+  function ease(u) { return u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; }
+
+  /* Souris et doigt */
   var spin = 0, lookX = 0, lookY = 0, down = null;
   var ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
   function rel(ev) { var r = stage.getBoundingClientRect(); return { x: (ev.clientX - r.left) / r.width, y: (ev.clientY - r.top) / r.height }; }
-  stage.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, moved: 0 }; stage.classList.add('drag'); });
+  stage.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, moved: 0 }; });
   window.addEventListener('pointermove', function (ev) {
     var p = rel(ev); lookX = Math.max(-0.5, Math.min(0.5, p.x - 0.5)); lookY = Math.max(-0.5, Math.min(0.5, p.y - 0.5));
-    if (down) { var dx = ev.clientX - down.x; down.moved += Math.abs(dx); spin += dx * 0.012; down.x = ev.clientX; }
+    if (down) { var dx = ev.clientX - down.x; down.moved += Math.abs(dx); if (phase === 'play') spin += dx * 0.012; down.x = ev.clientX; }
   });
   window.addEventListener('pointerup', function (ev) {
     if (down && down.moved < 6) {
-      var p = rel(ev); ptr.set(p.x * 2 - 1, -(p.y * 2 - 1));
-      ray.setFromCamera(ptr, camera);
-      if (ray.intersectObject(pet, true).length) {
-        var pick = Math.random();
-        start(mood === 'tete' ? 'wiggle' : mood === 'fatigue' ? (pick < 0.5 ? 'jump' : 'wiggle') : (pick < 0.4 ? 'jump' : pick < 0.7 ? 'spin' : 'wiggle'));
+      if (phase === 'title') openBox();
+      else if (phase === 'play' || phase === 'custom') {
+        var p = rel(ev); ptr.set(p.x * 2 - 1, -(p.y * 2 - 1));
+        ray.setFromCamera(ptr, camera);
+        if (ray.intersectObject(pet, true).length) {
+          var pick = Math.random();
+          start(mood === 'tete' ? 'wiggle' : mood === 'fatigue' ? (pick < 0.5 ? 'jump' : 'wiggle') : (pick < 0.4 ? 'jump' : pick < 0.7 ? 'spin' : 'wiggle'));
+        }
       }
     }
-    down = null; stage.classList.remove('drag');
+    down = null;
   });
 
+  /* La caméra a une place pour chaque étape et glisse doucement de l'une à l'autre */
+  var aspect = 1.6, camP = new THREE.Vector3(), camL = new THREE.Vector3(), camReady = false;
+  function camGoal() {
+    var narrow = aspect < 1, p, l;
+    if (phase === 'loading' || phase === 'title') { l = [BOX.x, narrow ? 0.9 : 0.75, BOX.z]; p = [BOX.x + 0.9, 2.3, narrow ? 8.5 : 5.6]; }
+    else if (phase === 'intro') { l = [-0.7, 1.3, 0]; p = [-0.5, 2.5, narrow ? 12 : 8.2]; }
+    else if (phase === 'custom') {
+      if (narrow) { l = [HOME.x, 0.1, HOME.z]; p = [HOME.x, 1.5, 9.5]; }
+      else { l = [HOME.x + 1.25, 1.2, HOME.z]; p = [HOME.x + 1.4, 2.0, 6.6]; }
+    }
+    else { l = [0, 1.25, 0]; p = [0, 2.5, narrow ? 11.5 : 8.4]; }
+    return { p: p, l: l };
+  }
   function resize() {
     var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
     renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.position.set(0, 2.5, w / h < 1.2 ? 11 : 8.4);
-    camera.lookAt(0, 1.25, 0);
-    camera.updateProjectionMatrix();
+    aspect = w / h; camera.aspect = aspect; camera.updateProjectionMatrix();
   }
   if (window.ResizeObserver) new ResizeObserver(resize).observe(stage); else window.addEventListener('resize', resize);
   resize();
 
   var last = 0, lean = 0, open = 1, droop = 0, aLs = 0.3, aRs = 0.3, mouthO = 0, earLag = 0, prevY = 0, starK = 0, zK = 0;
-  if (!reduce) start('intro');
 
   function frame() {
     var t = clock.getElapsedTime(), dt = Math.min(0.05, t - last); last = t;
-    var tired = mood === 'fatigue', ache = mood === 'tete';
+    var playing = phase === 'play';
+    var tired = playing && mood === 'fatigue', ache = playing && mood === 'tete';
     var sp = tired ? 0.5 : 1;
+    var hidden = phase === 'loading' || phase === 'title';
 
     /* 1. La vie au repos, selon l'humeur */
     var eyeT = tired ? 0.45 : 1, leanT = tired ? 0.2 : ache ? 0.08 : 0, droopT = tired ? 0.5 : ache ? 0.25 : 0;
@@ -408,10 +534,15 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
         eyeT = 0.32 + Math.sin(t * 6) * 0.08;
       }
       var bt = t % 4.2; if (bt < 0.12 || (bt > 0.3 && bt < 0.4)) eyeT *= 0.08;
-      if (!act && !down && t > nextAuto) autoAct();
+      if (!act && !down && !hidden && phase !== 'intro' && t > nextAuto) autoAct();
     } else if (ache) { aL = 2.75; aR = 2.75; eyeT = 0.32; }
 
     /* 2. L'action en cours, qui passe par-dessus */
+    var boxShake = 0, boxHop = 0;
+    if (phase === 'title' && !reduce) {
+      var bp = t % 2.6;
+      if (bp < 0.5) { boxShake = Math.sin(bp * 50) * 0.05 * (1 - bp / 0.5); boxHop = Math.abs(Math.sin(bp / 0.5 * Math.PI * 2)) * 0.07; }
+    }
     if (act) {
       var u = (t - act.t0) / act.dur;
       if (u >= 1) {
@@ -419,7 +550,7 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
         if (done === 'jump') { bump(tired ? 2 : 4.2); puff(pet.position.x, pet.position.z); }
         if (done === 'hop') bump(1.6);
         if (done === 'spin') bump(2.4);
-        if (done === 'intro') { bump(4.8); puff(HOME.x, HOME.z); box.rotation.z = 0; start('wave'); }
+        if (done === 'intro') { bump(4.8); puff(HOME.x, HOME.z); goCustom(); }
       } else if (act.type === 'jump') {
         var H = tired ? 0.45 : 1.4;
         if (u < 0.25) { pose += Math.sin(u / 0.25 * Math.PI / 2) * 0.24; }
@@ -439,13 +570,13 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
       } else if (act.type === 'intro') {
         if (u < 0.4) {
           px = BOX.x; pz = BOX.z; sc = 0.55; y = -1.3 + 1.5 * ease(u / 0.4);
-          box.rotation.z = Math.sin(t * 45) * 0.045 * (1 - u / 0.4 * 0.5);
+          boxShake = Math.sin(t * 45) * 0.045 * (1 - u / 0.4 * 0.5);
         } else {
           var w = (u - 0.4) / 0.6;
           px = BOX.x + (HOME.x - BOX.x) * w; pz = BOX.z + (HOME.z - BOX.z) * w;
           y = 0.2 * (1 - w) + 3.0 * 4 * w * (1 - w); sc = 0.55 + 0.45 * w;
           extraSpin = w * Math.PI * 2; aL = aR = 2.4; mouthT = 0.6; pose -= Math.sin(Math.PI * w) * 0.12;
-          box.rotation.z = Math.sin(t * 30) * 0.02 * (1 - w);
+          boxShake = Math.sin(t * 30) * 0.02 * (1 - w);
         }
       }
     }
@@ -457,9 +588,15 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
     mouthO += (mouthT - mouthO) * Math.min(1, f * 2);
     open += (eyeT - open) * fFast;
     sqV += (-190 * sq - 11 * sqV) * dt; sq += sqV * dt;
+    flapV += (-130 * (flap - flapT) - 9 * flapV) * dt; flap += flapV * dt;
     var S = sq + pose;
 
-    /* 4. On applique tout à la créature */
+    /* 4. On applique tout */
+    box.rotation.z = boxShake; box.position.y = boxHop;
+    var fo = Math.max(-0.05, flap) * 2.25;
+    flapL.rotation.z = fo; flapR.rotation.z = -fo;
+
+    pet.visible = !hidden;
     pet.position.set(px, y, pz);
     pet.scale.setScalar(sc);
     pet.rotation.y = spin + lookX * 0.5 + extraSpin;
@@ -504,10 +641,38 @@ button:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
       d.material.opacity = Math.max(0, (1 - o.life) * 0.6);
     });
 
+    var goal = camGoal(), cf = camReady && !reduce ? 1 - Math.pow(0.03, dt) : 1; camReady = true;
+    camP.x += (goal.p[0] - camP.x) * cf; camP.y += (goal.p[1] - camP.y) * cf; camP.z += (goal.p[2] - camP.z) * cf;
+    camL.x += (goal.l[0] - camL.x) * cf; camL.y += (goal.l[1] - camL.y) * cf; camL.z += (goal.l[2] - camL.z) * cf;
+    camera.position.copy(camP); camera.lookAt(camL);
+
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
   frame();
+
+  /* Le chargement : on attend que les polices soient prêtes, et on laisse le temps de lire */
+  var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
+  var stepN = 0;
+  function loadStep() {
+    stepN++;
+    var pct = Math.min(100, stepN * 25);
+    $('barfill').style.width = pct + '%'; $('bar').setAttribute('aria-valuenow', pct);
+    $('loadmsg').textContent = msgs[Math.min(msgs.length - 1, stepN - 1)];
+    if (stepN < 4) return setTimeout(loadStep, reduce ? 150 : 520);
+    var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    Promise.race([ready, new Promise(function (r) { setTimeout(r, 1500); })]).then(function () {
+      setTimeout(function () {
+        $('loading').classList.add('out');
+        setTimeout(function () {
+          var s = load();
+          if (s && s.name) { setColor(Math.max(0, Math.min(palette.length - 1, s.color | 0))); goPlay(String(s.name).slice(0, 12)); if (!reduce) start('wave'); }
+          else goTitle();
+        }, 480);
+      }, 450);
+    });
+  }
+  setTimeout(loadStep, 200);
 })();
 </script>
 </body>

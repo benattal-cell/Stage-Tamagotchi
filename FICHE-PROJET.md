@@ -99,6 +99,7 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 | Les écrans | Larges, pensés pour l'ordinateur |
 | Le démarrage | Un écran de chargement, puis le joueur ouvre le carton, la créature en sort, et il choisit son nom et sa couleur |
 | La musique | Une petite musique de fond, réglable dans les paramètres : on peut la couper, changer le volume et choisir parmi trois mélodies |
+| Les bruitages | Des petits sons quand la créature sort du carton, saute, atterrit, tourne, se tortille, bâille ou fait coucou. On peut les couper et régler leur volume à part |
 
 ## 6. Les fonctionnalités, triées
 

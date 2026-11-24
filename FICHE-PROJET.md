@@ -148,6 +148,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 ### L'atelier et la boutique
 
 - **L'atelier est gratuit** : 10 couleurs, 5 formes d'oreilles, 5 formes d'yeux, 5 dentitions. On peut changer quand on veut.
+- **Chaque article a son image** : l'appli prend une photo en 3D de la créature du joueur avec l'objet, et une photo de chaque décor. Aucun fichier image à dessiner.
 - **La boutique est payante**, avec les pièces gagnées : les 7 décors (aux prix décidés pendant l'atelier) et 9 accessoires.
 
 | Accessoire | Prix |

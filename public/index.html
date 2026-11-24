@@ -238,6 +238,13 @@ button, input { touch-action: manipulation; }
 .opts { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; min-height: 116px; }
 .item { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--night); border-radius: 16px; padding: 10px 12px; box-sizing: border-box; }
 .item .nm { font-weight: 800; min-width: 0; } .item .sub { display: block; font-size: .85rem; font-weight: 700; color: var(--muted); }
+.item .nm { flex: 1; }
+.th { flex: none; width: 64px; height: 64px; border-radius: 14px; background: #3B4160; object-fit: cover; display: block; }
+.th.wide { width: 84px; }
+.tile { width: calc((100% - 20px) / 3); min-width: 0; box-sizing: border-box; border: 3px solid transparent; border-radius: 16px; background: var(--panel-solid); color: var(--ink); padding: 6px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 800; font-size: .85rem; line-height: 1.15; text-align: center; }
+.tile img { width: 100%; max-width: 92px; aspect-ratio: 1; height: auto; border-radius: 12px; background: #3B4160; display: block; }
+.tile[aria-pressed="true"] { border-color: var(--coin); }
+.tile:active { transform: scale(.96); }
 .buy { flex: none; min-height: 44px; padding: 6px 14px; border-radius: 12px; border: 0; background: var(--coin); color: var(--dark-ink); font-weight: 800; font-size: .95rem; box-shadow: 0 4px 0 var(--coin-deep); }
 .buy:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--coin-deep); }
 .buy:disabled { background: var(--line); color: var(--muted); box-shadow: none; }
@@ -1470,6 +1477,54 @@ button, input { touch-action: manipulation; }
   $('settings').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSettings(); });
   paintSettings();
 
+  /* ---------- Les images de la boutique et de l'atelier ----------
+     Ce ne sont pas des fichiers : l'appli prend une vraie photo en 3D de TA créature avec l'objet, puis la range en mémoire. */
+  var TH = 160, rt = new THREE.WebGLRenderTarget(TH, TH); rt.texture.encoding = THREE.sRGBEncoding;
+  var studio = new THREE.Scene(); studio.add(new THREE.HemisphereLight(0xFFFFFF, 0x555566, 0.8));
+  var studioSun = new THREE.DirectionalLight(0xFFFFFF, 0.75); studioSun.position.set(2, 4, 5); studio.add(studioSun);
+  var thumbCam = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  var tcv = document.createElement('canvas'); tcv.width = tcv.height = TH;
+  var tctx = tcv.getContext('2d'), tbuf = new Uint8Array(TH * TH * 4), thumbCache = {};
+  function snap(sc, cam) {
+    var oldT = renderer.getRenderTarget(), oldA = renderer.getClearAlpha(), oldC = new THREE.Color(); renderer.getClearColor(oldC);
+    renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(sc, cam);
+    renderer.readRenderTargetPixels(rt, 0, 0, TH, TH, tbuf);
+    renderer.setRenderTarget(oldT); renderer.setClearColor(oldC, oldA);
+    var im = tctx.createImageData(TH, TH);
+    for (var y = 0; y < TH; y++) im.data.set(tbuf.subarray((TH - 1 - y) * TH * 4, (TH - y) * TH * 4), y * TH * 4);   /* l'image arrive à l'envers : on la retourne */
+    tctx.putImageData(im, 0, 0);
+    return tcv.toDataURL('image/png');
+  }
+  var FOCUS = { hat: [2.25, 5.4], ears: [2.3, 5.6], glasses: [1.55, 4.6], eyes: [1.55, 4.6], teeth: [1.1, 3.9], neck: [0.9, 4.8] };   /* où regarder, et de quelle distance */
+  function thumbLook(look, focus) {
+    var key = focus + '|' + colorIndex + '|' + badNow + '|' + JSON.stringify(look);
+    if (thumbCache[key]) return thumbCache[key];
+    try {
+      buildEars(look.ears); buildEyes(look.eyes); buildTeeth(look.teeth); buildAcc(look);
+      tuft.children.forEach(function (o) { o.visible = false; });
+      var par = pet.parent; studio.add(pet);
+      pet.position.set(0, 0, 0); pet.rotation.set(0, -0.3, 0); pet.scale.setScalar(1); bodyG.scale.set(1, 1, 1);
+      eyes.forEach(function (e) { e.scale.y = 1; });
+      var fc = FOCUS[focus]; thumbCam.position.set(0, fc[0] + 0.15, fc[1]); thumbCam.lookAt(0, fc[0], 0);
+      var url = snap(studio, thumbCam);
+      par.add(pet);
+      return (thumbCache[key] = url);
+    } catch (e) { if (pet.parent !== scene) scene.add(pet); return ''; }
+  }
+  function thumbDecor(n) {
+    var key = 'decor' + n; if (thumbCache[key]) return thumbCache[key];
+    try {
+      var cur = decorNow, vis = pet.visible; applyDecor(n); pet.visible = false;
+      thumbCam.position.set(HOME.x, 2.4, 9.2); thumbCam.lookAt(HOME.x, 1.7, -1);
+      var url = snap(scene, thumbCam);
+      pet.visible = vis; applyDecor(cur);
+      return (thumbCache[key] = url);
+    } catch (e) { return ''; }
+  }
+  function withItem(slot, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }; l[slot] = id; return l; }
+  function withShape(key, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }; l[key] = id; return l; }
+  function picture(url, cls) { var im = document.createElement('img'); im.className = cls || 'th'; im.alt = ''; im.width = 64; im.height = 64; if (url) im.src = url; return im; }
+
   /* ---------- L'atelier : changer l'apparence de la créature, gratuitement ---------- */
   var SHOP = [
     { id: 'bonnet', slot: 'hat', name: 'Bonnet à pompon', price: 80 }, { id: 'casquette', slot: 'hat', name: 'Casquette', price: 120 },
@@ -1496,8 +1551,9 @@ button, input { touch-action: manipulation; }
     });
   }
   function empty2(el) { while (el.firstChild) el.removeChild(el.firstChild); }
-  function chipOpt(box, label, on, fn) {
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = label; b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  function chipOpt(box, label, on, fn, url) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'tile'; b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.appendChild(picture(url, 'tp')); var sp = document.createElement('span'); sp.textContent = label; b.appendChild(sp);
     b.addEventListener('click', fn); box.appendChild(b);
   }
   function changed() { saveG(); dress(); start('wiggle'); paintLook(); }
@@ -1512,14 +1568,15 @@ button, input { touch-action: manipulation; }
       });
     } else if (L.slot) {
       var mine = SHOP.filter(function (it) { return it.slot === L.key && G.owned.indexOf(it.id) >= 0; });
-      if (!mine.length) { var pm = document.createElement('p'); pm.className = 'small'; pm.textContent = 'Tu n\'en as pas encore. Va voir la boutique !'; box.appendChild(pm); return; }
-      chipOpt(box, 'Rien', !G.look[L.key], function () { G.look[L.key] = null; changed(); });
-      mine.forEach(function (it) { chipOpt(box, it.name, G.look[L.key] === it.id, function () { G.look[L.key] = it.id; changed(); }); });
-    } else L.opts.forEach(function (o2) { chipOpt(box, o2[1], G.look[L.key] === o2[0], function () { G.look[L.key] = o2[0]; changed(); }); });
+      if (!mine.length) { dress(); var pm = document.createElement('p'); pm.className = 'small'; pm.textContent = 'Tu n\'en as pas encore. Va voir la boutique !'; box.appendChild(pm); return; }
+      chipOpt(box, 'Rien', !G.look[L.key], function () { G.look[L.key] = null; changed(); }, thumbLook(withItem(L.key, null), L.key));
+      mine.forEach(function (it) { chipOpt(box, it.name, G.look[L.key] === it.id, function () { G.look[L.key] = it.id; changed(); }, thumbLook(withItem(L.key, it.id), L.key)); });
+    } else L.opts.forEach(function (o2) { chipOpt(box, o2[1], G.look[L.key] === o2[0], function () { G.look[L.key] = o2[0]; changed(); }, thumbLook(withShape(L.key, o2[0]), L.key)); });
+    dress();                                  /* les photos ont changé son apparence un instant : on lui remet la vraie */
   }
   /* ---------- La boutique : dépenser ses pièces en décors et en accessoires ---------- */
-  function shopRow(box, name, sub, label, cls, disabled, fn) {
-    var row = document.createElement('div'); row.className = 'item';
+  function shopRow(box, name, sub, label, cls, disabled, fn, url, wide) {
+    var row = document.createElement('div'); row.className = 'item'; row.appendChild(picture(url, wide ? 'th wide' : 'th'));
     var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = name;
     var sb = document.createElement('span'); sb.className = 'sub'; sb.textContent = sub; nm.appendChild(sb);
     var b = document.createElement('button'); b.type = 'button'; b.className = 'buy' + (cls ? ' ' + cls : ''); b.textContent = label; b.disabled = !!disabled; b.addEventListener('click', fn);
@@ -1531,18 +1588,19 @@ button, input { touch-action: manipulation; }
     var box = $('shopList'), coins = calc().coins; empty2(box);
     if (shopTab === 0) DECORS.forEach(function (d, n) {
       var have = G.decors.indexOf(n) >= 0;
-      if (have) shopRow(box, d.name, G.decor === n ? 'Installé' : 'Acheté', G.decor === n ? 'Installé' : 'Installer', 'on', G.decor === n, function () { G.decor = n; saveG(); applyDecor(n); sfx('pop'); paintShop(); });
+      if (have) shopRow(box, d.name, G.decor === n ? 'Installé' : 'Acheté', G.decor === n ? 'Installé' : 'Installer', 'on', G.decor === n, function () { G.decor = n; saveG(); applyDecor(n); sfx('pop'); paintShop(); }, thumbDecor(n), true);
       else shopRow(box, d.name, d.price <= coins ? d.price + ' pièces' : 'Il te manque ' + (d.price - coins) + ' pièces', 'Acheter · ' + d.price, '', d.price > coins, function () {
         G.decors.push(n); G.decor = n; pay(d.price); applyDecor(n); say('Trop bien, ma nouvelle maison !'); start('jump'); paintShop();
-      });
+      }, thumbDecor(n), true);
     });
     else SHOP.forEach(function (it) {
       var have = G.owned.indexOf(it.id) >= 0, worn = G.look[it.slot] === it.id;
-      if (have) shopRow(box, it.name, worn ? 'Porté' : 'Acheté', worn ? 'Enlever' : 'Porter', 'on', false, function () { G.look[it.slot] = worn ? null : it.id; saveG(); dress(); start('wiggle'); paintShop(); });
+      if (have) shopRow(box, it.name, worn ? 'Porté' : 'Acheté', worn ? 'Enlever' : 'Porter', 'on', false, function () { G.look[it.slot] = worn ? null : it.id; saveG(); dress(); start('wiggle'); paintShop(); }, thumbLook(withItem(it.slot, it.id), it.slot));
       else shopRow(box, it.name, it.price <= coins ? it.price + ' pièces' : 'Il te manque ' + (it.price - coins) + ' pièces', 'Acheter · ' + it.price, '', it.price > coins, function () {
         G.owned.push(it.id); G.look[it.slot] = it.id; pay(it.price); dress(); say('Ça me va bien, non ?'); start('spin'); paintShop();
-      });
+      }, thumbLook(withItem(it.slot, it.id), it.slot));
     });
+    dress();
   }
   function closeSheets() { $('look').hidden = true; $('shop').hidden = true; focusCam = false; }
   $('navLook').addEventListener('click', function () { sfx('tick'); closeSheets(); paintLook(); $('look').hidden = false; focusCam = true; $('lookClose').focus(); });

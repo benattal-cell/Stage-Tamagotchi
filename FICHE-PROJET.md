@@ -119,6 +119,35 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | **V2 — On a envie de revenir** | Points et pièces · boutique des 7 décors · day streak · quêtes et cadeaux · rattrapage · export Santé | Jouer longtemps sans s'ennuyer |
 | **V3 — On joue entre copains** | Comptes et pseudos · créatures des copains · classement de la semaine · autres créatures | Se défier |
 
+## Où en est la construction
+
+| Fonctionnalité | État |
+|---|---|
+| Chargement, ouverture du carton, choix du nom et de la couleur | Fait |
+| La créature en 3D, ses animations, la musique et les bruitages | Fait |
+| Entrer sa journée à la main (sommeil, pas, écran) | Fait |
+| Points, pièces et day streak | Fait |
+| La créature réagit : en forme, fatiguée, mal de tête, pas contente | Fait |
+| Elle grandit tous les 3 jours joués (bébé, ado, adulte), en bien ou en mal, et on peut la rattraper | Fait |
+| Panneau administrateur pour tester | Fait |
+| Boutique et les 6 autres décors | À faire |
+| Quêtes bonus et cadeaux hebdomadaires | À faire |
+| Export de l'appli Santé | À faire |
+| Comptes, créatures des copains, classement | À faire |
+
+### Comment l'appli applique les règles
+
+- **Grandir** : la créature change d'âge toutes les 3 journées remplies. Une journée oubliée ne la fait pas grandir.
+- **Bonne ou mauvaise forme** : on regarde la moyenne des 3 dernières journées. En dessous de 300 points, elle passe en mauvais état ; dès que la moyenne remonte, elle redevient belle. Le bébé est toujours en forme.
+- **Son état du jour**, dans cet ordre : plus de 5 h d'écran → gros mal de tête ; moins de 7 h de sommeil → fatiguée ; entre 3 et 5 h d'écran → petit mal de tête ; moins de 10 000 pas → pas contente ; sinon en forme.
+- **Les données restent dans le navigateur** du joueur : rien n'est envoyé au serveur pour l'instant.
+
+### Le panneau administrateur
+
+Il s'ouvre depuis les paramètres, avec le code `1234`. Il sert à tester sans attendre des jours : forcer l'état, l'âge ou la forme de la créature, faire passer une bonne ou une mauvaise journée, tout effacer.
+
+Le code est écrit dans la page, donc n'importe qui peut le lire : il évite les clics par erreur, ce n'est pas une vraie sécurité. Une vraie protection demandera un compte administrateur vérifié par le serveur, en même temps que les comptes des joueurs.
+
 ## 8. Les contraintes techniques
 
 Une contrainte, c'est une règle imposée que le projet doit respecter, qu'on le veuille ou non.

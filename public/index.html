@@ -102,6 +102,34 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
 .hint { background: var(--panel); border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: .95rem; color: var(--muted); }
 #fallback:not([hidden]) { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; font-weight: 700; background: var(--night); }
 
+.day { width: min(360px, 100%); background: var(--panel); border: 2px solid var(--line); border-radius: 20px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
+.dayhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.dayhead .lab { font-family: var(--display); font-weight: 800; font-size: 1.25rem; }
+.dayhead strong { color: var(--coin); font-weight: 800; font-variant-numeric: tabular-nums; }
+.g { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-weight: 800; font-size: .95rem; }
+.g .gv { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.track { grid-column: 1 / -1; height: 12px; border-radius: 6px; background: var(--night); overflow: hidden; }
+.track i { display: block; height: 100%; width: 0%; border-radius: 6px; background: var(--line); transition: width .5s ease-out, background .3s; }
+.lv2 { color: var(--mint); } .lv1 { color: var(--coin); } .lv0 { color: var(--warn); }
+.day .big { font-size: 1.1rem; min-height: 48px; }
+.pair { display: flex; gap: 8px; align-items: center; }
+.num { min-height: 48px; width: 5.2rem; border-radius: 12px; border: 2px solid var(--line); background: var(--night); color: var(--ink); font-family: var(--body); font-weight: 800; font-size: 1.15rem; padding: 4px 10px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+.num.wide { width: 8rem; }
+.unit { font-weight: 700; color: var(--muted); }
+.fieldhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.fieldhead span:last-child { font-weight: 800; font-size: .95rem; }
+.err { color: var(--warn); font-weight: 800; }
+.ghost { min-height: 44px; padding: 6px 14px; border-radius: 12px; border: 2px solid var(--line); background: transparent; color: var(--ink); font-weight: 800; font-size: .95rem; }
+.ghost:hover { border-color: var(--coin); }
+.danger { border-color: var(--warn); color: var(--warn); }
+.tools:not([hidden]) { display: flex; flex-direction: column; gap: 14px; }
+.small { margin: 0; color: var(--muted); font-weight: 700; font-size: .9rem; }
+#toast:not([hidden]) {
+  position: absolute; left: 50%; top: 84px; transform: translateX(-50%); z-index: 6; max-width: calc(100% - 32px); box-sizing: border-box;
+  background: var(--coin); color: var(--dark-ink); font-family: var(--display); font-weight: 800; font-size: 1.2rem; text-align: center;
+  padding: 10px 22px; border-radius: 999px; box-shadow: 0 10px 24px rgba(0,0,0,.4); animation: rise .3s ease-out both; pointer-events: none;
+}
+
 /* Paramètres */
 .gear:not([hidden]) {
   position: absolute; top: 16px; right: max(16px, env(safe-area-inset-right, 0px)); z-index: 5;
@@ -114,6 +142,7 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   background: rgba(15, 17, 28, .72); animation: rise .25s ease-out both;
 }
+.veil .card { max-height: 100%; overflow-y: auto; box-sizing: border-box; }
 .switch { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.05rem; min-height: 44px; cursor: pointer; }
 .switch input { width: 26px; height: 26px; accent-color: var(--coin); cursor: pointer; }
 #setVol, #setSfxVol { width: 100%; min-height: 32px; accent-color: var(--coin); cursor: pointer; }
@@ -123,9 +152,11 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
 @media (max-width: 700px) {
   #custom { justify-content: flex-end; align-items: center; }
   .card { padding: 16px; gap: 10px; }
-  .veil .card { max-height: 100%; overflow-y: auto; box-sizing: border-box; }
   .card h2 { font-size: 1.5rem; }
   .hint { display: none; }
+  .day { width: 100%; padding: 10px 12px; gap: 8px; }
+  .plate strong { font-size: 1.35rem; }
+  .pill { padding: 6px 12px; font-size: .9rem; }
 }
 @media (prefers-reduced-motion: reduce) { .ui:not([hidden]), #open { animation: none; } }
 </style>
@@ -137,21 +168,19 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
 
   <div class="ui" id="hud" hidden>
     <div class="topbar">
-      <div class="plate"><strong id="hudName"></strong><span>Bébé · jour 1</span></div>
+      <div class="plate"><strong id="hudName"></strong><span id="hudStage"></span></div>
       <div class="pills">
-        <div class="pill"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#F7C948"/><circle cx="11" cy="11" r="6" fill="none" stroke="#B8860B" stroke-width="2"/></svg><span>0 pièce</span></div>
-        <div class="pill"><svg aria-hidden="true" width="18" height="20" viewBox="0 0 20 22"><path d="M10 1c1 4 6 6 6 12a6 6 0 0 1-12 0c0-2 1-4 2-5 0 2 1 3 2 3 0-4 1-7 2-10z" fill="#FF8A4B"/></svg><span>Série : 0 jour</span></div>
+        <div class="pill"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#F7C948"/><circle cx="11" cy="11" r="6" fill="none" stroke="#B8860B" stroke-width="2"/></svg><span id="hudCoins"></span></div>
+        <div class="pill"><svg aria-hidden="true" width="18" height="20" viewBox="0 0 20 22"><path d="M10 1c1 4 6 6 6 12a6 6 0 0 1-12 0c0-2 1-4 2-5 0 2 1 3 2 3 0-4 1-7 2-10z" fill="#FF8A4B"/></svg><span id="hudStreak"></span></div>
       </div>
     </div>
     <div class="bottombar">
-      <div class="test">
-        <span class="lab">Mode test · son état</span>
-        <div class="row" id="moods">
-          <button type="button" class="chip" id="mood-forme" data-mood="forme" aria-pressed="true">En forme</button>
-          <button type="button" class="chip" id="mood-fatigue" data-mood="fatigue" aria-pressed="false">Fatiguée</button>
-          <button type="button" class="chip" id="mood-tete" data-mood="tete" aria-pressed="false">Mal de tête</button>
-          <button type="button" class="chip" id="restart">Recommencer</button>
-        </div>
+      <div class="day">
+        <div class="dayhead"><span class="lab">Aujourd'hui</span><strong id="dayPts"></strong></div>
+        <div class="g"><span>Sommeil</span><span class="gv" id="gSleep"></span><div class="track"><i id="bSleep"></i></div></div>
+        <div class="g"><span>Pas</span><span class="gv" id="gSteps"></span><div class="track"><i id="bSteps"></i></div></div>
+        <div class="g"><span>Écran</span><span class="gv" id="gScreen"></span><div class="track"><i id="bScreen"></i></div></div>
+        <button type="button" class="big" id="enter">Entrer ma journée</button>
       </div>
       <span class="hint">Glisse pour la faire tourner · clique sur elle</span>
     </div>
@@ -208,9 +237,67 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
         <label for="setSfxVol">Volume des bruitages : <span id="sfxVal"></span></label>
         <input type="range" id="setSfxVol" min="0" max="100" step="5">
       </div>
+      <div class="row">
+        <button type="button" class="ghost" id="adminOpen">Administrateur</button>
+      </div>
       <button type="button" class="big" id="setClose">Fermer</button>
     </div>
   </div>
+
+  <div class="veil" id="entry" hidden>
+    <form class="card" id="dayForm" role="dialog" aria-modal="true" aria-labelledby="entryTitle" novalidate>
+      <h2 id="entryTitle">Ma journée</h2>
+      <div class="field">
+        <div class="fieldhead"><span class="lab" id="lSleep">Mon sommeil cette nuit</span><span id="pSleep"></span></div>
+        <div class="pair" role="group" aria-labelledby="lSleep">
+          <input class="num" id="sleepH" type="number" inputmode="numeric" min="0" max="16" step="1" aria-label="Heures de sommeil"><span class="unit">h</span>
+          <input class="num" id="sleepM" type="number" inputmode="numeric" min="0" max="59" step="5" aria-label="Minutes de sommeil"><span class="unit">min</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="fieldhead"><label class="lab" for="steps">Mes pas aujourd'hui</label><span id="pSteps"></span></div>
+        <div class="pair"><input class="num wide" id="steps" type="number" inputmode="numeric" min="0" max="80000" step="100"><span class="unit">pas</span></div>
+      </div>
+      <div class="field">
+        <div class="fieldhead"><span class="lab" id="lScreen">Mon temps d'écran</span><span id="pScreen"></span></div>
+        <div class="pair" role="group" aria-labelledby="lScreen">
+          <input class="num" id="screenH" type="number" inputmode="numeric" min="0" max="24" step="1" aria-label="Heures d'écran"><span class="unit">h</span>
+          <input class="num" id="screenM" type="number" inputmode="numeric" min="0" max="59" step="5" aria-label="Minutes d'écran"><span class="unit">min</span>
+        </div>
+      </div>
+      <span class="err" id="dayErr" role="alert" hidden>Remplis les trois lignes avec des nombres pour valider.</span>
+      <button type="submit" class="big" id="daySave">Valider ma journée</button>
+      <button type="button" class="ghost" id="dayCancel">Annuler</button>
+    </form>
+  </div>
+
+  <div class="veil" id="admin" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+      <h2 id="adminTitle">Administrateur</h2>
+      <form class="field" id="adminLock" novalidate>
+        <label for="adminCode">Code administrateur</label>
+        <div class="pair"><input class="num wide" id="adminCode" type="password" inputmode="numeric" autocomplete="off" maxlength="8"><button type="submit" class="ghost" id="adminGo">Entrer</button></div>
+        <span class="err" id="adminErr" role="alert" hidden>Ce n'est pas le bon code.</span>
+      </form>
+      <div id="adminTools" class="tools" hidden>
+        <p class="small" id="adminDay"></p>
+        <div class="field"><span class="lab" id="aMoodLab">Forcer son état</span><div class="row" id="aMood" role="group" aria-labelledby="aMoodLab"></div></div>
+        <div class="field"><span class="lab" id="aStageLab">Forcer son âge</span><div class="row" id="aStage" role="group" aria-labelledby="aStageLab"></div></div>
+        <div class="field"><span class="lab" id="aBadLab">Forcer sa forme</span><div class="row" id="aBad" role="group" aria-labelledby="aBadLab"></div></div>
+        <div class="field"><span class="lab">Faire passer le temps</span>
+          <div class="row">
+            <button type="button" class="ghost" id="aGood">Bonne journée + jour suivant</button>
+            <button type="button" class="ghost" id="aBadDay">Mauvaise journée + jour suivant</button>
+            <button type="button" class="ghost" id="aNext">Jour suivant sans rien entrer</button>
+          </div>
+        </div>
+        <div class="row"><button type="button" class="ghost danger" id="aReset">Tout effacer et recommencer</button></div>
+      </div>
+      <button type="button" class="big" id="adminClose">Fermer</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite" hidden></div>
 
   <div id="fallback" hidden>La 3D ne peut pas s'afficher sur cet appareil.</div>
 </div>
@@ -409,6 +496,21 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
     stick(new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.14, 0.035), thread), onBody(-0.5 + q * 0.13, -0.55 - q * 0.03, 0.75, 0.005));
   }
 
+  /* Ce qui change quand elle grandit (un toupet) ou quand elle va mal (cernes et rapiéçages en plus) */
+  var tuft = new THREE.Group(); bodyG.add(tuft);
+  [[0.05, 2.42, 0.1, 0.5, 0], [-0.14, 2.36, 0.12, 0.36, 0.5], [0.24, 2.36, 0.12, 0.36, -0.5]].forEach(function (q) {
+    var tc = mesh(new THREE.ConeGeometry(0.1, q[3], 12), darkMat, q[0], q[1], q[2], tuft); tc.rotation.z = q[4]; tc.visible = false;
+  });
+  var rag = new THREE.Group(); bodyG.add(rag); rag.visible = false;
+  var bagMatE = mat(0x4A3D5C);
+  [[-0.34, 1.5, 0.76, 0.34], [0.38, 1.58, 0.78, 0.22]].forEach(function (q) {
+    var eb = mesh(new THREE.SphereGeometry(q[3], 20, 12), bagMatE, q[0], q[1] - q[3] * 0.62, q[2] + 0.03, rag); eb.scale.set(0.95, 0.42, 0.75); eb.castShadow = false;
+  });
+  [[0.8, 0.35, 0.5, 0.3], [-0.75, -0.15, 0.62, 0.34], [0.35, 0.75, 0.55, 0.26]].forEach(function (q, n) {
+    var rp = stick(new THREE.Mesh(new THREE.BoxGeometry(q[3], q[3] * 0.85, 0.05), darkMat), onBody(q[0], q[1], q[2], 0));
+    rp.rotateZ(0.3 + n); stitchRing(rp, q[3], q[3] * 0.85); bodyG.remove(rp); rag.add(rp);
+  });
+
   /* Effets : étoiles du mal de tête, « z » de la fatigue, poussière à l'atterrissage */
   var stars = new THREE.Group(); stars.position.set(0, 2.75, 0); stars.scale.setScalar(0.001); pet.add(stars);
   var starMat = new THREE.MeshBasicMaterial({ color: 0xF7C948 });
@@ -432,25 +534,109 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   function puff(x, z) { dust.forEach(function (d) { d.userData.life = 0; d.userData.ox = x; d.userData.oz = z; d.visible = true; }); }
 
   /* ---------- Les étapes de l'appli : chargement → titre → sortie du carton → personnalisation → jeu ---------- */
-  var phase = 'loading', mood = 'forme', colorIndex = 0;
+  var phase = 'loading', mood = 'forme', acheLv = 1, colorIndex = 0;
   var SAVE = 'formilife.creature';
-  function load() { try { return JSON.parse(localStorage.getItem(SAVE) || 'null'); } catch (e) { return null; } }
-  function save(o) { try { if (o) localStorage.setItem(SAVE, JSON.stringify(o)); else localStorage.removeItem(SAVE); } catch (e) {} }
+  /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
+  var G = { name: '', color: 0, entries: {}, dayOffset: 0 };
+  function load() {
+    try {
+      var o = JSON.parse(localStorage.getItem(SAVE) || 'null'); if (!o || !o.name) return false;
+      G.name = String(o.name).slice(0, 12); G.color = Math.max(0, Math.min(palette.length - 1, o.color | 0));
+      G.entries = (o.entries && typeof o.entries === 'object') ? o.entries : {}; G.dayOffset = o.dayOffset | 0;
+      return true;
+    } catch (e) { return false; }
+  }
+  function saveG() { try { localStorage.setItem(SAVE, JSON.stringify(G)); } catch (e) {} }
+  function wipe() { G = { name: '', color: 0, entries: {}, dayOffset: 0 }; try { localStorage.removeItem(SAVE); } catch (e) {} }
+
+  /* ---------- Les règles de gestion : c'est ici que sont écrites les règles décidées pendant l'atelier ---------- */
+  var PTS = [0, 100, 300], LVL = ['Pas bien', 'Correct', 'Idéal'];      /* niveau 0, 1 ou 2 */
+  function lvlSleep(h) { return (h >= 8 && h <= 10) ? 2 : h >= 7 ? 1 : 0; }   /* 8 à 10 h idéal · 7 à 8 h ou plus de 10 h correct */
+  function lvlSteps(n) { return n >= 15000 ? 2 : n >= 10000 ? 1 : 0; }        /* 15 000 idéal · 10 000 correct */
+  function lvlScreen(h) { return h <= 3 ? 2 : h <= 5 ? 1 : 0; }               /* 3 h ou moins idéal · jusqu'à 5 h correct */
+  function score(e) {
+    var l = [lvlSleep(e.sleep), lvlSteps(e.steps), lvlScreen(e.screen)];
+    return { l: l, pts: PTS[l[0]] + PTS[l[1]] + PTS[l[2]] };
+  }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function dayKey(back) {
+    var d = new Date(Date.now() + (G.dayOffset - (back || 0)) * 864e5);
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function hm(h) { var m = Math.round(h * 60); return Math.floor(m / 60) + ' h ' + pad(m % 60); }
+  function calc() {
+    var keys = Object.keys(G.entries).sort(), n = keys.length, today = G.entries[dayKey(0)] || null;
+    var coins = 0; keys.forEach(function (k) { coins += Math.floor(score(G.entries[k]).pts / 10); });   /* 100 points = 10 pièces */
+    var last = keys.slice(-3), sum = 0; last.forEach(function (k) { sum += score(G.entries[k]).pts; });
+    var stage = Math.min(2, Math.floor(n / 3));                       /* elle grandit tous les 3 jours joués */
+    var bad = stage > 0 && last.length > 0 && sum / last.length < 300;  /* mauvaise forme si la moyenne des 3 derniers jours est sous 300 points */
+    var streak = 0, back = today ? 0 : 1;                             /* série : jours d'affilée avec les trois mesures au moins « Correct » */
+    for (;;) { var e = G.entries[dayKey(back)]; if (!e || Math.min.apply(null, score(e).l) < 1) break; streak++; back++; }
+    var m = 'forme', lv = 1, ref = today || (n ? G.entries[keys[n - 1]] : null);   /* tant qu'aujourd'hui n'est pas rempli, elle garde l'état de la dernière journée */
+    if (ref) {
+      var sc = score(ref);
+      if (ref.screen > 5) { m = 'tete'; lv = 2; }             /* plus de 5 h d'écran : gros mal de tête */
+      else if (sc.l[0] === 0) m = 'fatigue';                  /* moins de 7 h de sommeil : fatiguée */
+      else if (ref.screen > 3) { m = 'tete'; lv = 1; }        /* entre 3 et 5 h d'écran : petit mal de tête */
+      else if (sc.l[1] === 0) m = 'triste';                   /* moins de 10 000 pas : pas contente */
+    }
+    return { n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv };
+  }
 
   function show(id) { ['loading', 'title', 'custom', 'hud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; }
   function setColor(i) {
-    colorIndex = i; furMat.color.setHex(palette[i].fur); darkMat.color.setHex(palette[i].dark);
+    colorIndex = i; paint();
     Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
   }
-  function setMood(m) {
-    mood = m;
-    ['forme', 'fatigue', 'tete'].forEach(function (k) { $('mood-' + k).setAttribute('aria-pressed', k === m ? 'true' : 'false'); });
+  function setMood(m) { mood = m; }
+  var STAGE = [{ k: 0.72, ear: 0.7, name: 'Bébé' }, { k: 0.88, ear: 1, name: 'Ado' }, { k: 1.05, ear: 1.3, name: 'Adulte' }];
+  var stageNow = 0, badNow = false, pending = null, forceMood = null, forceStage = null, forceBad = null;
+  var grey = new THREE.Color(0x77778A);
+  function paint() {
+    furMat.color.setHex(palette[colorIndex].fur); darkMat.color.setHex(palette[colorIndex].dark);
+    if (badNow) { furMat.color.lerp(grey, 0.55); darkMat.color.lerp(grey, 0.55); }
+    rag.visible = badNow; tuft.children.forEach(function (o, i) { o.visible = stageNow === 2 || (stageNow === 1 && i === 0); });
   }
-  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; show('title'); musicSync(); }
+  var toastT = null;
+  function toast(msg) { $('toast').textContent = msg; $('toast').hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { $('toast').hidden = true; }, 3200); }
+  function gauge(id, bar, txt, lv, pct) {
+    $(id).textContent = txt; $(id).className = 'gv' + (lv == null ? '' : ' lv' + lv);
+    $(bar).style.width = pct + '%'; $(bar).style.background = lv == null ? '' : ['var(--warn)', 'var(--coin)', 'var(--mint)'][lv];
+  }
+  /* Recalcule tout à partir des journées enregistrées et met l'écran à jour */
+  function refresh(animate) {
+    var c = calc(), t = c.today;
+    mood = forceMood || c.mood; acheLv = forceMood ? 2 : c.acheLv;
+    var st = forceStage == null ? c.stage : forceStage, bd = forceBad == null ? c.bad : forceBad;
+    $('hudName').textContent = G.name;
+    $('hudStage').textContent = STAGE[st].name + (st < 2 ? ' · grandit dans ' + (3 - c.n % 3) + (3 - c.n % 3 > 1 ? ' jours' : ' jour') : '') + (bd ? ' · en mauvais état' : '');
+    $('hudCoins').textContent = c.coins + (c.coins > 1 ? ' pièces' : ' pièce');
+    $('hudStreak').textContent = 'Série : ' + c.streak + (c.streak > 1 ? ' jours' : ' jour');
+    if (t) {
+      var sc = score(t);
+      $('dayPts').textContent = sc.pts + ' / 900 points';
+      gauge('gSleep', 'bSleep', hm(t.sleep) + ' · ' + LVL[sc.l[0]], sc.l[0], Math.min(100, t.sleep / 10 * 100));
+      gauge('gSteps', 'bSteps', t.steps.toLocaleString('fr-FR') + ' · ' + LVL[sc.l[1]], sc.l[1], Math.min(100, t.steps / 15000 * 100));
+      gauge('gScreen', 'bScreen', hm(t.screen) + ' · ' + LVL[sc.l[2]], sc.l[2], Math.min(100, t.screen / 6 * 100));
+      $('enter').textContent = 'Modifier ma journée';
+    } else {
+      $('dayPts').textContent = 'Pas encore remplie';
+      gauge('gSleep', 'bSleep', 'à remplir', null, 0); gauge('gSteps', 'bSteps', 'à remplir', null, 0); gauge('gScreen', 'bScreen', 'à remplir', null, 0);
+      $('enter').textContent = 'Entrer ma journée';
+    }
+    stage.setAttribute('aria-label', G.name + ', ta créature en peluche, dans la ruelle aux poubelles');
+    if (st !== stageNow || bd !== badNow) {
+      var msg = st > stageNow ? G.name + ' a grandi !' : st < stageNow ? G.name + ' a rajeuni' : bd ? G.name + ' ne va pas bien…' : G.name + ' va mieux !';
+      if (animate && !reduce && phase === 'play') { pending = { stage: st, bad: bd }; act = null; start('evolve'); toast(msg); }
+      else { stageNow = st; badNow = bd; paint(); }
+      return true;
+    }
+    return false;
+  }
+  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; stageNow = 0; badNow = false; pending = null; forceMood = forceStage = forceBad = null; paint(); show('title'); musicSync(); }
   function goCustom() { phase = 'custom'; show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
   function goPlay(name) {
-    phase = 'play'; flapT = 1; $('hudName').textContent = name; show('hud'); musicSync();
-    stage.setAttribute('aria-label', name + ', ta créature en peluche, dans la ruelle aux poubelles');
+    phase = 'play'; flapT = 1; show('hud'); musicSync(); refresh(false);
   }
   function openBox() {
     if (phase !== 'title') return;
@@ -474,28 +660,22 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    save({ name: name, color: colorIndex });
+    G.name = name; G.color = colorIndex; G.entries = {}; G.dayOffset = 0; saveG();
     goPlay(name); sfx('fanfare'); start('jump');
   });
-  $('moods').addEventListener('click', function (ev) {
-    var b = ev.target.closest('button'); if (!b) return;
-    sfx('tick');
-    if (b.id === 'restart') { save(null); $('name').value = ''; act = null; goTitle(); return; }
-    setMood(b.dataset.mood);
-  });
-
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
   var clock = new THREE.Clock();
-  var DUR = { intro: 2.1, jump: 0.95, hop: 0.45, spin: 0.85, wiggle: 0.75, wave: 1.5, yawn: 2.3 };
+  var DUR = { intro: 2.1, jump: 0.95, hop: 0.45, spin: 0.85, wiggle: 0.75, wave: 1.5, yawn: 2.3, sigh: 1.6, evolve: 1.9 };
   var act = null, nextAuto = 6, lastAuto = '', quietNext = false, lastBp = 0;
   var AUTO = {
     forme: ['wave', 'wave', 'hop', 'hop', 'jump', 'spin', 'wiggle'],
     fatigue: ['yawn', 'yawn', 'yawn', 'hop'],
-    tete: ['wiggle', 'hop']
+    tete: ['wiggle', 'hop'],
+    triste: ['sigh', 'sigh', 'hop']
   };
   function start(type) {
     var loud = quietNext ? 0.4 : 1; quietNext = false;
-    if (act && act.type === 'intro') return;
+    if (act && (act.type === 'intro' || act.type === 'evolve')) return;
     act = { type: type, t0: clock.getElapsedTime(), dur: DUR[type] };
     if (type === 'jump') sfx('boing', loud, DUR.jump * 0.25); else sfx(type, loud);
     nextAuto = act.t0 + act.dur + 1.8 + Math.random() * 3;
@@ -554,21 +734,25 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   if (window.ResizeObserver) new ResizeObserver(resize).observe(stage); else window.addEventListener('resize', resize);
   resize();
 
+  var stageK = STAGE[0].k, earK = STAGE[0].ear;
   var last = 0, lean = 0, open = 1, droop = 0, aLs = 0.3, aRs = 0.3, mouthO = 0, earLag = 0, prevY = 0, starK = 0, zK = 0;
 
   function frame() {
     var t = clock.getElapsedTime(), dt = Math.min(0.05, t - last); last = t;
     var playing = phase === 'play';
-    var tired = playing && mood === 'fatigue', ache = playing && mood === 'tete';
+    var tired = playing && mood === 'fatigue', ache = playing && mood === 'tete', sad = playing && mood === 'triste';
+    var strong = acheLv > 1 ? 1 : 0.45;
     var sp = tired ? 0.5 : 1;
     var hidden = phase === 'loading' || phase === 'title';
 
     /* 1. La vie au repos, selon l'humeur */
-    var eyeT = tired ? 0.45 : 1, leanT = tired ? 0.2 : ache ? 0.08 : 0, droopT = tired ? 0.5 : ache ? 0.25 : 0;
+    var eyeT = tired ? 0.45 : sad ? 0.7 : 1, leanT = tired ? 0.2 : sad ? 0.14 : ache ? 0.08 : 0, droopT = tired ? 0.5 : sad ? 0.45 : ache ? 0.25 : 0;
+    if (badNow && playing) { droopT += 0.25; eyeT *= 0.85; leanT += 0.05; }
     var aL = 0.3, aR = 0.3, mouthT = 0, pose = 0, y = 0, extraSpin = 0, tilt = 0, px = HOME.x, pz = HOME.z, sc = 1, shake = 0;
     var breath = reduce ? 0 : Math.sin(t * 2.2 * sp) * (tired ? 0.035 : 0.022);
     if (!reduce) {
-      if (!tired && !ache) {
+      if (sad) { tilt += Math.sin(t * 0.7) * 0.03; }
+      if (!tired && !ache && !sad) {
         y += Math.abs(Math.sin(t * 2.2)) * 0.05;
         tilt += Math.sin(t * 1.1) * 0.03;
         aL += Math.sin(t * 2.2) * 0.1; aR += Math.sin(t * 2.2 + 1) * 0.1;
@@ -576,9 +760,9 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
       if (tired) { leanT += Math.sin(t * 0.9) * 0.05; tilt += Math.sin(t * 0.6) * 0.04; }
       if (ache) {
         aL = 2.75; aR = 2.75;
-        tilt += Math.sin(t * 2) * 0.07 + Math.sin(t * 15) * 0.02;
-        pose += Math.sin(t * 6) * 0.015;
-        eyeT = 0.32 + Math.sin(t * 6) * 0.08;
+        tilt += (Math.sin(t * 2) * 0.07 + Math.sin(t * 15) * 0.02) * strong;
+        pose += Math.sin(t * 6) * 0.015 * strong;
+        eyeT = (acheLv > 1 ? 0.32 : 0.6) + Math.sin(t * 6) * 0.08;
       }
       var bt = t % 4.2; if (bt < 0.12 || (bt > 0.3 && bt < 0.4)) eyeT *= 0.08;
       if (!act && !down && !hidden && phase !== 'intro' && t > nextAuto) autoAct();
@@ -597,6 +781,7 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
         if (done === 'jump') { bump(tired ? 2 : 4.2); puff(pet.position.x, pet.position.z); sfx('thud', 0.7); }
         if (done === 'hop') bump(1.6);
         if (done === 'spin') bump(2.4);
+        if (done === 'evolve') { bump(4.5); puff(pet.position.x, pet.position.z); sfx('thud', 0.7); }
         if (done === 'intro') { bump(4.8); puff(HOME.x, HOME.z); sfx('thud'); goCustom(); }
       } else if (act.type === 'jump') {
         var H = tired ? 0.45 : 1.4;
@@ -614,6 +799,12 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
       } else if (act.type === 'yawn') {
         var k = Math.sin(Math.PI * u);
         mouthT = k; eyeT = Math.min(eyeT, 1 - k * 0.95); aL = aR = 0.3 + k * 1.7; pose -= k * 0.09; leanT -= k * 0.3;
+      } else if (act.type === 'sigh') {
+        var ks = Math.sin(Math.PI * u);
+        pose += ks * 0.09; leanT += ks * 0.12; mouthT = ks * 0.3; eyeT = Math.min(eyeT, 1 - ks * 0.6);
+      } else if (act.type === 'evolve') {
+        extraSpin = ease(u) * Math.PI * 4; y += Math.sin(Math.PI * u) * 1.1; aL = aR = 2.3; mouthT = 0.5; pose -= Math.sin(Math.PI * u) * 0.14;
+        if (u > 0.5 && pending) { stageNow = pending.stage; badNow = pending.bad; pending = null; paint(); puff(pet.position.x, pet.position.z); }
       } else if (act.type === 'intro') {
         if (u < 0.4) {
           px = BOX.x; pz = BOX.z; sc = 0.55; y = -1.3 + 1.5 * ease(u / 0.4);
@@ -645,7 +836,8 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
 
     pet.visible = !hidden;
     pet.position.set(px, y, pz);
-    pet.scale.setScalar(sc);
+    stageK += (STAGE[stageNow].k - stageK) * f; earK += (STAGE[stageNow].ear - earK) * f;
+    pet.scale.setScalar(sc * stageK); earL.scale.y = earK; earR.scale.y = earK;
     pet.rotation.y = spin + lookX * 0.5 + extraSpin;
     pet.rotation.x = lean + lookY * 0.15;
     pet.rotation.z = tilt + shake;
@@ -671,7 +863,7 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
 
     starK += ((ache ? 1 : 0) - starK) * f; stars.scale.setScalar(Math.max(0.001, starK));
     stars.rotation.y = t * 3; stars.position.y = 2.75 + Math.sin(t * 4) * 0.05;
-    stars.children.forEach(function (o, i) { o.rotation.y = t * 5 + i; o.rotation.x = t * 3; });
+    stars.children.forEach(function (o, i) { o.rotation.y = t * 5 + i; o.rotation.x = t * 3; o.visible = acheLv > 1 || i % 2 === 0; });
     zK += ((tired ? 1 : 0) - zK) * f;
     zs.forEach(function (o, i) {
       var ph = (t * 0.3 + i / 3) % 1;
@@ -816,6 +1008,8 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
     wiggle:  function (k, at) { [720, 860, 760, 900, 800].forEach(function (f, n) { voice(f, f * 1.12, 0.07, 1.3 * k, at + n * 0.085, I, E); }); },
     wave:    function (k, at) { voice(520, 560, 0.13, 0.32 * k, at + 0.2, E, E); voice(620, 820, 0.22, 0.34 * k, at + 0.36, O, I); },
     yawn:    function (k, at) { voice(600, 620, 0.35, 0.45 * k, at + 0.45, O, A); voice(620, 260, 0.9, 0.55 * k, at + 0.8, A, O); hiss(900, 500, 0.8, 0.07 * k, at + 0.9); },
+    sigh:    function (k, at) { voice(430, 270, 0.7, 0.4 * k, at + 0.15, O, U); hiss(900, 400, 0.7, 0.08 * k, at + 0.2); },
+    evolve:  function (k, at) { hiss(500, 6000, 0.9, 0.5 * k, at, 3); [523, 659, 784, 1047, 1319].forEach(function (fq, n) { blip(fq, fq, 0.18, 'triangle', 0.24 * k, at + 0.2 + n * 0.12); }); },
     /* l'interface */
     tick:    function (k, at) { blip(1300, 900, 0.035, 'sine', 0.22 * k, at); blip(2600, 2000, 0.02, 'triangle', 0.07 * k, at); },
     fanfare: function (k, at) {
@@ -827,7 +1021,7 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   function sfx(name, loud, delay) {
     if (!actx || !prefs.sfx || document.hidden || phase === 'loading' || !SFX[name]) return;
     if (actx.state === 'suspended') actx.resume();
-    PV = (name === 'fanfare' || name === 'tick') ? 1 : 0.94 + Math.random() * 0.12;
+    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve') ? 1 : 0.94 + Math.random() * 0.12;
     SFX[name](loud == null ? 1 : loud, actx.currentTime + 0.01 + (delay || 0));
   }
   /* Un navigateur refuse de jouer du son avant que le joueur ait touché la page : on attend son premier geste */
@@ -882,6 +1076,91 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   $('settings').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSettings(); });
   paintSettings();
 
+  /* ---------- Le formulaire « Ma journée » ---------- */
+  function num(id) { var v = $(id).value.trim(); return v === '' ? NaN : Number(v); }
+  function readDay() {
+    var sh = num('sleepH'), sm = num('sleepM'), st = num('steps'), ch = num('screenH'), cm = num('screenM');
+    if (isNaN(sm)) sm = 0; if (isNaN(cm)) cm = 0;
+    if ([sh, st, ch].some(isNaN) || sh < 0 || sh > 16 || sm < 0 || sm > 59 || st < 0 || st > 80000 || ch < 0 || ch > 24 || cm < 0 || cm > 59) return null;
+    return { sleep: sh + sm / 60, steps: Math.round(st), screen: ch + cm / 60 };
+  }
+  function preview() {
+    var sh = num('sleepH'), st = num('steps'), ch = num('screenH');
+    function put(id, lv) { $(id).textContent = lv == null ? '' : LVL[lv] + ' · ' + PTS[lv] + ' pts'; $(id).className = lv == null ? '' : 'lv' + lv; }
+    put('pSleep', isNaN(sh) ? null : lvlSleep(sh + (num('sleepM') || 0) / 60));
+    put('pSteps', isNaN(st) ? null : lvlSteps(st));
+    put('pScreen', isNaN(ch) ? null : lvlScreen(ch + (num('screenM') || 0) / 60));
+    $('dayErr').hidden = true;
+  }
+  ['sleepH', 'sleepM', 'steps', 'screenH', 'screenM'].forEach(function (id) { $(id).addEventListener('input', preview); });
+  function closeEntry() { $('entry').hidden = true; $('enter').focus(); }
+  $('enter').addEventListener('click', function () {
+    sfx('tick');
+    var t = G.entries[dayKey(0)];
+    function split(h) { var m = Math.round(h * 60); return [Math.floor(m / 60), m % 60]; }
+    var a = t ? split(t.sleep) : ['', ''], c2 = t ? split(t.screen) : ['', ''];
+    $('sleepH').value = a[0]; $('sleepM').value = a[1]; $('steps').value = t ? t.steps : ''; $('screenH').value = c2[0]; $('screenM').value = c2[1];
+    preview(); $('entry').hidden = false; $('sleepH').focus();
+  });
+  $('dayCancel').addEventListener('click', function () { sfx('tick'); closeEntry(); });
+  $('entry').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeEntry(); });
+  function logDay(e) {
+    G.entries[dayKey(0)] = e; saveG();
+    var sc = score(e), grew = refresh(true);
+    if (!grew) {
+      toast('+' + sc.pts + ' points · +' + Math.floor(sc.pts / 10) + ' pièces');
+      if (sc.pts >= 600) { sfx('fanfare'); start('jump'); } else if (sc.pts < 300) start('sigh'); else start('wave');
+    } else sfx('evolve');
+  }
+  $('dayForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var e = readDay(); if (!e) { $('dayErr').hidden = false; return; }
+    closeEntry(); logDay(e);
+  });
+
+  /* ---------- Le panneau administrateur : pour tester l'appli sans attendre des jours ----------
+     Le code est écrit ici, dans la page : n'importe qui peut le lire. Il évite les clics par erreur, ce n'est pas une vraie sécurité. */
+  var ADMIN_CODE = '1234', adminOK = false;
+  function chips(box, list, get, set) {
+    list.forEach(function (it) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = it[0];
+      b.addEventListener('click', function () { sfx('tick'); set(it[1]); paintAdmin(); refresh(true); });
+      b._v = it[1]; b._get = get; $(box).appendChild(b);
+    });
+  }
+  chips('aMood', [['Automatique', null], ['En forme', 'forme'], ['Fatiguée', 'fatigue'], ['Mal de tête', 'tete'], ['Triste', 'triste']], function () { return forceMood; }, function (v) { forceMood = v; });
+  chips('aStage', [['Automatique', null], ['Bébé', 0], ['Ado', 1], ['Adulte', 2]], function () { return forceStage; }, function (v) { forceStage = v; });
+  chips('aBad', [['Automatique', null], ['En forme', false], ['En mauvais état', true]], function () { return forceBad; }, function (v) { forceBad = v; });
+  function paintAdmin() {
+    ['aMood', 'aStage', 'aBad'].forEach(function (box) { Array.prototype.forEach.call($(box).children, function (b) { b.setAttribute('aria-pressed', b._get() === b._v ? 'true' : 'false'); }); });
+    var c = calc();
+    $('adminDay').textContent = 'Jour simulé : ' + dayKey(0).split('-').reverse().join('/') + ' · ' + c.n + (c.n > 1 ? ' journées enregistrées' : ' journée enregistrée');
+    $('adminLock').hidden = adminOK; $('adminTools').hidden = !adminOK;
+    $('aReset').textContent = 'Tout effacer et recommencer'; resetArmed = false;
+  }
+  function closeAdmin() { $('admin').hidden = true; if (!$('gear').hidden) $('gear').focus(); }
+  $('adminOpen').addEventListener('click', function () {
+    sfx('tick'); $('settings').hidden = true; $('adminCode').value = ''; $('adminErr').hidden = true; paintAdmin(); $('admin').hidden = false;
+    (adminOK ? $('adminClose') : $('adminCode')).focus();
+  });
+  $('adminLock').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if ($('adminCode').value === ADMIN_CODE) { adminOK = true; sfx('wave'); paintAdmin(); $('adminClose').focus(); } else { $('adminErr').hidden = false; sfx('thud', 0.5); }
+  });
+  $('adminCode').addEventListener('input', function () { $('adminErr').hidden = true; });
+  $('adminClose').addEventListener('click', function () { sfx('tick'); closeAdmin(); });
+  $('admin').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeAdmin(); });
+  function needPlay() { if (phase === 'play') return true; toast('Adopte d\'abord une créature'); return false; }
+  function nextDay() { G.dayOffset++; saveG(); refresh(true); paintAdmin(); }
+  $('aGood').addEventListener('click', function () { if (!needPlay()) return; closeAdmin(); logDay({ sleep: 8.5, steps: 16000, screen: 2 }); G.dayOffset++; saveG(); setTimeout(function () { refresh(false); }, 2200); });
+  $('aBadDay').addEventListener('click', function () { if (!needPlay()) return; closeAdmin(); logDay({ sleep: 5, steps: 3000, screen: 7 }); G.dayOffset++; saveG(); setTimeout(function () { refresh(false); }, 2200); });
+  $('aNext').addEventListener('click', function () { if (!needPlay()) return; sfx('tick'); nextDay(); });
+  var resetArmed = false;
+  $('aReset').addEventListener('click', function () {
+    if (!resetArmed) { resetArmed = true; this.textContent = 'Clique encore pour confirmer'; return; }
+    wipe(); $('name').value = ''; act = null; closeAdmin(); goTitle();
+  });
+
   /* Le chargement : on attend que les polices soient prêtes, et on laisse le temps de lire */
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
@@ -896,8 +1175,7 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
       setTimeout(function () {
         $('loading').classList.add('out');
         setTimeout(function () {
-          var s = load();
-          if (s && s.name) { setColor(Math.max(0, Math.min(palette.length - 1, s.color | 0))); goPlay(String(s.name).slice(0, 12)); if (!reduce) start('wave'); }
+          if (load()) { setColor(G.color); goPlay(G.name); if (!reduce) start('wave'); }
           else goTitle();
         }, 480);
       }, 450);

@@ -1,0 +1,15 @@
+{
+  "name": "formilife",
+  "version": "0.1.0",
+  "description": "Une créature virtuelle en 3D qui dépend de ta vraie vie : sommeil, pas et temps d'écran.",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "three": "0.128.0"
+  }
+}

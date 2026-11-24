@@ -116,7 +116,19 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | **V2 — On a envie de revenir** | Points et pièces · boutique des 7 décors · day streak · quêtes et cadeaux · rattrapage · export Santé | Jouer longtemps sans s'ennuyer |
 | **V3 — On joue entre copains** | Comptes et pseudos · créatures des copains · classement de la semaine · autres créatures | Se défier |
 
-## 8. Ce qu'il reste à décider
+## 8. Les contraintes techniques
+
+Une contrainte, c'est une règle imposée que le projet doit respecter, qu'on le veuille ou non.
+
+| Contrainte | Ce que ça veut dire |
+|---|---|
+| **L'appli doit être hébergée sur Railway** (obligatoire) | Railway est un service qui fait tourner l'appli sur Internet, à une adresse que tout le monde peut ouvrir. L'appli doit donc avoir un **serveur** qui démarre avec `npm start` et qui écoute sur le port que Railway lui donne |
+| **Une appli web ne lit pas toute seule les données du téléphone** | Le joueur tape ses infos ou envoie son export Santé |
+| **Les données de santé sont sensibles** | On ne montre jamais les vrais chiffres d'un joueur aux autres |
+
+Le dépôt est déjà prêt pour Railway : `server.js` (le serveur), `package.json` (la recette de démarrage) et `public/` (ce que voit le joueur).
+
+## 9. Ce qu'il reste à décider
 
 - La **liste des couleurs** proposées au joueur.
 - **Combien de pièces** rapporte chaque quête bonus.
@@ -134,5 +146,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | **Prototype** | Un essai rapide qui marche à moitié, pour vérifier qu'une idée est faisable |
 | **Charte graphique** | Les règles de couleurs et de style de toute l'appli |
 | **Bêta-testeur** | Quelqu'un qui essaie l'appli en premier pour dire ce qui ne va pas |
-| **Serveur** | L'ordinateur central qui garde les infos de tous les joueurs |
+| **Serveur** | L'ordinateur central qui envoie l'appli aux joueurs et garde leurs infos |
+| **Hébergement** | Louer un serveur allumé en permanence pour que l'appli soit accessible sur Internet |
+| **Contrainte** | Une règle imposée que le projet doit respecter |
 | **Donnée personnelle** | Une info sur une vraie personne, qu'il faut protéger |

@@ -67,6 +67,7 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 
 - **100 points = 10 pièces.** Une journée parfaite rapporte 90 pièces, une semaine parfaite 630.
 - On en gagne aussi avec les **cadeaux hebdomadaires** et les **quêtes bonus** (des petits défis).
+- Exemples de quêtes : faire 20 000 pas dans la journée, rester à 1 h d'écran seulement.
 - Les pièces servent à acheter des décors.
 
 ### La boutique de décors
@@ -92,7 +93,9 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 |---|---|
 | Style | **Peluche bricolée** : tissu cousu, rapiéçages, coutures apparentes |
 | La créature | Inventée, moche mais attachante, avec de gros yeux et de grandes dents |
-| Sa couleur | **À choisir** par le chef de projet |
+| Sa couleur | **Le joueur choisit** parmi plusieurs couleurs |
+| Son nom | **Le joueur le choisit** au début |
+| La profondeur | Un rendu entre la 2D et la 3D : des dessins plats posés sur plusieurs plans (fond, milieu, devant), avec des ombres, pour donner du relief |
 | Les écrans | Larges, pensés pour l'ordinateur |
 
 ## 6. Les fonctionnalités, triées
@@ -115,9 +118,9 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 
 ## 8. Ce qu'il reste à décider
 
-- La **couleur** de la créature.
-- Des **exemples de quêtes bonus** et ce que contiennent les cadeaux hebdomadaires.
-- Le **nom** de la créature : est-ce le joueur qui le choisit ?
+- La **liste des couleurs** proposées au joueur.
+- **Combien de pièces** rapporte chaque quête bonus.
+- Ce que contiennent les **cadeaux hebdomadaires**.
 
 ## Petit lexique
 

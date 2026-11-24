@@ -102,6 +102,24 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
 .hint { background: var(--panel); border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: .95rem; color: var(--muted); }
 #fallback:not([hidden]) { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; font-weight: 700; background: var(--night); }
 
+/* Paramètres */
+.gear:not([hidden]) {
+  position: absolute; top: 16px; right: max(16px, env(safe-area-inset-right, 0px)); z-index: 5;
+  width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; padding: 0;
+  background: var(--panel); border: 2px solid var(--line); color: var(--ink);
+}
+.gear:hover { border-color: var(--coin); }
+.veil:not([hidden]) {
+  position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+  padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: rgba(15, 17, 28, .72); animation: rise .25s ease-out both;
+}
+.switch { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.05rem; min-height: 44px; cursor: pointer; }
+.switch input { width: 26px; height: 26px; accent-color: var(--coin); cursor: pointer; }
+#setVol { width: 100%; min-height: 32px; accent-color: var(--coin); cursor: pointer; }
+#volVal { color: var(--muted); font-variant-numeric: tabular-nums; }
+.topbar { padding-right: 60px; }
+
 @media (max-width: 700px) {
   #custom { justify-content: flex-end; align-items: center; }
   .card { padding: 16px; gap: 12px; }
@@ -167,6 +185,25 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
     <h1>FormiLife</h1>
     <div class="bar" role="progressbar" aria-label="Chargement" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar"><i id="barfill"></i></div>
     <p id="loadmsg">Chargement…</p>
+  </div>
+
+  <button type="button" class="gear" id="gear" aria-label="Paramètres" hidden>
+    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.6"/><circle cx="8" cy="17" r="2.6"/></svg>
+  </button>
+  <div class="veil" id="settings" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+      <h2 id="setTitle">Paramètres</h2>
+      <label class="switch" for="setMusic"><input type="checkbox" id="setMusic"><span>Musique de fond</span></label>
+      <div class="field">
+        <label for="setVol">Volume : <span id="volVal"></span></label>
+        <input type="range" id="setVol" min="0" max="100" step="5">
+      </div>
+      <div class="field">
+        <span class="lab" id="trkLab">Mélodie</span>
+        <div class="row" id="tracks" role="group" aria-labelledby="trkLab"></div>
+      </div>
+      <button type="button" class="big" id="setClose">Fermer</button>
+    </div>
   </div>
 
   <div id="fallback" hidden>La 3D ne peut pas s'afficher sur cet appareil.</div>
@@ -394,7 +431,7 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   function load() { try { return JSON.parse(localStorage.getItem(SAVE) || 'null'); } catch (e) { return null; } }
   function save(o) { try { if (o) localStorage.setItem(SAVE, JSON.stringify(o)); else localStorage.removeItem(SAVE); } catch (e) {} }
 
-  function show(id) { ['loading', 'title', 'custom', 'hud'].forEach(function (k) { $(k).hidden = k !== id; }); }
+  function show(id) { ['loading', 'title', 'custom', 'hud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; }
   function setColor(i) {
     colorIndex = i; furMat.color.setHex(palette[i].fur); darkMat.color.setHex(palette[i].dark);
     Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
@@ -403,10 +440,10 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
     mood = m;
     ['forme', 'fatigue', 'tete'].forEach(function (k) { $('mood-' + k).setAttribute('aria-pressed', k === m ? 'true' : 'false'); });
   }
-  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; show('title'); }
+  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; show('title'); musicSync(); }
   function goCustom() { phase = 'custom'; show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
   function goPlay(name) {
-    phase = 'play'; flapT = 1; $('hudName').textContent = name; show('hud');
+    phase = 'play'; flapT = 1; $('hudName').textContent = name; show('hud'); musicSync();
     stage.setAttribute('aria-label', name + ', ta créature en peluche, dans la ruelle aux poubelles');
   }
   function openBox() {
@@ -650,6 +687,102 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
     requestAnimationFrame(frame);
   }
   frame();
+
+  /* ---------- La musique : fabriquée par du code, note par note, sans fichier son ----------
+     Chaque mélodie a 4 mesures de 8 temps. Les nombres sont des notes (60 = do, 62 = ré, 64 = mi…), 0 = silence. */
+  var TRACKS = [
+    { name: 'Ruelle de nuit', bpm: 84,
+      lead: [69,0,72,0,76,0,72,0, 69,0,72,0,77,0,76,72, 67,0,72,0,76,0,79,0, 74,0,71,0,74,0,67,0],
+      bass: [45, 41, 48, 43], chords: [[57,60,64],[53,57,60],[55,60,64],[55,59,62]] },
+    { name: 'Balade joyeuse', bpm: 112,
+      lead: [72,76,79,76,72,76,79,0, 71,74,79,74,71,74,79,0, 69,72,76,72,69,72,76,0, 69,72,77,72,76,74,72,0],
+      bass: [48, 43, 45, 41], chords: [[52,55,60],[50,55,59],[52,57,60],[53,57,60]] },
+    { name: 'Berceuse', bpm: 66,
+      lead: [77,0,0,72,0,0,74,0, 77,0,0,74,0,0,69,0, 74,0,0,70,0,0,72,0, 72,0,0,67,0,0,72,0],
+      bass: [41, 38, 46, 48], chords: [[53,57,60],[50,53,57],[50,53,58],[52,55,60]] }
+  ];
+  var SET = 'formilife.reglages';
+  var prefs = { music: true, volume: 60, track: 0 };
+  try {
+    var sv = JSON.parse(localStorage.getItem(SET) || 'null');
+    if (sv) {
+      prefs.music = sv.music !== false;
+      prefs.volume = Math.max(0, Math.min(100, Number(sv.volume) || 0));
+      prefs.track = Math.max(0, Math.min(TRACKS.length - 1, sv.track | 0));
+    }
+  } catch (e) {}
+  function savePrefs() { try { localStorage.setItem(SET, JSON.stringify(prefs)); } catch (e) {} }
+
+  var actx = null, master = null, timer = null, stepI = 0, nextT = 0;
+  function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  function tone(type, m, t, dur, peak, attack) {
+    var o = actx.createOscillator(), gn = actx.createGain();
+    o.type = type; o.frequency.value = hz(m);
+    gn.gain.setValueAtTime(0.0001, t);
+    gn.gain.linearRampToValueAtTime(peak, t + attack);
+    gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(gn); gn.connect(master); o.start(t); o.stop(t + dur + 0.05);
+  }
+  /* On prépare les notes un quart de seconde à l'avance, pour que le rythme reste régulier */
+  function schedule() {
+    var tr = TRACKS[prefs.track], sd = 60 / tr.bpm / 2;
+    if (nextT < actx.currentTime) nextT = actx.currentTime + 0.05;
+    while (nextT < actx.currentTime + 0.25) {
+      var s = stepI % 32, bar = Math.floor(s / 8), inBar = s % 8, n = tr.lead[s];
+      if (n) tone('triangle', n, nextT, sd * 2.2, 0.22, 0.015);
+      if (inBar === 0) tr.chords[bar].forEach(function (cn) { tone('sine', cn, nextT, sd * 8.2, 0.07, 0.25); });
+      if (inBar === 0 || inBar === 4) tone('sine', tr.bass[bar], nextT, sd * 3, 0.2, 0.02);
+      nextT += sd; stepI++;
+    }
+  }
+  function musicSync() {
+    if (!actx) return;
+    var want = prefs.music && !document.hidden && phase !== 'loading';
+    if (want && !timer) {
+      if (actx.state === 'suspended') actx.resume();
+      stepI = 0; nextT = actx.currentTime + 0.1; schedule(); timer = setInterval(schedule, 60);
+    }
+    if (!want && timer) { clearInterval(timer); timer = null; }
+    master.gain.setTargetAtTime(want ? prefs.volume / 100 * 0.6 : 0, actx.currentTime, 0.08);
+  }
+  /* Un navigateur refuse de jouer du son avant que le joueur ait touché la page : on attend son premier geste */
+  function unlock() {
+    if (!actx) {
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      try { actx = new AC(); } catch (e) { actx = null; return; }
+      var lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
+      master = actx.createGain(); master.gain.value = 0; master.connect(lp); lp.connect(actx.destination);
+    }
+    musicSync();
+  }
+  window.addEventListener('pointerdown', unlock);
+  window.addEventListener('keydown', unlock);
+  document.addEventListener('visibilitychange', musicSync);
+
+  /* La fenêtre des paramètres */
+  function paintSettings() {
+    $('setMusic').checked = prefs.music; $('setVol').value = prefs.volume; $('volVal').textContent = prefs.volume + ' %';
+    $('setVol').disabled = !prefs.music;
+    Array.prototype.forEach.call($('tracks').children, function (x, n) { x.setAttribute('aria-pressed', n === prefs.track ? 'true' : 'false'); x.disabled = !prefs.music; });
+  }
+  TRACKS.forEach(function (tr, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.id = 'track-' + i; b.textContent = tr.name;
+    b.addEventListener('click', function () {
+      prefs.track = i; savePrefs(); paintSettings();
+      if (timer) { clearInterval(timer); timer = null; }
+      unlock();
+    });
+    $('tracks').appendChild(b);
+  });
+  $('setMusic').addEventListener('change', function () { prefs.music = this.checked; savePrefs(); paintSettings(); unlock(); });
+  $('setVol').addEventListener('input', function () { prefs.volume = Number(this.value); savePrefs(); paintSettings(); unlock(); });
+  function closeSettings() { $('settings').hidden = true; $('gear').focus(); }
+  $('gear').addEventListener('click', function () { paintSettings(); $('settings').hidden = false; $('setMusic').focus(); });
+  $('setClose').addEventListener('click', closeSettings);
+  $('settings').addEventListener('click', function (ev) { if (ev.target === this) closeSettings(); });
+  $('settings').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSettings(); });
+  paintSettings();
 
   /* Le chargement : on attend que les polices soient prêtes, et on laisse le temps de lire */
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];

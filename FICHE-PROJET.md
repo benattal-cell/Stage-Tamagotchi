@@ -97,6 +97,8 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 | Son nom | **Le joueur le choisit** au début |
 | La 3D | **La créature et les décors sont en vraie 3D** : on peut tourner autour de la créature, la toucher, et elle réagit. Elle est construite en code à partir de formes simples (boules, cônes, cubes) |
 | Les écrans | Larges, pensés pour l'ordinateur |
+| Le démarrage | Un écran de chargement, puis le joueur ouvre le carton, la créature en sort, et il choisit son nom et sa couleur |
+| La musique | Une petite musique de fond, réglable dans les paramètres : on peut la couper, changer le volume et choisir parmi trois mélodies |
 
 ## 6. Les fonctionnalités, triées
 

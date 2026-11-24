@@ -760,36 +760,74 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   }
 
   /* ---------- Les bruitages : eux aussi fabriqués par du code ----------
-     Deux briques suffisent : un « bip » dont la hauteur glisse, et un souffle (du bruit filtré). */
+     Quatre briques : un bip dont la hauteur glisse, un souffle (du bruit filtré),
+     un ressort (un bip qui tremble) et une petite voix (un son riche passé dans deux filtres, comme une bouche). */
+  var PV = 1;                                  /* à chaque son, la hauteur change un tout petit peu : ça évite l'effet robot */
+  function env(gn, at, attack, dur, peak) {
+    gn.gain.setValueAtTime(0.0001, at); gn.gain.linearRampToValueAtTime(peak, at + attack); gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  }
   function blip(f1, f2, dur, type, peak, at) {
     var o = actx.createOscillator(), gn = actx.createGain();
-    o.type = type; o.frequency.setValueAtTime(f1, at); o.frequency.exponentialRampToValueAtTime(f2, at + dur);
-    gn.gain.setValueAtTime(0.0001, at); gn.gain.linearRampToValueAtTime(peak, at + 0.008); gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.type = type; o.frequency.setValueAtTime(f1 * PV, at); o.frequency.exponentialRampToValueAtTime(f2 * PV, at + dur);
+    env(gn, at, 0.006, dur, peak);
     o.connect(gn); gn.connect(sfxBus); o.start(at); o.stop(at + dur + 0.05);
   }
-  function hiss(f1, f2, dur, peak, at) {
-    var src = actx.createBufferSource(), bp = actx.createBiquadFilter(), gn = actx.createGain();
-    src.buffer = noiseBuf; bp.type = 'bandpass'; bp.Q.value = 0.8;
-    bp.frequency.setValueAtTime(f1, at); bp.frequency.exponentialRampToValueAtTime(f2, at + dur);
-    gn.gain.setValueAtTime(0.0001, at); gn.gain.linearRampToValueAtTime(peak, at + dur * 0.3); gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-    src.connect(bp); bp.connect(gn); gn.connect(sfxBus); src.start(at); src.stop(at + dur + 0.05);
+  function hiss(f1, f2, dur, peak, at, q, type) {
+    var src = actx.createBufferSource(), fl = actx.createBiquadFilter(), gn = actx.createGain();
+    src.buffer = noiseBuf; fl.type = type || 'bandpass'; fl.Q.value = q || 0.8;
+    fl.frequency.setValueAtTime(f1, at); fl.frequency.exponentialRampToValueAtTime(f2, at + dur);
+    env(gn, at, dur * 0.3, dur, peak);
+    src.connect(fl); fl.connect(gn); gn.connect(sfxBus); src.start(at, Math.random() * 0.5); src.stop(at + dur + 0.05);
+  }
+  function spring(f1, f2, dur, peak, at) {
+    var lfo = actx.createOscillator(), lg = actx.createGain();
+    lfo.frequency.value = 27; lg.gain.setValueAtTime(f1 * 0.25, at); lg.gain.exponentialRampToValueAtTime(1, at + dur);
+    lfo.connect(lg); lfo.start(at); lfo.stop(at + dur + 0.05);
+    [[1, 'sine', peak], [2, 'triangle', peak * 0.22]].forEach(function (h) {
+      var o = actx.createOscillator(), gn = actx.createGain();
+      o.type = h[1]; o.frequency.setValueAtTime(f1 * h[0] * PV, at); o.frequency.exponentialRampToValueAtTime(f2 * h[0] * PV, at + dur);
+      lg.connect(o.frequency); env(gn, at, 0.008, dur, h[2]);
+      o.connect(gn); gn.connect(sfxBus); o.start(at); o.stop(at + dur + 0.05);
+    });
+  }
+  var A = [850, 1300], O = [480, 850], I = [320, 2400], E = [520, 1900], U = [350, 700];   /* les « voyelles » de sa voix */
+  function voice(f1, f2, dur, peak, at, v1, v2) {
+    var o = actx.createOscillator(), lfo = actx.createOscillator(), lg = actx.createGain(), out = actx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(f1 * PV, at); o.frequency.exponentialRampToValueAtTime(f2 * PV, at + dur);
+    lfo.frequency.value = 6.5; lg.gain.value = f1 * 0.025; lfo.connect(lg); lg.connect(o.frequency);
+    env(out, at, Math.min(0.03, dur * 0.3), dur, peak * 2.6);
+    [0, 1].forEach(function (n) {
+      var bp = actx.createBiquadFilter(), fgn = actx.createGain();
+      bp.type = 'bandpass'; bp.Q.value = 6; bp.frequency.setValueAtTime(v1[n], at); bp.frequency.linearRampToValueAtTime(v2[n], at + dur);
+      fgn.gain.value = n ? 0.6 : 1; o.connect(bp); bp.connect(fgn); fgn.connect(out);
+    });
+    out.connect(sfxBus); o.start(at); lfo.start(at); o.stop(at + dur + 0.05); lfo.stop(at + dur + 0.05);
   }
   var SFX = {
-    pop:     function (k, at) { blip(300, 900, 0.09, 'sine', 0.5 * k, at); hiss(1500, 3000, 0.06, 0.3 * k, at); },
-    rattle:  function (k, at) { for (var i = 0; i < 3; i++) hiss(500, 900, 0.05, 0.3 * k, at + i * 0.08); },
-    boing:   function (k, at) { blip(220, 660, 0.28, 'triangle', 0.4 * k, at); },
-    hop:     function (k, at) { blip(300, 460, 0.1, 'triangle', 0.28 * k, at); },
-    thud:    function (k, at) { blip(140, 50, 0.16, 'sine', 0.6 * k, at); hiss(300, 600, 0.09, 0.25 * k, at); },
-    spin:    function (k, at) { hiss(400, 2600, 0.55, 0.3 * k, at); },
-    wiggle:  function (k, at) { for (var i = 0; i < 4; i++) blip(i % 2 ? 980 : 760, i % 2 ? 1100 : 860, 0.06, 'triangle', 0.25 * k, at + i * 0.075); },
-    wave:    function (k, at) { blip(660, 700, 0.09, 'triangle', 0.28 * k, at + 0.2); blip(880, 940, 0.12, 'triangle', 0.28 * k, at + 0.34); },
-    yawn:    function (k, at) { blip(540, 190, 1.1, 'sine', 0.3 * k, at + 0.5); },
-    tick:    function (k, at) { blip(900, 700, 0.04, 'square', 0.1 * k, at); },
-    fanfare: function (k, at) { [523, 659, 784, 1047].forEach(function (f, i) { blip(f, f, i === 3 ? 0.35 : 0.12, 'triangle', 0.3 * k, at + i * 0.1); }); }
+    /* le carton */
+    pop:     function (k, at) { blip(520, 140, 0.07, 'sine', 0.6 * k, at); blip(1400, 2200, 0.03, 'triangle', 0.18 * k, at + 0.005); hiss(2000, 5000, 0.05, 0.25 * k, at); hiss(600, 1200, 0.16, 0.3 * k, at + 0.02); },
+    rattle:  function (k, at) { for (var n = 0; n < 4; n++) { var f = 700 + Math.random() * 600; hiss(f, f * 1.4, 0.035, 0.5 * k, at + n * 0.07 + Math.random() * 0.03, 1.5); } blip(110, 80, 0.06, 'sine', 0.2 * k, at); },
+    /* ses mouvements */
+    boing:   function (k, at) { spring(190, 540, 0.36, 0.42 * k, at); voice(480, 720, 0.16, 0.3 * k, at + 0.02, O, A); },
+    hop:     function (k, at) { spring(260, 420, 0.14, 0.3 * k, at); },
+    thud:    function (k, at) { blip(150, 45, 0.2, 'sine', 0.7 * k, at); hiss(260, 90, 0.12, 0.4 * k, at, 0.5, 'lowpass'); voice(420, 300, 0.12, 0.22 * k, at + 0.03, O, U); },
+    spin:    function (k, at) { hiss(300, 3200, 0.3, 1.1 * k, at, 2.5); hiss(3200, 500, 0.3, 0.9 * k, at + 0.28, 2.5); voice(500, 900, 0.5, 0.8 * k, at + 0.05, I, I); },
+    /* sa voix */
+    wiggle:  function (k, at) { [720, 860, 760, 900, 800].forEach(function (f, n) { voice(f, f * 1.12, 0.07, 1.3 * k, at + n * 0.085, I, E); }); },
+    wave:    function (k, at) { voice(520, 560, 0.13, 0.32 * k, at + 0.2, E, E); voice(620, 820, 0.22, 0.34 * k, at + 0.36, O, I); },
+    yawn:    function (k, at) { voice(600, 620, 0.35, 0.45 * k, at + 0.45, O, A); voice(620, 260, 0.9, 0.55 * k, at + 0.8, A, O); hiss(900, 500, 0.8, 0.07 * k, at + 0.9); },
+    /* l'interface */
+    tick:    function (k, at) { blip(1300, 900, 0.035, 'sine', 0.22 * k, at); blip(2600, 2000, 0.02, 'triangle', 0.07 * k, at); },
+    fanfare: function (k, at) {
+      [523, 659, 784, 1047].forEach(function (f, n) { var d = n === 3 ? 0.5 : 0.13; blip(f, f, d, 'triangle', 0.26 * k, at + n * 0.1); blip(f * 2, f * 2, d, 'sine', 0.07 * k, at + n * 0.1); });
+      [523, 659, 784].forEach(function (f) { blip(f, f, 0.5, 'sine', 0.1 * k, at + 0.3); });
+      hiss(4000, 8000, 0.35, 0.08 * k, at + 0.3, 3);
+    }
   };
   function sfx(name, loud, delay) {
     if (!actx || !prefs.sfx || document.hidden || phase === 'loading' || !SFX[name]) return;
     if (actx.state === 'suspended') actx.resume();
+    PV = (name === 'fanfare' || name === 'tick') ? 1 : 0.94 + Math.random() * 0.12;
     SFX[name](loud == null ? 1 : loud, actx.currentTime + 0.01 + (delay || 0));
   }
   /* Un navigateur refuse de jouer du son avant que le joueur ait touché la page : on attend son premier geste */
@@ -799,7 +837,12 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
       try { actx = new AC(); } catch (e) { actx = null; return; }
       var lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
       master = actx.createGain(); master.gain.value = 0; master.connect(lp); lp.connect(actx.destination);
-      sfxBus = actx.createGain(); sfxBus.gain.value = prefs.sfxVolume / 100 * 0.7; sfxBus.connect(actx.destination);
+      sfxBus = actx.createGain(); sfxBus.gain.value = prefs.sfxVolume / 100 * 0.7; 
+      /* Une petite réverbération (l'écho de la ruelle) et un limiteur pour que rien ne sature */
+      var comp = actx.createDynamicsCompressor(); comp.connect(actx.destination); sfxBus.connect(comp);
+      var conv = actx.createConvolver(), irLen = Math.floor(actx.sampleRate * 0.9), ir = actx.createBuffer(2, irLen, actx.sampleRate);
+      for (var ch = 0; ch < 2; ch++) { var id = ir.getChannelData(ch); for (var ii = 0; ii < irLen; ii++) id[ii] = (Math.random() * 2 - 1) * Math.pow(1 - ii / irLen, 3); }
+      conv.buffer = ir; var wet = actx.createGain(); wet.gain.value = 0.2; sfxBus.connect(conv); conv.connect(wet); wet.connect(comp);
       noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate);
       var nd = noiseBuf.getChannelData(0); for (var ni = 0; ni < nd.length; ni++) nd[ni] = Math.random() * 2 - 1;
     }

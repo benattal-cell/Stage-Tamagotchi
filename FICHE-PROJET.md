@@ -15,7 +15,7 @@ Bien dormir, bouger et limiter les écrans la fait grandir en bien. Prendre soin
 | Question | Décision |
 |---|---|
 | Pour qui ? | D'abord le chef de projet et ses copains (les **bêta-testeurs**) |
-| Sur quel appareil ? | Surtout sur ordinateur |
+| Sur quel appareil ? | **Sur téléphone**, tenu à la verticale (décision changée en cours de projet : au départ c'était l'ordinateur) |
 | Quand ? | Quand on veut, plusieurs fois par jour |
 | Seul ou à plusieurs ? | Seul au début, puis entre copains avec un classement |
 
@@ -96,7 +96,7 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 | Sa couleur | **Le joueur choisit** parmi plusieurs couleurs |
 | Son nom | **Le joueur le choisit** au début |
 | La 3D | **La créature et les décors sont en vraie 3D** : on peut tourner autour de la créature, la toucher, et elle réagit. Elle est construite en code à partir de formes simples (boules, cônes, cubes) |
-| Les écrans | Larges, pensés pour l'ordinateur |
+| Les écrans | **Pensés pour le téléphone** : les infos en haut, les boutons en bas sous le pouce, des fenêtres qui montent du bas de l'écran, de gros boutons − et + plutôt que du texte à taper. Sur ordinateur, l'appli garde la largeur d'un téléphone |
 | Le démarrage | Un écran de chargement, puis le joueur ouvre le carton, la créature en sort, et il choisit son nom et sa couleur |
 | La musique | Une petite musique de fond, réglable dans les paramètres : on peut la couper, changer le volume et choisir parmi trois mélodies |
 | Les bruitages | Des petits sons quand la créature sort du carton, saute, atterrit, tourne, se tortille, bâille ou fait coucou. On peut les couper et régler leur volume à part |
@@ -130,6 +130,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | La créature réagit : en forme, fatiguée, mal de tête, pas contente | Fait |
 | Elle grandit tous les 3 jours joués (bébé, ado, adulte), en bien ou en mal, et on peut la rattraper | Fait |
 | Panneau administrateur pour tester | Fait |
+| Interface pour téléphone, installable sur l'écran d'accueil | Fait |
 | Boutique et les 6 autres décors | À faire |
 | Quêtes bonus et cadeaux hebdomadaires | À faire |
 | Export de l'appli Santé | À faire |

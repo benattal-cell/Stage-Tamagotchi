@@ -2,7 +2,14 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E2233">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <title>FormiLife</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap">
 <style>
@@ -23,6 +30,8 @@
   --body: 'Nunito', system-ui, sans-serif;
 }
 [hidden] { display: none !important; }
+/* On laisse la place de l'encoche et de la barre du bas des téléphones */
+:root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); background: #12141F; }
 html, body { height: 100%; margin: 0; }
 body { background: var(--night); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.4; overflow: hidden; }
 #app { position: relative; height: 100%; min-height: 520px; overflow: hidden; background: #2B2F52; }
@@ -158,7 +167,44 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   .plate strong { font-size: 1.35rem; }
   .pill { padding: 6px 12px; font-size: .9rem; }
 }
-@media (prefers-reduced-motion: reduce) { .ui:not([hidden]), #open { animation: none; } }
+/* ---------- Pensé d'abord pour le téléphone, tenu à la verticale ----------
+   Sur un ordinateur, l'appli garde la largeur d'un téléphone, au centre de l'écran. */
+body { background: #12141F; }
+#app { max-width: 480px; margin: 0 auto; }
+button, input { touch-action: manipulation; }
+.hint { display: none; }
+.topbar { flex-direction: column; align-items: flex-start; padding-right: 60px; }
+#toast:not([hidden]) { top: 184px; }
+#title { padding-inline: 56px; }
+#title h1 { font-size: clamp(2.4rem, 11vw, 3.6rem); }
+.pills { gap: 8px; } .pill { padding: 6px 12px; font-size: .9rem; }
+/* Le pouce travaille en bas : les actions sont en bas, les infos en haut */
+.day { width: 100%; padding: 12px 14px; gap: 10px; }
+.gauges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.g { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: .9rem; }
+.g .gv { text-align: left; color: var(--ink); font-family: var(--display); font-size: 1.15rem; line-height: 1.1; }
+.g .gk { font-weight: 800; font-size: .8rem; color: var(--muted); }
+.track { height: 10px; }
+.day .big, .card .big { width: 100%; }
+/* Les fenêtres montent du bas de l'écran, comme dans une appli de téléphone */
+#custom { justify-content: flex-end; align-items: stretch; padding-bottom: 0; padding-left: 0; padding-right: 0; }
+.veil:not([hidden]) { align-items: flex-end; padding: 16px 0 0; }
+.card { width: 100%; box-sizing: border-box; }
+#custom .card, .veil .card {
+  border-radius: 26px 26px 0 0; border-bottom: 0; border-left: 0; border-right: 0; max-height: 92%; overflow-y: auto;
+  padding: 20px max(18px, env(safe-area-inset-right, 0px)) 22px max(18px, env(safe-area-inset-left, 0px));
+  animation: sheet .3s ease-out both;
+}
+@keyframes sheet { from { transform: translateY(48px); opacity: 0; } to { transform: none; opacity: 1; } }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.st { width: 56px; height: 56px; flex: none; border-radius: 16px; border: 2px solid var(--line); background: var(--night); color: var(--ink); font-family: var(--display); font-weight: 800; font-size: 1.7rem; line-height: 1; padding: 0; }
+.st:active { background: var(--line); }
+.val { flex: 1; min-width: 0; text-align: center; font-family: var(--display); font-weight: 800; font-size: 1.7rem; font-variant-numeric: tabular-nums; }
+.stepper .num { flex: 1; width: auto; min-width: 0; min-height: 56px; text-align: center; font-family: var(--display); font-size: 1.5rem; }
+.chip, .ghost { min-height: 48px; }
+
+@media (prefers-reduced-motion: reduce) {
+  #custom .card, .veil .card { animation: none; } .ui:not([hidden]), #open { animation: none; } }
 </style>
 </head>
 <body>
@@ -177,12 +223,14 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
     <div class="bottombar">
       <div class="day">
         <div class="dayhead"><span class="lab">Aujourd'hui</span><strong id="dayPts"></strong></div>
-        <div class="g"><span>Sommeil</span><span class="gv" id="gSleep"></span><div class="track"><i id="bSleep"></i></div></div>
-        <div class="g"><span>Pas</span><span class="gv" id="gSteps"></span><div class="track"><i id="bSteps"></i></div></div>
-        <div class="g"><span>Écran</span><span class="gv" id="gScreen"></span><div class="track"><i id="bScreen"></i></div></div>
+        <div class="gauges">
+          <div class="g"><span>Sommeil</span><div class="track"><i id="bSleep"></i></div><span class="gv" id="gSleep"></span><span class="gk" id="kSleep"></span></div>
+          <div class="g"><span>Pas</span><div class="track"><i id="bSteps"></i></div><span class="gv" id="gSteps"></span><span class="gk" id="kSteps"></span></div>
+          <div class="g"><span>Écran</span><div class="track"><i id="bScreen"></i></div><span class="gv" id="gScreen"></span><span class="gk" id="kScreen"></span></div>
+        </div>
         <button type="button" class="big" id="enter">Entrer ma journée</button>
       </div>
-      <span class="hint">Glisse pour la faire tourner · clique sur elle</span>
+      <span class="hint">Glisse pour la faire tourner · touche-la</span>
     </div>
   </div>
 
@@ -249,23 +297,29 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
       <h2 id="entryTitle">Ma journée</h2>
       <div class="field">
         <div class="fieldhead"><span class="lab" id="lSleep">Mon sommeil cette nuit</span><span id="pSleep"></span></div>
-        <div class="pair" role="group" aria-labelledby="lSleep">
-          <input class="num" id="sleepH" type="number" inputmode="numeric" min="0" max="16" step="1" aria-label="Heures de sommeil"><span class="unit">h</span>
-          <input class="num" id="sleepM" type="number" inputmode="numeric" min="0" max="59" step="5" aria-label="Minutes de sommeil"><span class="unit">min</span>
+        <div class="stepper" role="group" aria-labelledby="lSleep">
+          <button type="button" class="st" id="sleepMinus" data-f="sleep" data-d="-15" aria-label="Un quart d'heure de sommeil en moins">−</button>
+          <output class="val" id="vSleep" aria-live="polite"></output>
+          <button type="button" class="st" id="sleepPlus" data-f="sleep" data-d="15" aria-label="Un quart d'heure de sommeil en plus">+</button>
         </div>
       </div>
       <div class="field">
         <div class="fieldhead"><label class="lab" for="steps">Mes pas aujourd'hui</label><span id="pSteps"></span></div>
-        <div class="pair"><input class="num wide" id="steps" type="number" inputmode="numeric" min="0" max="80000" step="100"><span class="unit">pas</span></div>
+        <div class="stepper">
+          <button type="button" class="st" id="stepsMinus" data-f="steps" data-d="-1000" aria-label="Mille pas en moins">−</button>
+          <input class="num" id="steps" type="number" inputmode="numeric" min="0" max="80000" step="100" placeholder="0">
+          <button type="button" class="st" id="stepsPlus" data-f="steps" data-d="1000" aria-label="Mille pas en plus">+</button>
+        </div>
       </div>
       <div class="field">
         <div class="fieldhead"><span class="lab" id="lScreen">Mon temps d'écran</span><span id="pScreen"></span></div>
-        <div class="pair" role="group" aria-labelledby="lScreen">
-          <input class="num" id="screenH" type="number" inputmode="numeric" min="0" max="24" step="1" aria-label="Heures d'écran"><span class="unit">h</span>
-          <input class="num" id="screenM" type="number" inputmode="numeric" min="0" max="59" step="5" aria-label="Minutes d'écran"><span class="unit">min</span>
+        <div class="stepper" role="group" aria-labelledby="lScreen">
+          <button type="button" class="st" id="screenMinus" data-f="screen" data-d="-15" aria-label="Un quart d'heure d'écran en moins">−</button>
+          <output class="val" id="vScreen" aria-live="polite"></output>
+          <button type="button" class="st" id="screenPlus" data-f="screen" data-d="15" aria-label="Un quart d'heure d'écran en plus">+</button>
         </div>
       </div>
-      <span class="err" id="dayErr" role="alert" hidden>Remplis les trois lignes avec des nombres pour valider.</span>
+      <span class="err" id="dayErr" role="alert" hidden>Écris ton nombre de pas pour valider.</span>
       <button type="submit" class="big" id="daySave">Valider ma journée</button>
       <button type="button" class="ghost" id="dayCancel">Annuler</button>
     </form>
@@ -600,7 +654,7 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   var toastT = null;
   function toast(msg) { $('toast').textContent = msg; $('toast').hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { $('toast').hidden = true; }, 3200); }
   function gauge(id, bar, txt, lv, pct) {
-    $(id).textContent = txt; $(id).className = 'gv' + (lv == null ? '' : ' lv' + lv);
+    $(id).textContent = txt; var kid = 'k' + id.slice(1); $(kid).textContent = lv == null ? 'à remplir' : LVL[lv]; $(kid).className = 'gk' + (lv == null ? '' : ' lv' + lv);
     $(bar).style.width = pct + '%'; $(bar).style.background = lv == null ? '' : ['var(--warn)', 'var(--coin)', 'var(--mint)'][lv];
   }
   /* Recalcule tout à partir des journées enregistrées et met l'écran à jour */
@@ -615,13 +669,13 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
     if (t) {
       var sc = score(t);
       $('dayPts').textContent = sc.pts + ' / 900 points';
-      gauge('gSleep', 'bSleep', hm(t.sleep) + ' · ' + LVL[sc.l[0]], sc.l[0], Math.min(100, t.sleep / 10 * 100));
-      gauge('gSteps', 'bSteps', t.steps.toLocaleString('fr-FR') + ' · ' + LVL[sc.l[1]], sc.l[1], Math.min(100, t.steps / 15000 * 100));
-      gauge('gScreen', 'bScreen', hm(t.screen) + ' · ' + LVL[sc.l[2]], sc.l[2], Math.min(100, t.screen / 6 * 100));
+      gauge('gSleep', 'bSleep', hm(t.sleep), sc.l[0], Math.min(100, t.sleep / 10 * 100));
+      gauge('gSteps', 'bSteps', t.steps.toLocaleString('fr-FR'), sc.l[1], Math.min(100, t.steps / 15000 * 100));
+      gauge('gScreen', 'bScreen', hm(t.screen), sc.l[2], Math.min(100, t.screen / 6 * 100));
       $('enter').textContent = 'Modifier ma journée';
     } else {
       $('dayPts').textContent = 'Pas encore remplie';
-      gauge('gSleep', 'bSleep', 'à remplir', null, 0); gauge('gSteps', 'bSteps', 'à remplir', null, 0); gauge('gScreen', 'bScreen', 'à remplir', null, 0);
+      gauge('gSleep', 'bSleep', '–', null, 0); gauge('gSteps', 'bSteps', '–', null, 0); gauge('gScreen', 'bScreen', '–', null, 0);
       $('enter').textContent = 'Entrer ma journée';
     }
     stage.setAttribute('aria-label', G.name + ', ta créature en peluche, dans la ruelle aux poubelles');
@@ -705,6 +759,7 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
         var p = rel(ev); ptr.set(p.x * 2 - 1, -(p.y * 2 - 1));
         ray.setFromCamera(ptr, camera);
         if (ray.intersectObject(pet, true).length) {
+          try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}      /* une petite vibration sous le doigt, sur les téléphones qui le permettent */
           var pick = Math.random();
           start(mood === 'tete' ? 'wiggle' : mood === 'fatigue' ? (pick < 0.5 ? 'jump' : 'wiggle') : (pick < 0.4 ? 'jump' : pick < 0.7 ? 'spin' : 'wiggle'));
         }
@@ -723,7 +778,8 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
       if (narrow) { l = [HOME.x, 0.1, HOME.z]; p = [HOME.x, 1.5, 9.5]; }
       else { l = [HOME.x + 1.25, 1.2, HOME.z]; p = [HOME.x + 1.4, 2.0, 6.6]; }
     }
-    else { l = [0, 1.25, 0]; p = [0, 2.5, narrow ? 11.5 : 8.4]; }
+    else if (narrow) { l = [HOME.x, 0.45, HOME.z]; p = [HOME.x, 2.3, 11.2]; }      /* le panneau du bas cache le sol : on vise plus bas pour la remonter */
+    else { l = [0, 1.25, 0]; p = [0, 2.5, 8.4]; }
     return { p: p, l: l };
   }
   function resize() {
@@ -1076,31 +1132,42 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
   $('settings').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSettings(); });
   paintSettings();
 
-  /* ---------- Le formulaire « Ma journée » ---------- */
-  function num(id) { var v = $(id).value.trim(); return v === '' ? NaN : Number(v); }
+  /* ---------- Le formulaire « Ma journée » ----------
+     Sur un téléphone, taper des chiffres est pénible : le sommeil et l'écran se règlent avec deux gros boutons − et +. */
+  var F = { sleep: 480, screen: 120 }, MAXF = { sleep: 960, screen: 1440 };      /* en minutes */
+  function stepsVal() { var v = $('steps').value.trim(); return v === '' ? NaN : Number(v); }
   function readDay() {
-    var sh = num('sleepH'), sm = num('sleepM'), st = num('steps'), ch = num('screenH'), cm = num('screenM');
-    if (isNaN(sm)) sm = 0; if (isNaN(cm)) cm = 0;
-    if ([sh, st, ch].some(isNaN) || sh < 0 || sh > 16 || sm < 0 || sm > 59 || st < 0 || st > 80000 || ch < 0 || ch > 24 || cm < 0 || cm > 59) return null;
-    return { sleep: sh + sm / 60, steps: Math.round(st), screen: ch + cm / 60 };
+    var st = stepsVal(); if (isNaN(st) || st < 0 || st > 80000) return null;
+    return { sleep: F.sleep / 60, steps: Math.round(st), screen: F.screen / 60 };
   }
   function preview() {
-    var sh = num('sleepH'), st = num('steps'), ch = num('screenH');
     function put(id, lv) { $(id).textContent = lv == null ? '' : LVL[lv] + ' · ' + PTS[lv] + ' pts'; $(id).className = lv == null ? '' : 'lv' + lv; }
-    put('pSleep', isNaN(sh) ? null : lvlSleep(sh + (num('sleepM') || 0) / 60));
-    put('pSteps', isNaN(st) ? null : lvlSteps(st));
-    put('pScreen', isNaN(ch) ? null : lvlScreen(ch + (num('screenM') || 0) / 60));
+    $('vSleep').textContent = hm(F.sleep / 60); $('vScreen').textContent = hm(F.screen / 60);
+    put('pSleep', lvlSleep(F.sleep / 60)); put('pScreen', lvlScreen(F.screen / 60));
+    var st = stepsVal(); put('pSteps', isNaN(st) ? null : lvlSteps(st));
     $('dayErr').hidden = true;
   }
-  ['sleepH', 'sleepM', 'steps', 'screenH', 'screenM'].forEach(function (id) { $(id).addEventListener('input', preview); });
-  function closeEntry() { $('entry').hidden = true; $('enter').focus(); }
+  function nudge(b) {
+    var f = b.dataset.f, d = Number(b.dataset.d);
+    if (f === 'steps') { var st = stepsVal(); $('steps').value = Math.max(0, Math.min(80000, (isNaN(st) ? 0 : st) + d)); }
+    else F[f] = Math.max(0, Math.min(MAXF[f], F[f] + d));
+    preview();
+  }
+  /* Un appui : un cran. En restant appuyé, ça défile tout seul. */
+  var holdT = null, holdI = null;
+  function holdStop() { clearTimeout(holdT); clearInterval(holdI); holdT = holdI = null; }
+  Array.prototype.forEach.call(document.querySelectorAll('.st'), function (b) {
+    b.addEventListener('click', function () { nudge(b); sfx('tick', 0.6); });
+    b.addEventListener('pointerdown', function () { holdStop(); holdT = setTimeout(function () { holdI = setInterval(function () { nudge(b); }, 90); }, 420); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { b.addEventListener(ev, holdStop); });
+  });
+  $('steps').addEventListener('input', preview);
+  function closeEntry() { holdStop(); $('entry').hidden = true; $('enter').focus(); }
   $('enter').addEventListener('click', function () {
     sfx('tick');
     var t = G.entries[dayKey(0)];
-    function split(h) { var m = Math.round(h * 60); return [Math.floor(m / 60), m % 60]; }
-    var a = t ? split(t.sleep) : ['', ''], c2 = t ? split(t.screen) : ['', ''];
-    $('sleepH').value = a[0]; $('sleepM').value = a[1]; $('steps').value = t ? t.steps : ''; $('screenH').value = c2[0]; $('screenM').value = c2[1];
-    preview(); $('entry').hidden = false; $('sleepH').focus();
+    F.sleep = t ? Math.round(t.sleep * 60) : 480; F.screen = t ? Math.round(t.screen * 60) : 120; $('steps').value = t ? t.steps : '';
+    preview(); $('entry').hidden = false; $('sleepPlus').focus();
   });
   $('dayCancel').addEventListener('click', function () { sfx('tick'); closeEntry(); });
   $('entry').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeEntry(); });

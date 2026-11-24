@@ -91,11 +91,11 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 
 | Élément | Décision |
 |---|---|
-| Style | **Peluche bricolée** : tissu cousu, rapiéçages, coutures apparentes |
+| Style | **Peluche bricolée en 3D** : tissu granuleux, coutures et rapiéçages visibles |
 | La créature | Inventée, moche mais attachante, avec de gros yeux et de grandes dents |
 | Sa couleur | **Le joueur choisit** parmi plusieurs couleurs |
 | Son nom | **Le joueur le choisit** au début |
-| La profondeur | Un rendu entre la 2D et la 3D : des dessins plats posés sur plusieurs plans (fond, milieu, devant), avec des ombres, pour donner du relief |
+| La 3D | **La créature et les décors sont en vraie 3D** : on peut tourner autour de la créature, la toucher, et elle réagit. Elle est construite en code à partir de formes simples (boules, cônes, cubes) |
 | Les écrans | Larges, pensés pour l'ordinateur |
 
 ## 6. Les fonctionnalités, triées
@@ -131,6 +131,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | **Règle de gestion** | Une loi que l'appli doit suivre |
 | **MVP / V1** | La plus petite version de l'appli qui marche déjà |
 | **Maquette** | Le dessin d'un écran avant de le coder |
+| **Prototype** | Un essai rapide qui marche à moitié, pour vérifier qu'une idée est faisable |
 | **Charte graphique** | Les règles de couleurs et de style de toute l'appli |
 | **Bêta-testeur** | Quelqu'un qui essaie l'appli en premier pour dire ce qui ne va pas |
 | **Serveur** | L'ordinateur central qui garde les infos de tous les joueurs |

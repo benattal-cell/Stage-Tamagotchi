@@ -133,6 +133,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Interface pour téléphone, installable sur l'écran d'accueil | Fait |
 | Boutique : les 7 décors et 9 accessoires à acheter avec ses pièces | Fait |
 | Atelier : couleur, oreilles, yeux, dents, chapeau, lunettes, tour de cou | Fait |
+| 18 monstres au choix : la peluche d'origine et 17 monstres animés d'un pack gratuit | Fait |
 | La créature parle (bulles), aime les caresses (cœurs), fête les bonnes journées (confettis) | Fait |
 | Quêtes bonus et cadeaux hebdomadaires | À faire |
 | Export de l'appli Santé | À faire |
@@ -144,6 +145,13 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 - **Bonne ou mauvaise forme** : on regarde la moyenne des 3 dernières journées. En dessous de 300 points, elle passe en mauvais état ; dès que la moyenne remonte, elle redevient belle. Le bébé est toujours en forme.
 - **Son état du jour**, dans cet ordre : plus de 5 h d'écran → gros mal de tête ; moins de 7 h de sommeil → fatiguée ; entre 3 et 5 h d'écran → petit mal de tête ; moins de 10 000 pas → pas contente ; sinon en forme.
 - **Les données restent dans le navigateur** du joueur : rien n'est envoyé au serveur pour l'instant.
+
+### Les monstres
+
+- Le joueur choisit son espèce à l'adoption, et peut en changer dans l'atelier.
+- **La peluche** est fabriquée en code : on peut changer sa couleur, ses oreilles, ses yeux et ses dents.
+- **Les 17 autres** viennent du pack « Ultimate Monsters » de Quaternius, sous licence CC0 (libre de tout droit). Ils ont leurs propres animations. On peut changer leur teinte (8 choix), mais pas leurs oreilles ni leurs yeux.
+- **Les accessoires de la boutique vont sur tous les monstres.** L'appli mesure chaque monstre pour trouver où poser le chapeau, les lunettes et le tour de cou, puis les accroche à son squelette pour qu'ils suivent ses mouvements.
 
 ### L'atelier et la boutique
 

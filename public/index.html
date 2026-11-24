@@ -244,6 +244,10 @@ button, input { touch-action: manipulation; }
 .tile { width: calc((100% - 20px) / 3); min-width: 0; box-sizing: border-box; border: 3px solid transparent; border-radius: 16px; background: var(--panel-solid); color: var(--ink); padding: 6px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 800; font-size: .85rem; line-height: 1.15; text-align: center; }
 .tile img { width: 100%; max-width: 92px; aspect-ratio: 1; height: auto; border-radius: 12px; background: #3B4160; display: block; }
 .tile[aria-pressed="true"] { border-color: var(--coin); }
+.strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.strip .tile { flex: none; width: 78px; font-size: .78rem; }
+.cbtn { min-height: 48px; padding: 6px 14px; border-radius: 14px; border: 3px solid transparent; background: var(--panel-solid); color: var(--ink); font-weight: 800; font-size: .9rem; }
+.cbtn[aria-pressed="true"] { border-color: var(--coin); }
 .tile:active { transform: scale(.96); }
 .buy { flex: none; min-height: 44px; padding: 6px 14px; border-radius: 12px; border: 0; background: var(--coin); color: var(--dark-ink); font-weight: 800; font-size: .95rem; box-shadow: 0 4px 0 var(--coin-deep); }
 .buy:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--coin-deep); }
@@ -303,6 +307,10 @@ button, input { touch-action: manipulation; }
         <span id="nameErr" role="alert" hidden>Il lui faut un nom pour continuer.</span>
       </div>
       <div class="field">
+        <span class="lab" id="spLab">Son espèce</span>
+        <div class="strip" id="spStrip" role="group" aria-labelledby="spLab"></div>
+      </div>
+      <div class="field" id="colField">
         <span class="lab" id="colLab">Sa couleur</span>
         <div class="row" id="swatches" role="group" aria-labelledby="colLab"></div>
       </div>
@@ -432,6 +440,7 @@ button, input { touch-action: manipulation; }
 </div>
 
 <script src="/vendor/three.min.js"></script>
+<script src="/vendor/GLTFLoader.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -715,6 +724,108 @@ button, input { touch-action: manipulation; }
   var patch = mesh(new THREE.BoxGeometry(0.42, 0.42, 0.05), darkMat, 0.45, 0.6, 0.67, bodyG);
   patch.rotation.set(0.5, 0.45, 0.2);
 
+  /* ---------- Les 17 autres monstres ----------
+     Ce sont des modèles 3D tout faits (pack « Ultimate Monsters » de Quaternius, licence CC0) rangés dans le dossier models/.
+     Chacun arrive avec un squelette et 9 animations : Idle, Jump, Dance, Yes, No, Walk, HitRecieve, Bite_Front, Death. */
+  var SPECIES = [
+    { id: 'peluche', name: 'Peluche' }, { id: 'PinkBlob', name: 'Blob rose' }, { id: 'GreenBlob', name: 'Blob vert' }, { id: 'GreenSpikyBlob', name: 'Blob piquant' },
+    { id: 'Alien', name: 'Alien' }, { id: 'Mushnub', name: 'Champi' }, { id: 'Mushnub_Evolved', name: 'Grand champi' }, { id: 'Cactoro', name: 'Cactus' },
+    { id: 'Yeti', name: 'Yéti' }, { id: 'Birb', name: 'Piaf' }, { id: 'Pigeon', name: 'Pigeon' }, { id: 'Chicken', name: 'Poulet' }, { id: 'Cat', name: 'Chat' },
+    { id: 'Dog', name: 'Chien' }, { id: 'Fish', name: 'Poisson' }, { id: 'Orc', name: 'Orc' }, { id: 'Ninja', name: 'Ninja' }, { id: 'Wizard', name: 'Sorcier' }
+  ];
+  /* Où poser les accessoires sur chaque monstre, en fraction de sa hauteur. Les valeurs par défaut vont à la plupart. */
+  var FIT0 = { hat: 0.9, hatR: 1, eye: 0.62, eyeW: 1, eyeDX: 0, neck: 0.3, neckR: 1 };
+  var FIT = {
+    Fish: { eye: 0.5, eyeW: 0.6, neckR: 0.45, hatR: 0.9 },          /* tout fin : il lui faut de petits accessoires */
+    Alien: { hat: 0.74, eye: 0.5 },                                  /* le chapeau se pose sous ses antennes */
+    Mushnub: { eye: 0.42 }, Mushnub_Evolved: { eye: 0.42 },          /* les yeux sont sous le chapeau du champignon */
+    Cactoro: { eye: 0.42, eyeDX: 0.3, neck: 0.25 }, Wizard: { eye: 0.42, hatR: 0.8 }
+  };
+  var MODELS = {}, modelNow = null, hooked = [];
+  var modelG = new THREE.Group(); bodyG.add(modelG);
+  var CLIP = { jump: 'Jump', hop: 'Jump', intro: 'Jump', spin: 'Dance', wiggle: 'Dance', evolve: 'Dance', wave: 'Yes', yawn: 'No', sigh: 'No' };
+  function unhook() { hooked.forEach(function (o) { if (o.parent) o.parent.remove(o); }); hooked = []; }
+  function addModel(id, gltf) {
+    var hueU = { value: 0 };
+    var root = gltf.scene, holder = new THREE.Group(), mats = [], meshes = [], bones = [], pts = [], v = new THREE.Vector3(), n;
+    holder.add(root); holder.updateMatrixWorld(true);
+    root.traverse(function (o) {
+      if (o.isBone) bones.push(o);
+      if (!o.isMesh) return;
+      o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; meshes.push(o);
+      if (mats.indexOf(o.material) < 0) {
+        o.material.roughness = 0.9; o.material.metalness = 0; mats.push(o.material);
+        o.material.emissive.setHex(0xFFFFFF); o.material.emissiveMap = o.material.map; o.material.emissiveIntensity = 0.28;   /* un peu de lumière propre, pour qu'ils restent colorés la nuit */
+        /* Changer la teinte : on fait tourner les couleurs de sa texture sur le cercle des couleurs (le rose devient orange, puis jaune…) */
+        o.material.onBeforeCompile = function (sh) {
+          sh.uniforms.uHue = hueU;
+          sh.fragmentShader = sh.fragmentShader
+            .replace('void main() {', 'uniform float uHue;\nvec3 hueRot(vec3 c, float a) { const vec3 k = vec3(0.57735); float ca = cos(a); return c * ca + cross(k, c) * sin(a) + k * dot(k, c) * (1.0 - ca); }\nvoid main() {')
+            .replace('#include <map_fragment>', '#include <map_fragment>\n\tdiffuseColor.rgb = hueRot(diffuseColor.rgb, uHue);')
+            .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n\ttotalEmissiveRadiance = hueRot(totalEmissiveRadiance, uHue);');
+        };
+      }
+      var pa = o.geometry.attributes.position;
+      for (n = 0; n < pa.count; n++) { v.fromBufferAttribute(pa, n); if (o.isSkinnedMesh) o.boneTransform(n, v); v.applyMatrix4(o.matrixWorld); pts.push(v.x, v.y, v.z); }
+    });
+    /* On mesure le monstre, puis on le met à la même taille que la peluche, les pieds au sol */
+    var box = { x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9, z0: 1e9, z1: -1e9 };
+    for (n = 0; n < pts.length; n += 3) { box.x0 = Math.min(box.x0, pts[n]); box.x1 = Math.max(box.x1, pts[n]); box.y0 = Math.min(box.y0, pts[n + 1]); box.y1 = Math.max(box.y1, pts[n + 1]); box.z0 = Math.min(box.z0, pts[n + 2]); box.z1 = Math.max(box.z1, pts[n + 2]); }
+    var hgt = box.y1 - box.y0, wid = box.x1 - box.x0, k = 2.3 / Math.max(hgt, wid * 0.75), cx = (box.x0 + box.x1) / 2, cz = (box.z0 + box.z1) / 2;
+    root.scale.multiplyScalar(k); root.position.set(-cx * k, -box.y0 * k, -cz * k);
+    for (n = 0; n < pts.length; n += 3) { pts[n] = (pts[n] - cx) * k; pts[n + 1] = (pts[n + 1] - box.y0) * k; pts[n + 2] = (pts[n + 2] - cz) * k; }
+    var H = hgt * k, f = {}, key; for (key in FIT0) f[key] = (FIT[id] && FIT[id][key] != null) ? FIT[id][key] : FIT0[key];
+    function slice(a, b) {
+      var q = { x0: 1e9, x1: -1e9, z0: 1e9, z1: -1e9, n: 0 };
+      for (var m = 0; m < pts.length; m += 3) if (pts[m + 1] >= a && pts[m + 1] <= b) { q.n++; q.x0 = Math.min(q.x0, pts[m]); q.x1 = Math.max(q.x1, pts[m]); q.z0 = Math.min(q.z0, pts[m + 2]); q.z1 = Math.max(q.z1, pts[m + 2]); }
+      if (!q.n) q = { x0: -0.6, x1: 0.6, z0: -0.6, z1: 0.6, n: 0 };
+      q.cx = (q.x0 + q.x1) / 2; q.cz = (q.z0 + q.z1) / 2; q.w = q.x1 - q.x0; q.d = q.z1 - q.z0; return q;
+    }
+    var sh = slice((f.hat - 0.16) * H, f.hat * H), se = slice((f.eye - 0.08) * H, (f.eye + 0.08) * H), sn = slice((f.neck - 0.06) * H, (f.neck + 0.06) * H);
+    var mixer = new THREE.AnimationMixer(root), actions = {};
+    gltf.animations.forEach(function (c) { actions[c.name] = mixer.clipAction(c); });
+    MODELS[id] = {
+      id: id, holder: holder, hueU: hueU, mats: mats, meshes: meshes, bones: bones, mixer: mixer, actions: actions, cur: '', curA: null, H: H,
+      A: { hatX: sh.cx, hatZ: sh.cz, hatY: f.hat * H, hatR: Math.max(0.25, Math.min(0.85, Math.max(sh.w, sh.d) * 0.48 * f.hatR)),
+           eyeX: se.cx + f.eyeDX, eyeY: f.eye * H, eyeZ: se.z1, eyeK: Math.max(0.35, Math.min(1.1, se.w * 0.31 / 0.63 * f.eyeW)),
+           neckX: sn.cx, neckZ: sn.cz, neckY: f.neck * H, neckRX: sn.w / 2 * f.neckR, neckRZ: sn.d / 2 * f.neckR },
+      play: function (name) {
+        if (this.cur === name) return; var a = this.actions[name] || this.actions.Idle; if (!a) return;
+        a.reset().fadeIn(0.18).play(); if (this.curA && this.curA !== a) this.curA.fadeOut(0.18); this.cur = name; this.curA = a;
+      },
+      rest: function () { this.mixer.stopAllAction(); this.cur = ''; this.curA = null; this.meshes.forEach(function (m) { if (m.skeleton) m.skeleton.pose(); }); }
+    };
+  }
+  /* Les accessoires sont construits pour la peluche. Ici on les met à la taille du monstre, puis on les accroche
+     à l'os le plus proche : comme ça le chapeau suit la tête quand elle bouge. */
+  function fitAcc(M, h, gl, nk) {
+    var A = M.A, k = A.hatR / 0.72, sy;
+    M.rest(); pet.updateMatrixWorld(true);
+    h.scale.setScalar(k); h.position.set(A.hatX, A.hatY - 2.0 * k, A.hatZ);
+    gl.scale.setScalar(A.eyeK); gl.position.set(A.eyeX, A.eyeY - 1.52 * A.eyeK, A.eyeZ - 0.97 * A.eyeK);
+    sy = (A.neckRX + A.neckRZ) / 1.75; nk.scale.set(A.neckRX / 0.9 * 0.96, sy * 0.8, A.neckRZ / 0.83 * 0.96); nk.position.set(A.neckX, A.neckY - 0.66 * sy, A.neckZ);
+    pet.updateMatrixWorld(true);
+    var w = new THREE.Vector3();
+    function boneAt(y) {
+      var best = null, by = -1e9;
+      M.bones.forEach(function (bn) { bn.getWorldPosition(w); bodyG.worldToLocal(w); if (w.y <= y + 0.01 && w.y > by) { by = w.y; best = bn; } });
+      return best || M.bones[0];
+    }
+    if (!M.bones.length) return;
+    [[h, A.hatY], [gl, A.eyeY], [nk, A.neckY]].forEach(function (q) { boneAt(q[1]).attach(q[0]); hooked.push(q[0]); });
+    M.play('Idle');
+  }
+  /* Montre la peluche ou un monstre téléchargé */
+  function useSpecies(id) {
+    var M = MODELS[id] || null;
+    if (M !== modelNow) { unhook(); empty(modelG); modelNow = M; if (M) { modelG.add(M.holder); M.play('Idle'); } }
+  }
+  function syncParts() {
+    var native = !modelNow;
+    bodyG.children.forEach(function (c) { if (c !== modelG && c !== acc) c.visible = native; });
+    modelG.visible = !native; footL.visible = footR.visible = native;
+  }
+
   /* Aspect peluche : tissu granuleux, coutures et rapiéçages */
   var fc = document.createElement('canvas'); fc.width = fc.height = 128;
   var fg = fc.getContext('2d'), img = fg.createImageData(128, 128);
@@ -783,8 +894,8 @@ button, input { touch-action: manipulation; }
   /* Les accessoires de la boutique : chapeau, lunettes, tour de cou */
   var acc = new THREE.Group(); bodyG.add(acc);
   function buildAcc(look) {
-    empty(acc);
-    var h = new THREE.Group(), o, n; acc.add(h);
+    unhook(); empty(acc);
+    var h = new THREE.Group(), gl = new THREE.Group(), nk = new THREE.Group(), o, n; acc.add(h); acc.add(gl); acc.add(nk);
     if (look.hat === 'bonnet') {
       o = mesh(new THREE.SphereGeometry(0.74, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xD64545), 0, 1.95, 0, h); o.scale.set(1, 0.72, 0.94);
       o = mesh(new THREE.TorusGeometry(0.73, 0.09, 10, 28), mat(0xFFFFFF), 0, 1.97, 0, h); o.rotation.x = Math.PI / 2; o.scale.y = 0.94;
@@ -802,23 +913,24 @@ button, input { touch-action: manipulation; }
       for (n = 0; n < 6; n++) mesh(new THREE.ConeGeometry(0.09, 0.24, 4), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), Math.cos(n * 1.047) * 0.44, 2.58, Math.sin(n * 1.047) * 0.44, h);
       [0xD64545, 0x3B6FD9, 0x3FA7A0].forEach(function (col, k) { mesh(new THREE.SphereGeometry(0.05, 10, 8), mat(col, { roughness: 0.2 }), (k - 1) * 0.2, 2.36, 0.4, h); });
     }
-    var ey = EYES[look.eyes] || EYES.bizarres;
+    var ey = modelNow ? EYES.ronds : (EYES[look.eyes] || EYES.bizarres);   /* les autres monstres ont leurs propres yeux : lunettes standard */
     if (look.glasses) ey.forEach(function (q) {
-      if (look.glasses === 'soleil') { o = mesh(new THREE.CylinderGeometry(q[3] * 1.05, q[3] * 1.05, 0.05, 24), mat(0x14151E, { roughness: 0.15 }), q[0], q[1], q[2] + q[3] + 0.02, acc); o.rotation.x = Math.PI / 2; }
-      else mesh(new THREE.TorusGeometry(q[3] * 0.98, 0.035, 8, 28), mat(0x1B1D2B, { roughness: 0.4 }), q[0], q[1], q[2] + q[3] * 0.5, acc);
+      if (look.glasses === 'soleil') { o = mesh(new THREE.CylinderGeometry(q[3] * 1.05, q[3] * 1.05, 0.05, 24), mat(0x14151E, { roughness: 0.15 }), q[0], q[1], q[2] + q[3] + 0.02, gl); o.rotation.x = Math.PI / 2; }
+      else mesh(new THREE.TorusGeometry(q[3] * 0.98, 0.035, 8, 28), mat(0x1B1D2B, { roughness: 0.4 }), q[0], q[1], q[2] + q[3] * 0.5, gl);
     });
-    if (look.glasses && ey.length > 1) mesh(new THREE.BoxGeometry(Math.abs(ey[1][0] - ey[0][0]) - ey[0][3] - ey[1][3] + 0.1, 0.045, 0.045), mat(0x1B1D2B), (ey[0][0] + ey[0][3] + ey[1][0] - ey[1][3]) / 2, (ey[0][1] + ey[1][1]) / 2, 0.96, acc);
+    if (look.glasses && ey.length > 1) mesh(new THREE.BoxGeometry(Math.abs(ey[1][0] - ey[0][0]) - ey[0][3] - ey[1][3] + 0.1, 0.045, 0.045), mat(0x1B1D2B), (ey[0][0] + ey[0][3] + ey[1][0] - ey[1][3]) / 2, (ey[0][1] + ey[1][1]) / 2, 0.96, gl);
     if (look.neck === 'noeud') {
-      o = mesh(new THREE.ConeGeometry(0.2, 0.32, 12), mat(0xD64545), -0.17, 0.68, 0.9, acc); o.rotation.z = -Math.PI / 2;
-      o = mesh(new THREE.ConeGeometry(0.2, 0.32, 12), mat(0xD64545), 0.17, 0.68, 0.9, acc); o.rotation.z = Math.PI / 2;
-      mesh(new THREE.SphereGeometry(0.09, 12, 10), mat(0xA83232), 0, 0.68, 0.92, acc);
+      o = mesh(new THREE.ConeGeometry(0.2, 0.32, 12), mat(0xD64545), -0.17, 0.68, 0.9, nk); o.rotation.z = -Math.PI / 2;
+      o = mesh(new THREE.ConeGeometry(0.2, 0.32, 12), mat(0xD64545), 0.17, 0.68, 0.9, nk); o.rotation.z = Math.PI / 2;
+      mesh(new THREE.SphereGeometry(0.09, 12, 10), mat(0xA83232), 0, 0.68, 0.92, nk);
     } else if (look.neck === 'echarpe') {
-      o = mesh(new THREE.TorusGeometry(0.9, 0.13, 10, 30), mat(0xE2725B), 0, 0.66, 0, acc); o.rotation.x = Math.PI / 2; o.scale.y = 0.92;
-      o = mesh(new THREE.BoxGeometry(0.24, 0.6, 0.1), mat(0xE2725B), 0.45, 0.38, 0.84, acc); o.rotation.z = -0.15;
+      o = mesh(new THREE.TorusGeometry(0.9, 0.13, 10, 30), mat(0xE2725B), 0, 0.66, 0, nk); o.rotation.x = Math.PI / 2; o.scale.y = 0.92;
+      o = mesh(new THREE.BoxGeometry(0.24, 0.6, 0.1), mat(0xE2725B), 0.45, 0.38, 0.84, nk); o.rotation.z = -0.15;
     } else if (look.neck === 'collier') {
-      o = mesh(new THREE.TorusGeometry(0.9, 0.04, 8, 30), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), 0, 0.7, 0, acc); o.rotation.x = Math.PI / 2; o.scale.y = 0.92;
-      o = mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 16), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), 0, 0.6, 0.86, acc); o.rotation.x = Math.PI / 2;
+      o = mesh(new THREE.TorusGeometry(0.9, 0.04, 8, 30), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), 0, 0.7, 0, nk); o.rotation.x = Math.PI / 2; o.scale.y = 0.92;
+      o = mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 16), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), 0, 0.6, 0.86, nk); o.rotation.x = Math.PI / 2;
     }
+    if (modelNow) fitAcc(modelNow, h, gl, nk);
   }
   [[0.8, 0.35, 0.5, 0.3], [-0.75, -0.15, 0.62, 0.34], [0.35, 0.75, 0.55, 0.26]].forEach(function (q, n) {
     var rp = stick(new THREE.Mesh(new THREE.BoxGeometry(q[3], q[3] * 0.85, 0.05), darkMat), onBody(q[0], q[1], q[2], 0));
@@ -852,7 +964,7 @@ button, input { touch-action: manipulation; }
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
   var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0 }; }
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0 }; }
   var G = freshG();
   function load() {
     try {
@@ -866,6 +978,7 @@ button, input { touch-action: manipulation; }
       if (G.decors.indexOf(0) < 0) G.decors.push(0);
       G.decor = G.decors.indexOf(o.decor | 0) >= 0 ? (o.decor | 0) : 0;
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
+      G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
       return true;
     } catch (e) { return false; }
   }
@@ -919,9 +1032,13 @@ button, input { touch-action: manipulation; }
   function paint() {
     furMat.color.setHex(palette[colorIndex].fur); darkMat.color.setHex(palette[colorIndex].dark);
     if (badNow) { furMat.color.lerp(grey, 0.55); darkMat.color.lerp(grey, 0.55); }
-    rag.visible = badNow; tuft.children.forEach(function (o, i) { o.visible = !G.look.hat && (stageNow === 2 || (stageNow === 1 && i === 0)); });
+    if (modelNow) modelNow.mats.forEach(function (m) {   /* la teinte d'un monstre téléchargé se règle dans le shader */
+      m.color.setHex(0xFFFFFF); if (badNow) m.color.lerp(grey, 0.5);
+    });
+    if (modelNow) modelNow.hueU.value = (G.hue || 0) * Math.PI / 4;
+    rag.visible = badNow && !modelNow; tuft.children.forEach(function (o, i) { o.visible = !G.look.hat && (stageNow === 2 || (stageNow === 1 && i === 0)); });
   }
-  function dress() { buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth); buildAcc(G.look); paint(); }
+  function dress() { useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth); buildAcc(G.look); syncParts(); paint(); }
   var toastT = null;
   function toast(msg) { $('toast').textContent = msg; $('toast').hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { $('toast').hidden = true; }, 3200); }
   function gauge(id, bar, txt, lv, pct) {
@@ -960,7 +1077,7 @@ button, input { touch-action: manipulation; }
     return false;
   }
   function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; stageNow = 0; badNow = false; pending = null; forceMood = forceStage = forceBad = null; closeSheets(); $('bubble').hidden = true; dress(); applyDecor(0); show('title'); musicSync(); }
-  function goCustom() { phase = 'custom'; show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
+  function goCustom() { phase = 'custom'; paintStrip(); show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
   function goPlay(name) {
     phase = 'play'; flapT = 1; show('hud'); musicSync(); dress(); applyDecor(G.decor); coinShown = -1; refresh(false); nextSay = clock.getElapsedTime() + 4;
   }
@@ -986,7 +1103,7 @@ button, input { touch-action: manipulation; }
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    G = freshG(); G.name = name; G.color = colorIndex; saveG();
+    var sp0 = G.species; G = freshG(); G.name = name; G.color = colorIndex; G.species = sp0; saveG();
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
@@ -1159,7 +1276,7 @@ button, input { touch-action: manipulation; }
         if (done === 'evolve') { bump(4.5); puff(pet.position.x, pet.position.z); sfx('thud', 0.7); }
         if (done === 'intro') { bump(4.8); puff(HOME.x, HOME.z); sfx('thud'); goCustom(); }
       } else if (act.type === 'jump') {
-        var H = tired ? 0.45 : 1.4;
+        var H = (tired ? 0.45 : 1.4) * (modelNow ? 0.6 : 1);
         if (u < 0.25) { pose += Math.sin(u / 0.25 * Math.PI / 2) * 0.24; }
         else { var v = (u - 0.25) / 0.75; y += H * 4 * v * (1 - v); pose -= Math.sin(Math.PI * v) * 0.16; aL = aR = 2.3; mouthT = 0.5; }
       } else if (act.type === 'hop') {
@@ -1279,6 +1396,7 @@ button, input { touch-action: manipulation; }
     camL.x += (goal.l[0] - camL.x) * cf; camL.y += (goal.l[1] - camL.y) * cf; camL.z += (goal.l[2] - camL.z) * cf;
     camera.position.copy(camP); camera.lookAt(camL);
 
+    if (modelNow) { modelNow.play(act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) modelNow.mixer.update(dt * (tired ? 0.5 : 1)); }
     renderer.render(scene, camera);
     if (!$('bubble').hidden) {                /* la bulle suit la tête de la créature */
       v3.set(pet.position.x, pet.position.y + (2.75 + (G.look.hat ? 0.45 : 0)) * sc * stageK, pet.position.z).project(camera);
@@ -1495,19 +1613,23 @@ button, input { touch-action: manipulation; }
     tctx.putImageData(im, 0, 0);
     return tcv.toDataURL('image/png');
   }
-  var FOCUS = { hat: [2.25, 5.4], ears: [2.3, 5.6], glasses: [1.55, 4.6], eyes: [1.55, 4.6], teeth: [1.1, 3.9], neck: [0.9, 4.8] };   /* où regarder, et de quelle distance */
+  function focusOf(focus) {
+    if (!modelNow) return FOCUS[focus]; var A = modelNow.A;
+    return focus === 'hat' ? [A.hatY + 0.1, 5.4] : focus === 'glasses' ? [A.eyeY, 4.8] : focus === 'neck' ? [A.neckY + 0.35, 5] : [modelNow.H / 2, 7.2];
+  }
+  var FOCUS = { all: [1.2, 7.2], hat: [2.25, 5.4], ears: [2.3, 5.6], glasses: [1.55, 4.6], eyes: [1.55, 4.6], teeth: [1.1, 3.9], neck: [0.9, 4.8] };   /* où regarder, et de quelle distance */
   function thumbLook(look, focus) {
-    var key = focus + '|' + colorIndex + '|' + badNow + '|' + JSON.stringify(look);
+    var key = focus + '|' + (modelNow ? modelNow.id + (G.hue || 0) : 'p') + '|' + colorIndex + '|' + badNow + '|' + JSON.stringify(look);
     if (thumbCache[key]) return thumbCache[key];
     try {
-      buildEars(look.ears); buildEyes(look.eyes); buildTeeth(look.teeth); buildAcc(look);
+      buildEars(look.ears); buildEyes(look.eyes); buildTeeth(look.teeth); buildAcc(look); syncParts();
       tuft.children.forEach(function (o) { o.visible = false; });
-      var par = pet.parent; studio.add(pet);
+      var par = pet.parent, shown = pet.visible; studio.add(pet); pet.visible = true;
       pet.position.set(0, 0, 0); pet.rotation.set(0, -0.3, 0); pet.scale.setScalar(1); bodyG.scale.set(1, 1, 1);
       eyes.forEach(function (e) { e.scale.y = 1; });
-      var fc = FOCUS[focus]; thumbCam.position.set(0, fc[0] + 0.15, fc[1]); thumbCam.lookAt(0, fc[0], 0);
+      var fc = focusOf(focus); thumbCam.position.set(0, fc[0] + 0.15, fc[1]); thumbCam.lookAt(0, fc[0], 0);
       var url = snap(studio, thumbCam);
-      par.add(pet);
+      par.add(pet); pet.visible = shown;
       return (thumbCache[key] = url);
     } catch (e) { if (pet.parent !== scene) scene.add(pet); return ''; }
   }
@@ -1521,6 +1643,16 @@ button, input { touch-action: manipulation; }
       return (thumbCache[key] = url);
     } catch (e) { return ''; }
   }
+  function thumbHue(n) {
+    var keep = G.hue, url; G.hue = n; paint();
+    url = thumbLook({ ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }, 'all');
+    G.hue = keep; return url;
+  }
+  function thumbSpecies(id) {
+    var keep = G.species, keepH = G.hue, url; G.species = id; G.hue = (id === keep) ? keepH : 0; useSpecies(id); paint();
+    url = thumbLook({ ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }, 'all');
+    G.species = keep; G.hue = keepH; return url;
+  }
   function withItem(slot, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }; l[slot] = id; return l; }
   function withShape(key, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }; l[key] = id; return l; }
   function picture(url, cls) { var im = document.createElement('img'); im.className = cls || 'th'; im.alt = ''; im.width = 64; im.height = 64; if (url) im.src = url; return im; }
@@ -1533,10 +1665,11 @@ button, input { touch-action: manipulation; }
     { id: 'noeud', slot: 'neck', name: 'Nœud papillon', price: 90 }, { id: 'echarpe', slot: 'neck', name: 'Écharpe', price: 140 }, { id: 'collier', slot: 'neck', name: 'Collier doré', price: 300 }
   ];
   var LOOKS = [
+    { key: 'species', name: 'Monstre' },
     { key: 'color', name: 'Couleur' },
-    { key: 'ears', name: 'Oreilles', opts: [['pointues', 'Pointues'], ['rondes', 'Rondes'], ['longues', 'Longues'], ['cornes', 'Cornes'], ['antennes', 'Antennes']] },
-    { key: 'eyes', name: 'Yeux', opts: [['bizarres', 'Dépareillés'], ['ronds', 'Ronds'], ['cyclope', 'Cyclope'], ['trois', 'Trois yeux'], ['petits', 'Tout petits']] },
-    { key: 'teeth', name: 'Dents', opts: [['trois', 'Trois dents'], ['crocs', 'Crocs'], ['une', 'Une grosse dent'], ['sourire', 'Grand sourire'], ['aucune', 'Sans dents']] },
+    { key: 'ears', name: 'Oreilles', native: true, opts: [['pointues', 'Pointues'], ['rondes', 'Rondes'], ['longues', 'Longues'], ['cornes', 'Cornes'], ['antennes', 'Antennes']] },
+    { key: 'eyes', name: 'Yeux', native: true, opts: [['bizarres', 'Dépareillés'], ['ronds', 'Ronds'], ['cyclope', 'Cyclope'], ['trois', 'Trois yeux'], ['petits', 'Tout petits']] },
+    { key: 'teeth', name: 'Dents', native: true, opts: [['trois', 'Trois dents'], ['crocs', 'Crocs'], ['une', 'Une grosse dent'], ['sourire', 'Grand sourire'], ['aucune', 'Sans dents']] },
     { key: 'hat', name: 'Chapeau', slot: true }, { key: 'glasses', name: 'Lunettes', slot: true }, { key: 'neck', name: 'Cou', slot: true }
   ];
   var lookTab = 0, shopTab = 0;
@@ -1557,10 +1690,33 @@ button, input { touch-action: manipulation; }
     b.addEventListener('click', fn); box.appendChild(b);
   }
   function changed() { saveG(); dress(); start('wiggle'); paintLook(); }
+  /* La bande de monstres sur la fiche d'adoption */
+  function paintStrip() {
+    var box = $('spStrip'); empty2(box);
+    SPECIES.forEach(function (sp) {
+      if (sp.id !== 'peluche' && !MODELS[sp.id]) return;
+      chipOpt(box, sp.name, G.species === sp.id, function () { G.species = sp.id; G.hue = 0; dress(); sfx('pop'); start('wiggle'); paintStrip(); }, thumbSpecies(sp.id));
+    });
+    $('colField').hidden = G.species !== 'peluche';       /* la couleur ne concerne que la peluche ; les autres ont des teintes, dans l'atelier */
+    dress();
+  }
   function paintLook() {
-    tabs('lookTabs', LOOKS.map(function (l) { return l.name; }), lookTab, function (n) { lookTab = n; paintLook(); });
-    var box = $('lookOpts'), L = LOOKS[lookTab]; empty2(box);
-    if (L.key === 'color') {
+    var list = LOOKS.filter(function (l) { return !l.native || G.species === 'peluche'; });   /* oreilles, yeux et dents ne se changent que sur la peluche */
+    if (lookTab >= list.length) lookTab = 0;
+    tabs('lookTabs', list.map(function (l) { return l.name; }), lookTab, function (n) { lookTab = n; paintLook(); });
+    var box = $('lookOpts'), L = list[lookTab]; empty2(box);
+    if (L.key === 'species') {
+      SPECIES.forEach(function (sp) {
+        if (sp.id !== 'peluche' && !MODELS[sp.id]) return;
+        chipOpt(box, sp.name, G.species === sp.id, function () { G.species = sp.id; G.hue = 0; lookTab = 0; changed(); }, thumbSpecies(sp.id));
+      });
+    } else if (L.key === 'color') {
+      if (G.species !== 'peluche') {
+        ['D\'origine', 'Teinte 1', 'Teinte 2', 'Teinte 3', 'Teinte 4', 'Teinte 5', 'Teinte 6', 'Teinte 7'].forEach(function (nm, n) {
+          chipOpt(box, nm, (G.hue || 0) === n, function () { G.hue = n; changed(); }, thumbHue(n));
+        });
+        dress(); return;
+      }
       palette.forEach(function (p2, n) {
         var b = document.createElement('button'); b.type = 'button'; b.className = 'swatch'; b.setAttribute('aria-label', p2.label); b.setAttribute('aria-pressed', n === colorIndex ? 'true' : 'false');
         b.style.background = '#' + p2.fur.toString(16).padStart(6, '0');
@@ -1707,6 +1863,17 @@ button, input { touch-action: manipulation; }
   });
 
   /* Le chargement : on attend que les polices soient prêtes, et on laisse le temps de lire */
+  /* Les monstres se chargent pendant l'écran de chargement. Si un fichier manque, on continue sans lui. */
+  var modelsReady = new Promise(function (done) {
+    if (!THREE.GLTFLoader) return done();
+    var loader = new THREE.GLTFLoader(), left = SPECIES.length - 1;
+    SPECIES.forEach(function (sp) {
+      if (sp.id === 'peluche') return;
+      function end() { if (--left <= 0) done(); }
+      loader.load('models/' + sp.id + '.gltf', function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
+    });
+  });
+  if (location.hash === '#reglage') window.__fl = { MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
   function loadStep() {
@@ -1716,7 +1883,8 @@ button, input { touch-action: manipulation; }
     $('loadmsg').textContent = msgs[Math.min(msgs.length - 1, stepN - 1)];
     if (stepN < 4) return setTimeout(loadStep, reduce ? 150 : 520);
     var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
-    Promise.race([ready, new Promise(function (r) { setTimeout(r, 1500); })]).then(function () {
+    $('loadmsg').textContent = 'On réveille les monstres…';
+    Promise.all([Promise.race([ready, new Promise(function (r) { setTimeout(r, 1500); })]), Promise.race([modelsReady, new Promise(function (r) { setTimeout(r, 15000); })])]).then(function () {
       setTimeout(function () {
         $('loading').classList.add('out');
         setTimeout(function () {

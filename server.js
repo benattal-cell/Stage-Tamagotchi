@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 const PUBLIC = path.join(__dirname, 'public');
 const THREE = path.join(__dirname, 'node_modules', 'three', 'build', 'three.min.js');
+const GLTF_LOADER = path.join(__dirname, 'node_modules', 'three', 'examples', 'js', 'loaders', 'GLTFLoader.js');
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -19,6 +20,8 @@ const TYPES = {
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.webmanifest': 'application/manifest+json; charset=utf-8',
+  '.gltf': 'model/gltf+json',
+  '.glb': 'model/gltf-binary',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml',
@@ -41,11 +44,12 @@ const server = http.createServer((req, res) => {
   // Une adresse pour vérifier que le serveur est vivant.
   if (url === '/health') return send(res, 200, 'text/plain; charset=utf-8', 'ok');
 
-  // La bibliothèque 3D, installée par "npm install".
-  let file = url === '/vendor/three.min.js' ? THREE : path.join(PUBLIC, url === '/' ? 'index.html' : url);
+  // La bibliothèque 3D et son lecteur de modèles, installés par "npm install".
+  const VENDOR = { '/vendor/three.min.js': THREE, '/vendor/GLTFLoader.js': GLTF_LOADER };
+  const file = VENDOR[url] || path.join(PUBLIC, url === '/' ? 'index.html' : url);
 
   // Sécurité : on ne sert jamais un fichier en dehors du dossier "public".
-  if (file !== THREE && !file.startsWith(PUBLIC + path.sep)) {
+  if (!VENDOR[url] && !file.startsWith(PUBLIC + path.sep)) {
     return send(res, 403, 'text/plain; charset=utf-8', 'Interdit');
   }
 

@@ -291,6 +291,25 @@ button, input { touch-action: manipulation; }
 .stat strong { display: block; font-family: var(--display); font-weight: 800; font-size: 1.5rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .stat span { font-size: .78rem; font-weight: 800; color: var(--muted); }
 
+/* Les mini-jeux en fenêtre : mémoire, tri, respiration */
+.gcard { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--panel-solid); border-radius: 16px; padding: 10px 12px; box-sizing: border-box; }
+.gcard .nm { flex: 1; min-width: 0; font-weight: 800; } .gcard .sub { display: block; font-size: .82rem; font-weight: 700; color: var(--muted); }
+.memgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.memc { aspect-ratio: 1; border-radius: 14px; border: 3px solid var(--line); background: var(--panel-solid); padding: 0; display: grid; place-items: center; overflow: hidden; font-family: var(--display); font-weight: 800; font-size: 1.6rem; color: var(--muted); }
+.memc img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.memc.open { border-color: var(--coin); } .memc.done { border-color: var(--mint); opacity: .75; }
+.triItem { background: var(--night); border-radius: 18px; padding: 22px 12px; text-align: center; font-family: var(--display); font-weight: 800; font-size: 1.6rem; line-height: 1.15; min-height: 3.6em; display: grid; place-items: center; }
+.triItem.bad { animation: shakeX .3s; } @keyframes shakeX { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+.bins { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.bin { min-height: 64px; border: 0; border-radius: 16px; font-family: var(--display); font-weight: 800; font-size: 1.05rem; color: var(--dark-ink); padding: 6px; box-shadow: 0 5px 0 rgba(0,0,0,.35); }
+.bin:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.bin small { display: block; font-family: var(--body); font-size: .72rem; font-weight: 800; opacity: .8; }
+.zenwrap { display: grid; place-items: center; height: 230px; }
+.zen { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #BFF4FF, #5CC8FF 60%, #3B6FD9); box-shadow: 0 0 40px rgba(92, 200, 255, .5); transition: transform 4s ease-in-out; }
+.zentxt { text-align: center; font-family: var(--display); font-weight: 800; font-size: 1.5rem; min-height: 1.4em; }
+.barline { height: 10px; border-radius: 5px; background: var(--night); overflow: hidden; } .barline i { display: block; height: 100%; width: 100%; background: var(--coin); border-radius: 5px; }
+@media (prefers-reduced-motion: reduce) { .zen { transition: none; } .triItem.bad { animation: none; } }
+
 /* La bulle de parole de la créature */
 #bubble:not([hidden]) {
   position: absolute; z-index: 4; transform: translate(-50%, -100%); max-width: 220px; pointer-events: none;
@@ -513,7 +532,7 @@ button, input { touch-action: manipulation; }
 
   <div class="ui" id="runHud" hidden>
     <div class="topbar">
-      <div class="pills"><div class="pill" id="runDist">0 m</div><div class="pill"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#F7C948"/><circle cx="11" cy="11" r="6" fill="none" stroke="#B8860B" stroke-width="2"/></svg><span id="runCoins">0</span></div></div>
+      <div class="pills"><div class="pill" id="runDist">0 m</div><div class="pill" id="runLives" hidden><svg aria-hidden="true" width="18" height="18" viewBox="0 0 64 64"><path d="M32 56C4 36 6 10 22 10c6 0 10 5 10 10 0-5 4-10 10-10 16 0 18 26-10 46z" fill="#FF6B8B"/></svg><span id="runLivesN">3</span></div><div class="pill"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#F7C948"/><circle cx="11" cy="11" r="6" fill="none" stroke="#B8860B" stroke-width="2"/></svg><span id="runCoins">0</span></div></div>
       <button type="button" class="ghost" id="runQuit">Arrêter</button>
     </div>
     <div id="runCount" aria-live="assertive"></div>
@@ -523,7 +542,7 @@ button, input { touch-action: manipulation; }
     <div class="card" role="dialog" aria-modal="true" aria-labelledby="runEndTitle">
       <h2 id="runEndTitle"></h2>
       <div class="stats">
-        <div class="stat"><strong id="reDist"></strong><span>distance</span></div>
+        <div class="stat"><strong id="reDist"></strong><span id="reLab1">distance</span></div>
         <div class="stat"><strong id="reCoins"></strong><span>pièces gagnées</span></div>
         <div class="stat"><strong id="reBest"></strong><span>record</span></div>
       </div>
@@ -535,14 +554,41 @@ button, input { touch-action: manipulation; }
   <div class="sheetwrap" id="games" hidden>
     <div class="sheet" role="dialog" aria-labelledby="gamesTitle">
       <div class="sheethead"><h2 id="gamesTitle">Mini-jeux</h2><button type="button" class="ghost" id="gamesClose">Terminé</button></div>
-      <div class="item"><span class="nm">La course des poubelles<span class="sub">Esquive, saute et glisse à travers cinq zones, entre les chariots qui zigzaguent et les camions qui foncent. Ça va de plus en plus vite, et ça devient vraiment dur.</span></span></div>
-      <div class="stats">
-        <div class="stat"><strong id="gmRuns"></strong><span>courses restantes</span></div>
+      <div class="stats" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+        <div class="stat"><strong id="gmRuns"></strong><span>parties restantes</span></div>
         <div class="stat"><strong id="gmCoins"></strong><span>pièces aujourd'hui</span></div>
-        <div class="stat"><strong id="gmBest"></strong><span>record</span></div>
       </div>
+      <div class="opts" id="gmList"></div>
       <p class="small" id="gmNote"></p>
-      <button type="button" class="big" id="gmPlay">Jouer</button>
+    </div>
+  </div>
+  <div class="veil" id="mem" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="memTitle">
+      <div class="sheethead"><h2 id="memTitle">Mémoire</h2><span class="pill" id="memMoves">0 coup</span></div>
+      <div class="memgrid" id="memGrid"></div>
+      <p class="small" id="memNote" role="status">Retrouve les paires en retournant le moins de cartes possible.</p>
+      <button type="button" class="big" id="memAgain" hidden>Rejouer</button>
+      <button type="button" class="ghost" id="memClose">Fermer</button>
+    </div>
+  </div>
+  <div class="veil" id="tri" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="triTitle">
+      <div class="sheethead"><h2 id="triTitle">Tri des déchets</h2><span class="pill" id="triScore">0</span></div>
+      <div class="barline"><i id="triBar"></i></div>
+      <div class="triItem" id="triItem" aria-live="polite"></div>
+      <div class="bins" id="triBins"></div>
+      <p class="small" id="triNote" role="status">Dans quelle poubelle ça va ? Les consignes changent un peu selon les villes : ici ce sont les plus courantes.</p>
+      <button type="button" class="big" id="triAgain" hidden>Rejouer</button>
+      <button type="button" class="ghost" id="triClose">Fermer</button>
+    </div>
+  </div>
+  <div class="veil" id="zen" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="zenTitle">
+      <div class="sheethead"><h2 id="zenTitle">Respiration</h2><span class="pill" id="zenLeft"></span></div>
+      <div class="zenwrap"><div class="zen" id="zenBall"></div></div>
+      <div class="zentxt" id="zenTxt" aria-live="polite"></div>
+      <p class="small" id="zenNote">Pose ton téléphone, respire avec le rond pendant une minute. Tu peux fermer les yeux et te laisser guider par le son.</p>
+      <button type="button" class="ghost" id="zenClose">Arrêter</button>
     </div>
   </div>
   <div class="sheetwrap" id="look" hidden>
@@ -1446,7 +1492,7 @@ button, input { touch-action: manipulation; }
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
   var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null, back: null, fx: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0 }, best: 0 }; }
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0 } }; }
   var G = freshG();
   function load() {
     try {
@@ -1461,7 +1507,7 @@ button, input { touch-action: manipulation; }
       G.decor = G.decors.indexOf(o.decor | 0) >= 0 ? (o.decor | 0) : 0;
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
-      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.best = Math.max(0, o.best | 0);
+      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0) };
       G.xpBonus = Math.max(0, Number(o.xpBonus) || 0); G.hpFrom = typeof o.hpFrom === 'string' ? o.hpFrom : ''; G.lvlSeen = Math.max(1, o.lvlSeen | 0); G.dead = o.dead === true; G.born = typeof o.born === 'string' ? o.born : '';
       return !!G.name;
     } catch (e) { return false; }
@@ -1647,7 +1693,7 @@ button, input { touch-action: manipulation; }
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
+    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
@@ -1684,6 +1730,7 @@ button, input { touch-action: manipulation; }
   stage.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, y: ev.clientY, sx: ev.clientX, sy: ev.clientY, used: false, moved: 0, acc: 0, onPet: phase === 'play' && hitPet(ev) }; });
   window.addEventListener('pointermove', function (ev) {
     var p = rel(ev); lookX = Math.max(-0.5, Math.min(0.5, p.x - 0.5)); lookY = Math.max(-0.5, Math.min(0.5, p.y - 0.5)); lastMove = clock.getElapsedTime();
+    if (phase === 'catch') { CT.target = HOME.x + Math.max(-1.8, Math.min(1.8, (p.x - 0.5) * 4.2)); $('runTip').hidden = true; return; }   /* le monstre suit le doigt */
     if (down) {
       var dx = ev.clientX - down.x, dy = ev.clientY - down.y, dist = Math.abs(dx) + Math.abs(dy); down.moved += dist; down.x = ev.clientX; down.y = ev.clientY;
       if (phase === 'run') {                  /* pendant la course : un glissement = un ordre */
@@ -1725,6 +1772,7 @@ button, input { touch-action: manipulation; }
       if (narrow) { l = [HOME.x, focusCam ? -0.35 : 0.1, HOME.z]; p = [HOME.x, 1.5, focusCam ? 11.5 : 9.5]; }
       else { l = [HOME.x + 1.25, 1.2, HOME.z]; p = [HOME.x + 1.4, 2.0, 6.6]; }
     }
+    else if (phase === 'catch') { l = [HOME.x, 2.3, HOME.z]; p = [HOME.x, 2.6, narrow ? 9.2 : 11]; }
     else if (narrow) { l = [HOME.x, 1.2, HOME.z]; p = [HOME.x, 2.45, 8.3]; }
     else { l = [0, 1.25, 0]; p = [0, 2.5, 8.4]; }
     return { p: p, l: l };
@@ -1834,7 +1882,7 @@ button, input { touch-action: manipulation; }
         eyeT = (acheLv > 1 ? 0.32 : 0.6) + Math.sin(t * 6) * 0.08;
       }
       var bt = t % 4.2; if (bt < 0.12 || (bt > 0.3 && bt < 0.4)) eyeT *= 0.08;
-      if (!act && !down && !hidden && phase !== 'intro' && phase !== 'dead' && phase !== 'run' && t > nextAuto) autoAct();
+      if (!act && !down && !hidden && phase !== 'intro' && phase !== 'dead' && phase !== 'run' && phase !== 'catch' && t > nextAuto) autoAct();
     } else if (ache) { aL = 2.75; aR = 2.75; eyeT = 0.32; }
 
     if (playing && t < petUntil) { eyeT = Math.min(eyeT, 0.12); mouthT = 0.45; tilt += Math.sin(t * 9) * 0.05; aL = aR = 0.9; }   /* elle ferme les yeux de plaisir */
@@ -1905,6 +1953,10 @@ button, input { touch-action: manipulation; }
       aL = 0.9 + Math.sin(t * 13) * 0.7; aR = 0.9 - Math.sin(t * 13) * 0.7; breath = 0; extraSpin = 0;
     }
 
+    if (phase === 'catch') {                  /* il court sous ce qui tombe, la bouche ouverte et les bras levés */
+      catchTick(dt, t); px = CT.x; pz = HOME.z; y = CT.over ? 0 : Math.abs(Math.sin(t * 9)) * 0.06;
+      tilt = (CT.target - CT.x) * -0.18; mouthT = CT.over ? 0.1 : 0.7; aL = aR = CT.over ? 0.4 : 2.1; extraSpin = 0; gazeY = -0.45; lastMove = t - 10; gazeNext = t + 1;
+    }
     var talking = t < talkUntil && phase !== 'dead' && phase !== 'run', petting = playing && t < petUntil;
     if (talking && !reduce && !(act && act.type === 'yawn')) mouthT = Math.max(mouthT, 0.18 + Math.abs(Math.sin(t * 13)) * 0.42);   /* il parle : la bouche s'ouvre et se ferme */
 
@@ -1927,7 +1979,7 @@ button, input { touch-action: manipulation; }
     pet.position.set(px, y, pz);
     stageK += ((phase === 'run' ? 0.62 : sizeGoal) - stageK) * f; earK += (STAGE[stageNow].ear - earK) * f;
     pet.scale.setScalar(sc * stageK); earL.scale.y = earK; earR.scale.y = earK;
-    pet.rotation.y = phase === 'run' ? Math.PI : spin + lookX * 0.5 + extraSpin;      /* en course, on le voit de dos */
+    pet.rotation.y = phase === 'run' ? Math.PI : phase === 'catch' ? 0 : spin + lookX * 0.5 + extraSpin;      /* en course, on le voit de dos */
     pet.rotation.x = phase === 'run' ? -lean : lean + lookY * 0.15;
     pet.rotation.z = tilt + shake;
     bodyG.scale.set(1 + S * 0.6 - breath * 0.5, 1 - S + breath, 1 + S * 0.6 - breath * 0.5);
@@ -2012,7 +2064,7 @@ button, input { touch-action: manipulation; }
       o.position.set(pet.position.x + Math.cos(q.a) * R + Math.sin(L * 6 + q.a) * 0.1, pet.position.y + by * stageK, pet.position.z + Math.sin(q.a) * R * 0.7 + 0.25);
       o.scale.setScalar(E.size * (E.mode === 'fire' ? 1 - L * 0.6 : 1)); o.material.opacity = Math.sin(Math.PI * L); o.visible = true;
     });
-    var tier = (pet.visible && phase !== 'dead' && phase !== 'intro' && phase !== 'custom' && phase !== 'run') ? tierOf(levelNow) : 0;
+    var tier = (pet.visible && phase !== 'dead' && phase !== 'intro' && phase !== 'custom' && phase !== 'run' && phase !== 'catch') ? tierOf(levelNow) : 0;
     auraRing.visible = tier > 0;
     if (tier) {
       auraRing.material.color.setHex(AURA[tier]); auraRing.position.set(pet.position.x, 0.04, pet.position.z);
@@ -2041,7 +2093,7 @@ button, input { touch-action: manipulation; }
     camP.x += (goal.p[0] - camP.x) * cf; camP.y += (goal.p[1] - camP.y) * cf; camP.z += (goal.p[2] - camP.z) * cf;
     camL.x += (goal.l[0] - camL.x) * cf; camL.y += (goal.l[1] - camL.y) * cf; camL.z += (goal.l[2] - camL.z) * cf;
     camera.position.copy(camP); camera.lookAt(camL);
-    var wantFov = phase === 'run' ? 64 + Math.min(13, (RUN.v - 9) * 0.55) : (phase === 'play' && !focusCam && aspect < 1) ? 56 : 38;   /* en jeu, sur un écran étroit, on élargit l'angle pour voir le décor */      /* pendant la course, la caméra voit plus large pour montrer les 3 voies */
+    var wantFov = phase === 'run' ? 64 + Math.min(13, (RUN.v - 9) * 0.55) : ((phase === 'play' || phase === 'catch') && !focusCam && aspect < 1) ? 56 : 38;   /* en jeu, sur un écran étroit, on élargit l'angle pour voir le décor */      /* pendant la course, la caméra voit plus large pour montrer les 3 voies */
     if (Math.abs(camera.fov - wantFov) > 0.05) { camera.fov += (wantFov - camera.fov) * cf; camera.updateProjectionMatrix(); }
     if (phase === 'run' && RUN.shake > 0 && !reduce) { camera.position.x += (Math.random() - 0.5) * RUN.shake; camera.position.y += (Math.random() - 0.5) * RUN.shake; RUN.shake -= dt; }
 
@@ -2178,6 +2230,8 @@ button, input { touch-action: manipulation; }
     evolve:  function (k, at) { hiss(500, 6000, 0.9, 0.5 * k, at, 3); [523, 659, 784, 1047, 1319].forEach(function (fq, n) { blip(fq, fq, 0.18, 'triangle', 0.24 * k, at + 0.2 + n * 0.12); }); },
     purr:    function (k, at) { voice(300, 350, 0.22, 0.3 * k, at, U, O); voice(350, 310, 0.22, 0.3 * k, at + 0.2, O, U); },
     honk:    function (k, at) { blip(233, 233, 0.22, 'sawtooth', 0.22 * k, at); blip(185, 185, 0.22, 'sawtooth', 0.22 * k, at); blip(233, 233, 0.3, 'sawtooth', 0.22 * k, at + 0.3); blip(185, 185, 0.3, 'sawtooth', 0.22 * k, at + 0.3); },
+    breathIn:  function (k, at) { hiss(300, 900, 3.6, 0.1 * k, at, 1.2); blip(196, 294, 3.6, 'sine', 0.08 * k, at); },
+    breathOut: function (k, at) { hiss(900, 250, 5.4, 0.1 * k, at, 1.2); blip(294, 196, 5.4, 'sine', 0.08 * k, at); },
     coin:    function (k, at) { blip(1568, 2093, 0.08, 'triangle', 0.22 * k, at); },
     cash:    function (k, at) { blip(1319, 1319, 0.09, 'triangle', 0.25 * k, at); blip(1760, 1760, 0.25, 'triangle', 0.25 * k, at + 0.08); hiss(5000, 9000, 0.12, 0.12 * k, at, 3); },
     death:   function (k, at) { [392, 311, 262, 196].forEach(function (fq, n) { blip(fq, fq * 0.97, n === 3 ? 1.2 : 0.5, 'sine', 0.3 * k, at + n * 0.45); }); },
@@ -2192,7 +2246,7 @@ button, input { touch-action: manipulation; }
   function sfx(name, loud, delay) {
     if (!actx || !prefs.sfx || document.hidden || phase === 'loading' || !SFX[name]) return;
     if (actx.state === 'suspended') actx.resume();
-    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash' || name === 'death' || name === 'honk') ? 1 : 0.94 + Math.random() * 0.12;
+    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash' || name === 'death' || name === 'honk' || name === 'breathIn' || name === 'breathOut') ? 1 : 0.94 + Math.random() * 0.12;
     SFX[name](loud == null ? 1 : loud, actx.currentTime + 0.01 + (delay || 0));
   }
   /* Un navigateur refuse de jouer du son avant que le joueur ait touché la page : on attend son premier geste */
@@ -2422,7 +2476,7 @@ button, input { touch-action: manipulation; }
   /* ---------- Mini-jeu : la course des poubelles ----------
      Le monstre court tout droit sur 3 voies. Le décor avance vers lui : c'est lui qui a l'air de courir.
      Pour que le jeu ne pousse pas à rester sur l'écran, il y a un nombre de courses et de pièces par jour. */
-  var RUNS_PER_DAY = 5, COINS_PER_DAY = 50, LANE = 1.3;
+  var RUNS_PER_DAY = 8, COINS_PER_DAY = 50, LANE = 1.3;      /* 8 parties et 50 pièces par jour, tous jeux confondus */
   var RUN = { state: '', lane: 0, x: 0, y: 0, vy: 0, slide: 0, v: 9, dist: 0, coins: 0, next: 0, t0: 0, safe: 0, hist: [0, 0, 0], zone: 0, shake: 0 };
   /* Le parcours traverse des zones : tous les 320 m, les couleurs changent */
   var ZONES = [
@@ -2488,7 +2542,7 @@ button, input { touch-action: manipulation; }
   var warns = [-1, 0, 1].map(function (l) { var wm = plain(new THREE.PlaneGeometry(1.15, 16), new THREE.MeshBasicMaterial({ color: 0xFF3B3B, transparent: true, opacity: 0, depthWrite: false }), l * LANE, 0.02, -9); wm.rotation.x = -Math.PI / 2; return wm; });
   var coinMat = mat(0xF7C948, { metalness: 0.7, roughness: 0.25, emissive: 0x6A5210 });
   for (rn = 0; rn < 36; rn++) { var rc = mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.07, 18), coinMat, 0, 0, 0, runG); rc.rotation.x = Math.PI / 2; rc.visible = false; rc.castShadow = false; rc.userData = { on: false }; rcoins.push(rc); }
-  function gameDay() { if (G.game.day !== dayKey(0)) G.game = { day: dayKey(0), runs: 0, coins: 0 }; return G.game; }
+  function gameDay() { if (G.game.day !== dayKey(0)) G.game = { day: dayKey(0), runs: 0, coins: 0, zen: false }; return G.game; }
   function freeOf(list) { for (var n = 0; n < list.length; n++) if (!list[n].userData.on) return list[n]; return null; }
   function put(type, lane, z) {
     var o = freeOf(obst), k; if (!o) return;
@@ -2545,13 +2599,14 @@ button, input { touch-action: manipulation; }
     if (zi !== RUN.zone) { RUN.zone = zi; toast(ZONES[zi % ZONES.length].name); sfx('evolve', 0.5); }
   }
   function runStart() {
-    var gm = gameDay(); if (gm.runs >= RUNS_PER_DAY || phase !== 'play') return;
-    gm.runs++; saveG(); closeSheets(); $('bubble').hidden = true; $('runEnd').hidden = true;
+    if (!usePlay()) return;
+    closeSheets(); $('bubble').hidden = true; $('runEnd').hidden = true;
     applyDecor(0); D.forEach(function (gr) { gr.visible = false; }); wall.visible = ledge.visible = false; box.visible = false; floor.visible = false; flies.visible = false; runG.visible = true;
     scene.fog.near = 26; scene.fog.far = 66;
     obst.concat(rcoins).forEach(function (o) { o.userData.on = false; o.visible = false; }); warns.forEach(function (wm) { wm.material.opacity = 0; });
     RUN.state = 'ready'; RUN.lane = 0; RUN.x = 0; RUN.y = 0; RUN.vy = 0; RUN.slide = 0; RUN.v = 9; RUN.dist = 0; RUN.coins = 0; RUN.next = 2; RUN.safe = 0; RUN.hist = [0, 0, 0]; RUN.zone = 0; RUN.shake = 0; RUN.t0 = clock.getElapsedTime();
-    paintZone(); act = null; spin = 0; phase = 'run'; show('runHud'); $('gear').hidden = true; $('runCount').hidden = false; $('runTip').hidden = false;
+    paintZone(); act = null; spin = 0; phase = 'run'; curGame = 'run'; show('runHud'); $('gear').hidden = true; $('runCount').hidden = false; $('runTip').hidden = false; $('runLives').hidden = true;
+    $('runTip').textContent = 'Glisse à gauche ou à droite pour changer de voie, vers le haut pour sauter, vers le bas pour passer sous les barrières';
     $('runDist').textContent = '0 m'; $('runCoins').textContent = '0';
   }
   function runOver(crash) {
@@ -2562,9 +2617,9 @@ button, input { touch-action: manipulation; }
     setTimeout(function () {
       if (phase !== 'run') return;
       $('runEndTitle').textContent = record && dist > 0 ? 'Nouveau record !' : crash ? 'Aïe !' : 'Course terminée';
-      $('reDist').textContent = dist + ' m'; $('reCoins').textContent = '+' + earned; $('reBest').textContent = G.best + ' m';
+      $('reLab1').textContent = 'distance'; $('reDist').textContent = dist + ' m'; $('reCoins').textContent = '+' + earned; $('reBest').textContent = G.best + ' m';
       var left = RUNS_PER_DAY - gm.runs;
-      $('reNote').textContent = (earned < got ? 'Tu as ramassé ' + got + ' pièces, mais on ne peut en gagner que ' + COINS_PER_DAY + ' par jour avec les jeux. ' : '') + (left > 0 ? 'Il te reste ' + left + (left > 1 ? ' courses' : ' course') + ' aujourd\'hui.' : 'Plus de course pour aujourd\'hui. Reviens demain, ou va marcher pour de vrai !');
+      $('reNote').textContent = (earned < got ? 'Tu as ramassé ' + got + ' pièces, mais on ne peut en gagner que ' + COINS_PER_DAY + ' par jour avec les jeux. ' : '') + (left > 0 ? 'Il te reste ' + left + (left > 1 ? ' parties' : ' partie') + ' aujourd\'hui.' : 'Plus de partie pour aujourd\'hui. Reviens demain, ou va marcher pour de vrai !');
       $('reAgain').hidden = left <= 0; $('runEnd').hidden = false; (left > 0 ? $('reAgain') : $('reBack')).focus();
       if (record && dist > 0) sfx('fanfare');
     }, crash ? 900 : 100);
@@ -2630,20 +2685,190 @@ button, input { touch-action: manipulation; }
     }
     RUN.x += (RUN.lane * LANE - RUN.x) * (1 - Math.pow(0.00002, dt));
   }
-  function paintGames() {
-    var gm = gameDay(), left = RUNS_PER_DAY - gm.runs;
-    $('gmRuns').textContent = left + ' / ' + RUNS_PER_DAY; $('gmCoins').textContent = gm.coins + ' / ' + COINS_PER_DAY; $('gmBest').textContent = G.best + ' m';
-    $('gmNote').textContent = left > 0 ? 'Le jeu rapporte un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.' : 'Plus de course pour aujourd\'hui. Reviens demain !';
-    $('gmPlay').disabled = left <= 0; $('gmPlay').textContent = left > 0 ? 'Jouer' : 'À demain';
+  /* ---------- Ce que les jeux ont en commun : le nombre de parties et de pièces par jour ---------- */
+  var curGame = 'run';
+  function playsLeft() { return RUNS_PER_DAY - gameDay().runs; }
+  function usePlay() { if (playsLeft() <= 0 || phase !== 'play') return false; gameDay().runs++; saveG(); return true; }
+  function earn(n) { var gm = gameDay(), e = Math.max(0, Math.min(Math.floor(n), COINS_PER_DAY - gm.coins)); gm.coins += e; G.bonus += e; saveG(); if (e) sfx('cash'); refresh(false); return e; }
+  function capNote(got, e) { var left = playsLeft(); return (e < got ? 'Tu as atteint le maximum de ' + COINS_PER_DAY + ' pièces par jour avec les jeux. ' : '') + (left > 0 ? 'Il te reste ' + left + (left > 1 ? ' parties' : ' partie') + ' aujourd\'hui.' : 'Plus de partie pour aujourd\'hui. Reviens demain !'); }
+
+  /* ---------- Mini-jeu : attrape les bons aliments ----------
+     Des choses tombent du ciel. Le monstre suit ton doigt : il faut attraper ce qui est bon pour lui et éviter le reste. */
+  var CT = { on: false, x: 0, target: 0, score: 0, lives: 3, next: 0, t0: 0, over: false }, catchG = new THREE.Group(); catchG.visible = false; scene.add(catchG);
+  var FOOD = [
+    { good: true, make: function (g) { qSph(0.3, 0xD62828, 0, 0, 0, g, { roughness: 0.3 }); qCyl(0.02, 0.02, 0.14, 0x5A3A22, 0, 0.32, 0, g); qSph(0.08, 0x4F9B4A, 0.09, 0.34, 0, g).scale.set(1.4, 0.4, 0.8); } },                                    /* pomme */
+    { good: true, make: function (g) { var o = mesh(new THREE.TorusGeometry(0.28, 0.1, 8, 14, Math.PI), mat(0xF7D048, { roughness: 0.4 }), 0, 0.1, 0, g); o.rotation.z = Math.PI; } },                                                      /* banane */
+    { good: true, make: function (g) { var o = qCone(0.17, 0.62, 0xF08A4B, 0, 0, 0, g); o.rotation.z = Math.PI; qCone(0.11, 0.26, 0x4F9B4A, 0, 0.4, 0, g); } },                                                                         /* carotte */
+    { good: true, make: function (g) { qCyl(0.15, 0.17, 0.5, 0x8FD3F4, 0, 0, 0, g, { transparent: true, opacity: 0.8, roughness: 0.1 }); qCyl(0.08, 0.08, 0.12, 0x3B6FD9, 0, 0.3, 0, g); } },                                              /* bouteille d'eau */
+    { good: false, make: function (g) { qSph(0.2, 0xFF4FD8, 0, 0, 0, g, { roughness: 0.25 }); [-1, 1].forEach(function (s2) { var o = qCone(0.14, 0.2, 0xFF9CE8, s2 * 0.28, 0, 0, g); o.rotation.z = s2 * Math.PI / 2; }); } },             /* bonbon */
+    { good: false, make: function (g) { qCyl(0.17, 0.17, 0.46, 0xC0392B, 0, 0, 0, g, { metalness: 0.5, roughness: 0.3 }); qCyl(0.172, 0.172, 0.1, 0xFFFFFF, 0, 0, 0, g); qCyl(0.15, 0.15, 0.03, 0xC9CDE6, 0, 0.24, 0, g, MET); } },          /* canette de soda */
+    { good: false, make: function (g) { bx2(0.34, 0.6, 0.05, 0x1B1D2B, 0, 0, 0, g); var sc2 = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.5), new THREE.MeshBasicMaterial({ color: 0x5CC8FF })); sc2.position.z = 0.03; g.add(sc2); } }  /* téléphone allumé */
+  ];
+  var foods = [];
+  for (var fd = 0; fd < 14; fd++) { var fo2 = new THREE.Group(); fo2.visible = false; fo2.userData = { on: false, kinds: [] }; FOOD.forEach(function (F2) { var kg = new THREE.Group(); F2.make(kg); kg.traverse(function (x) { x.raycast = function () {}; }); fo2.add(kg); fo2.userData.kinds.push(kg); }); catchG.add(fo2); foods.push(fo2); }
+  function catchHud() { $('runDist').textContent = CT.score + (CT.score > 1 ? ' attrapés' : ' attrapé'); $('runLivesN').textContent = CT.lives; $('runCoins').textContent = Math.floor(CT.score / 2); }
+  function catchStart() {
+    if (!usePlay()) return;
+    closeSheets(); $('bubble').hidden = true; $('runEnd').hidden = true; act = null; spin = 0;
+    foods.forEach(function (o) { o.userData.on = false; o.visible = false; }); catchG.visible = true;
+    CT.x = HOME.x; CT.target = HOME.x; CT.score = 0; CT.lives = 3; CT.next = 0.8; CT.t0 = clock.getElapsedTime(); CT.over = false;
+    phase = 'catch'; curGame = 'catch'; show('runHud'); $('gear').hidden = true; $('runCount').hidden = true; $('runLives').hidden = false; $('runTip').hidden = false;
+    $('runTip').textContent = 'Glisse ton doigt pour déplacer ton monstre. Attrape les fruits et l\'eau, évite les bonbons, le soda et les écrans !'; catchHud();
   }
-  $('navGames').addEventListener('click', function () { sfx('tick'); closeSheets(); paintGames(); $('games').hidden = false; $('gamesClose').focus(); });
+  function catchOver() {
+    if (CT.over || phase !== 'catch') return; CT.over = true; CT.t0 = clock.getElapsedTime();
+    var got = Math.floor(CT.score / 2), record = CT.score > G.rec.catch; if (record) G.rec.catch = CT.score; var e = earn(got);
+    setTimeout(function () {
+      if (phase !== 'catch') return;
+      $('runEndTitle').textContent = record && CT.score > 0 ? 'Nouveau record !' : 'Partie terminée';
+      $('reLab1').textContent = 'attrapés'; $('reDist').textContent = CT.score; $('reCoins').textContent = '+' + e; $('reBest').textContent = G.rec.catch;
+      $('reNote').textContent = capNote(got, e); $('reAgain').hidden = playsLeft() <= 0; $('runEnd').hidden = false; (playsLeft() > 0 ? $('reAgain') : $('reBack')).focus();
+      if (record && CT.score > 0) sfx('fanfare');
+    }, 700);
+  }
+  function catchStop() { catchG.visible = false; $('runEnd').hidden = true; phase = 'play'; show('hud'); refresh(false); nextSay = clock.getElapsedTime() + 5; }
+  function catchTick(dt, t) {
+    CT.x += (CT.target - CT.x) * (1 - Math.pow(0.0005, dt));
+    if (CT.over) return;
+    var el2 = t - CT.t0, hard = Math.min(1, el2 / 70);                 /* de plus en plus vite pendant 70 secondes */
+    CT.next -= dt;
+    if (CT.next <= 0) {
+      CT.next = 0.95 - hard * 0.6 + Math.random() * 0.25;
+      var o = freeOf(foods); if (o) {
+        var bad = Math.random() < 0.26 + hard * 0.2, pool = [], n; FOOD.forEach(function (F2, k) { if (F2.good !== bad) pool.push(k); }); n = pick(pool);
+        o.userData.on = true; o.userData.good = FOOD[n].good; o.userData.vy = 3 + hard * 5 + Math.random(); o.userData.kinds.forEach(function (kg, k) { kg.visible = k === n; });
+        o.position.set(HOME.x + (Math.random() - 0.5) * 3.4, 6.2, HOME.z + 0.15); o.rotation.set(0, 0, Math.random() * 6); o.userData.rs = (Math.random() - 0.5) * 4; o.visible = true;
+      }
+    }
+    foods.forEach(function (o) {
+      var u = o.userData; if (!u.on) return;
+      o.position.y -= u.vy * dt; o.rotation.z += u.rs * dt; o.rotation.y += dt * 1.5;
+      if (o.position.y < 1.9 * stageK + 0.3 && o.position.y > 0.5 && Math.abs(o.position.x - CT.x) < 0.85) {
+        u.on = false; o.visible = false;
+        if (u.good) { CT.score++; sfx('coin', 0.7); bump(1.2); if (CT.score % 10 === 0) heart(); }
+        else { CT.lives--; sfx('thud', 0.8); bump(-2.5); try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) {} if (CT.lives <= 0) catchOver(); }
+        catchHud();
+      } else if (o.position.y < 0.05) { u.on = false; o.visible = false; }
+    });
+  }
+
+  /* ---------- Mini-jeu : mémoire ---------- */
+  var MEM = { cards: [], open: [], moves: 0, found: 0, lock: false };
+  function memPaint() {
+    var box = $('memGrid'); empty2(box);
+    MEM.cards.forEach(function (c, n) {
+      var b = el('button', 'memc' + (c.done ? ' done' : c.up ? ' open' : '')); b.type = 'button'; b.setAttribute('aria-label', c.up || c.done ? c.name : 'Carte ' + (n + 1) + ', face cachée');
+      if (c.up || c.done) { var im = document.createElement('img'); im.alt = ''; im.src = c.url; b.appendChild(im); } else b.textContent = '?';
+      b.disabled = c.done || MEM.lock; b.addEventListener('click', function () { memFlip(n); }); box.appendChild(b);
+    });
+    $('memMoves').textContent = MEM.moves + (MEM.moves > 1 ? ' coups' : ' coup');
+  }
+  function memStart() {
+    if (!usePlay()) return;
+    closeSheets(); var items = SHOP.filter(function (it) { return it.slot !== 'fx'; }), chosen = [], n;
+    while (chosen.length < 8) { n = pick(items); if (chosen.indexOf(n) < 0) chosen.push(n); }
+    MEM.cards = []; chosen.forEach(function (it) { var url = thumbItem(it.slot, it.id); MEM.cards.push({ id: it.id, name: it.name, url: url }, { id: it.id, name: it.name, url: url }); });
+    dress();
+    for (n = MEM.cards.length - 1; n > 0; n--) { var m = Math.floor(Math.random() * (n + 1)), tmp = MEM.cards[n]; MEM.cards[n] = MEM.cards[m]; MEM.cards[m] = tmp; }
+    MEM.open = []; MEM.moves = 0; MEM.found = 0; MEM.lock = false; $('memAgain').hidden = true; $('memNote').textContent = 'Retrouve les paires en retournant le moins de cartes possible.';
+    memPaint(); $('mem').hidden = false; $('memClose').focus();
+  }
+  function memFlip(n) {
+    var c = MEM.cards[n]; if (MEM.lock || c.up || c.done) return;
+    c.up = true; MEM.open.push(n); sfx('tick');
+    if (MEM.open.length === 2) {
+      MEM.moves++; var a = MEM.cards[MEM.open[0]], b = MEM.cards[MEM.open[1]];
+      if (a.id === b.id) { a.done = b.done = true; MEM.open = []; MEM.found++; sfx('coin'); if (MEM.found === 8) memWin(); }
+      else { MEM.lock = true; setTimeout(function () { a.up = b.up = false; MEM.open = []; MEM.lock = false; memPaint(); }, 800); }
+    }
+    memPaint();
+  }
+  function memWin() {
+    var got = Math.max(3, 14 - Math.max(0, MEM.moves - 8)), record = !G.rec.mem || MEM.moves < G.rec.mem; if (record) G.rec.mem = MEM.moves; var e = earn(got);   /* moins de coups = plus de pièces */
+    $('memNote').textContent = (record ? 'Nouveau record : ' : 'Bravo : ') + MEM.moves + ' coups. +' + e + ' pièces. ' + capNote(got, e);
+    $('memAgain').hidden = playsLeft() <= 0; sfx('fanfare'); party(); start('jump');
+  }
+  $('memAgain').addEventListener('click', memStart);
+  $('memClose').addEventListener('click', function () { sfx('tick'); $('mem').hidden = true; });
+
+  /* ---------- Mini-jeu : le tri des déchets ---------- */
+  var BINS = [['jaune', 'Poubelle jaune', 'emballages, papier', '#F7C948'], ['verre', 'Verre', 'bouteilles, bocaux', '#5FCB8A'], ['compost', 'Compost', 'restes de fruits et légumes', '#C89A62'], ['gris', 'Ordures', 'le reste', '#A9AEC6']];
+  var WASTE = [['Bouteille en plastique', 'jaune'], ['Canette', 'jaune'], ['Boîte de conserve', 'jaune'], ['Carton de pizza propre', 'jaune'], ['Journal', 'jaune'], ['Brique de lait', 'jaune'], ['Boîte de céréales', 'jaune'],
+    ['Bouteille en verre', 'verre'], ['Bocal de cornichons', 'verre'], ['Pot de confiture', 'verre'],
+    ['Épluchures de légumes', 'compost'], ['Trognon de pomme', 'compost'], ['Coquille d\'œuf', 'compost'], ['Marc de café', 'compost'], ['Peau de banane', 'compost'],
+    ['Mouchoir usagé', 'gris'], ['Chewing-gum', 'gris'], ['Couche', 'gris'], ['Éponge usée', 'gris'], ['Brosse à dents', 'gris']];
+  var TRI = { score: 0, left: 0, cur: null, timer: null, on: false, miss: 0 };
+  BINS.forEach(function (q) { var b = el('button', 'bin', q[1]); b.type = 'button'; b.style.background = q[3]; b.appendChild(el('small', '', q[2])); b.addEventListener('click', function () { triAnswer(q[0]); }); $('triBins').appendChild(b); });
+  function triNext() { var prev = TRI.cur; do { TRI.cur = pick(WASTE); } while (TRI.cur === prev); $('triItem').textContent = TRI.cur[0]; }
+  function triStart() {
+    if (!usePlay()) return;
+    closeSheets(); TRI.score = 0; TRI.left = 45; TRI.on = true; TRI.miss = 0; $('triAgain').hidden = true; $('triBins').hidden = false; $('triScore').textContent = '0';
+    $('triNote').textContent = 'Dans quelle poubelle ça va ? Les consignes changent un peu selon les villes : ici ce sont les plus courantes.';
+    triNext(); $('tri').hidden = false; $('triBar').style.width = '100%';
+    clearInterval(TRI.timer); TRI.timer = setInterval(function () { TRI.left -= 0.1; $('triBar').style.width = Math.max(0, TRI.left / 45 * 100) + '%'; if (TRI.left <= 0) triEnd(); }, 100);
+  }
+  function triAnswer(bin) {
+    if (!TRI.on) return;
+    if (bin === TRI.cur[1]) { TRI.score++; sfx('coin', 0.7); $('triScore').textContent = TRI.score; triNext(); }
+    else { TRI.miss++; TRI.left -= 3; sfx('thud', 0.6); var it = $('triItem'); it.classList.remove('bad'); void it.offsetWidth; it.classList.add('bad'); $('triNote').textContent = TRI.cur[0] + ' : c\'était « ' + BINS.filter(function (q) { return q[0] === TRI.cur[1]; })[0][1] + ' ». 3 secondes de moins !'; triNext(); }
+  }
+  function triEnd() {
+    if (!TRI.on) return; TRI.on = false; clearInterval(TRI.timer);
+    var got = Math.floor(TRI.score / 2), record = TRI.score > G.rec.tri; if (record) G.rec.tri = TRI.score; var e = earn(got);
+    $('triItem').textContent = TRI.score + ' bien triés'; $('triBins').hidden = true;
+    $('triNote').textContent = (record && TRI.score > 0 ? 'Nouveau record ! ' : '') + '+' + e + ' pièces. ' + capNote(got, e); $('triAgain').hidden = playsLeft() <= 0; if (record && TRI.score > 0) sfx('fanfare');
+  }
+  $('triAgain').addEventListener('click', triStart);
+  $('triClose').addEventListener('click', function () { sfx('tick'); TRI.on = false; clearInterval(TRI.timer); $('tri').hidden = true; });
+
+  /* ---------- Une minute de respiration : le seul « jeu » qui fait vraiment du bien ----------
+     Il ne compte pas dans les parties du jour, et rapporte 10 pièces une fois par jour. */
+  var ZEN = { timer: null, t: 0, on: false, phase: '' };
+  function zenStart() {
+    if (phase !== 'play') return; closeSheets(); ZEN.t = 0; ZEN.on = true; ZEN.phase = '';
+    $('zenNote').textContent = 'Pose ton téléphone, respire avec le rond pendant une minute. Tu peux fermer les yeux et te laisser guider par le son.'; $('zenClose').textContent = 'Arrêter';
+    $('zen').hidden = false; $('zenClose').focus(); clearInterval(ZEN.timer); zenTick(); ZEN.timer = setInterval(zenTick, 250);
+  }
+  function zenTick() {
+    if (!ZEN.on) return;
+    var cyc = ZEN.t % 10, ph = cyc < 4 ? 'in' : 'out';                 /* 4 secondes pour inspirer, 6 pour souffler */
+    if (ph !== ZEN.phase) { ZEN.phase = ph; $('zenBall').style.transitionDuration = (ph === 'in' ? 4 : 6) + 's'; $('zenBall').style.transform = ph === 'in' ? 'scale(1.9)' : 'scale(1)'; $('zenTxt').textContent = ph === 'in' ? 'Inspire…' : 'Souffle…'; sfx(ph === 'in' ? 'breathIn' : 'breathOut'); }
+    $('zenLeft').textContent = Math.max(0, Math.ceil(60 - ZEN.t)) + ' s'; ZEN.t += 0.25;
+    if (ZEN.t >= 60) {
+      ZEN.on = false; clearInterval(ZEN.timer); var gm = gameDay(), first = !gm.zen, e = 0; if (first) { gm.zen = true; e = earn(10); }
+      $('zenTxt').textContent = 'Bravo'; $('zenBall').style.transform = 'scale(1.3)'; $('zenClose').textContent = 'Fermer';
+      $('zenNote').textContent = first ? 'Une minute de calme. +' + e + ' pièces, une fois par jour.' : 'Une minute de calme. Tu as déjà eu ta récompense aujourd\'hui, mais ça fait toujours du bien.';
+      say('Ça fait du bien…', 4000); start('yawn');
+    }
+  }
+  $('zenClose').addEventListener('click', function () { sfx('tick'); ZEN.on = false; clearInterval(ZEN.timer); $('zen').hidden = true; });
+  ['mem', 'tri', 'zen'].forEach(function (id) { $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Escape') $(id + 'Close').click(); }); });
+
+  /* ---------- La liste des jeux ---------- */
+  var GAMES = [
+    { name: 'La course des poubelles', sub: 'Esquive, saute et glisse à travers cinq zones.', rec: function () { return G.best ? 'Record : ' + G.best + ' m' : ''; }, go: runStart },
+    { name: 'Attrape-fruits', sub: 'Attrape ce qui est bon, évite les bonbons et les écrans.', rec: function () { return G.rec.catch ? 'Record : ' + G.rec.catch : ''; }, go: catchStart },
+    { name: 'Mémoire', sub: 'Retrouve les paires de cosmétiques.', rec: function () { return G.rec.mem ? 'Record : ' + G.rec.mem + ' coups' : ''; }, go: memStart },
+    { name: 'Tri des déchets', sub: '45 secondes pour mettre chaque déchet dans la bonne poubelle.', rec: function () { return G.rec.tri ? 'Record : ' + G.rec.tri : ''; }, go: triStart },
+    { name: 'Respiration', sub: 'Une minute de calme. Ne compte pas dans tes parties.', rec: function () { return gameDay().zen ? 'Fait aujourd\'hui' : '+10 pièces, une fois par jour'; }, go: zenStart, free: true }
+  ];
+  function paintGames() {
+    var gm = gameDay(), left = playsLeft(), box = $('gmList'); empty2(box);
+    $('gmRuns').textContent = left + ' / ' + RUNS_PER_DAY; $('gmCoins').textContent = gm.coins + ' / ' + COINS_PER_DAY;
+    GAMES.forEach(function (gq) {
+      var row = el('div', 'gcard'), nm = el('span', 'nm', gq.name); nm.appendChild(el('span', 'sub', gq.sub)); var rc = gq.rec(); if (rc) nm.appendChild(el('span', 'sub rar3', rc));
+      var b = btn('buy', 'Jouer', gq.go); b.disabled = !gq.free && left <= 0; row.appendChild(nm); row.appendChild(b); box.appendChild(row);
+    });
+    $('gmNote').textContent = left > 0 ? 'Les jeux rapportent un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.' : 'Plus de partie pour aujourd\'hui. La respiration reste ouverte. Reviens demain !';
+  }
+  $('navGames').addEventListener('click', function () { sfx('tick'); closeSheets(); paintGames(); $('games').hidden = false; focusCam = true; $('gamesClose').focus(); });
   $('gamesClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navGames').focus(); });
   $('games').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSheets(); });
-  $('gmPlay').addEventListener('click', runStart);
-  $('runQuit').addEventListener('click', function () { runOver(false); });
-  $('reAgain').addEventListener('click', function () { $('runEnd').hidden = true; phase = 'play'; runStart(); });
-  $('reBack').addEventListener('click', function () { sfx('tick'); runStop(); });
+  $('runQuit').addEventListener('click', function () { if (curGame === 'catch') catchOver(); else runOver(false); });
+  $('reAgain').addEventListener('click', function () { $('runEnd').hidden = true; if (curGame === 'catch') { catchG.visible = false; phase = 'play'; catchStart(); } else { phase = 'play'; runStart(); } });
+  $('reBack').addEventListener('click', function () { sfx('tick'); if (curGame === 'catch') catchStop(); else runStop(); });
   window.addEventListener('keydown', function (ev) {
+    if (phase === 'catch' && $('runEnd').hidden) { if (ev.key === 'ArrowLeft') { CT.target = Math.max(HOME.x - 1.8, CT.target - 0.6); ev.preventDefault(); } if (ev.key === 'ArrowRight') { CT.target = Math.min(HOME.x + 1.8, CT.target + 0.6); ev.preventDefault(); } return; }
     if (phase !== 'run' || !$('runEnd').hidden) return;
     var d = ev.key === 'ArrowLeft' ? 'left' : ev.key === 'ArrowRight' ? 'right' : (ev.key === 'ArrowUp' || ev.key === ' ') ? 'up' : ev.key === 'ArrowDown' ? 'down' : '';
     if (d) { ev.preventDefault(); runMove(d); }
@@ -2883,8 +3108,8 @@ button, input { touch-action: manipulation; }
   $('aLevel').addEventListener('click', function () { if (!needPlay()) return; var c = calc(); G.xpBonus += c.need - c.xp; saveG(); closeAdmin(); refresh(true); });
   $('aHeal').addEventListener('click', function () { if (!needPlay()) return; G.hpFrom = dayKey(0); saveG(); sfx('wave'); refresh(false); paintAdmin(); });
   $('deadNew').addEventListener('click', function () {
-    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins), best: G.best, game: G.game };          /* le joueur garde ses achats et ses pièces */
-    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; G.best = keep.best; G.game = keep.game; saveG();
+    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins), best: G.best, game: G.game, rec: G.rec };          /* le joueur garde ses achats et ses pièces */
+    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; G.best = keep.best; G.game = keep.game; G.rec = keep.rec; saveG();
     $('name').value = ''; act = null; $('dead').hidden = true; goTitle();
   });
   $('aNext').addEventListener('click', function () { if (!needPlay()) return; sfx('tick'); nextDay(); });
@@ -2906,7 +3131,7 @@ button, input { touch-action: manipulation; }
       loader.load('models/' + sp.id + MODEL_EXT, function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
     });
   });
-  if (location.hash === '#reglage') window.__fl = { stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
+  if (location.hash === '#reglage') window.__fl = { CT: CT, foods: foods, MEM: MEM, TRI: TRI, ZEN: ZEN, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
   function loadStep() {

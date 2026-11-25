@@ -137,6 +137,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Niveaux et expérience, avec récompenses et auras | Fait |
 | Barre de vie, et mort du monstre s'il est vraiment négligé | Fait |
 | 47 cosmétiques dans 5 catégories, avec raretés, niveaux requis et essayage | Fait |
+| Mini-jeu « La course des poubelles » | Fait |
 | La créature parle (bulles), aime les caresses (cœurs), fête les bonnes journées (confettis) | Fait |
 | Quêtes bonus et cadeaux hebdomadaires | À faire |
 | Export de l'appli Santé | À faire |
@@ -174,6 +175,15 @@ Cette règle remplace « il grandit tous les 3 jours ».
 - **À 40 ou moins**, le monstre passe en mauvais état. **À 30 ou moins**, sa barre clignote et il dit qu'il ne va pas bien.
 - **À zéro, il meurt.** Il faut donc 5 journées catastrophiques d'affilée, ou 10 jours sans ouvrir l'appli.
 - Le joueur adopte alors un nouveau monstre, qui repart au niveau 1. **Il garde ses pièces, ses décors et ses cosmétiques.**
+
+### Les mini-jeux
+
+Le premier mini-jeu est **« La course des poubelles »** : le monstre court tout droit sur trois voies, évite les poubelles, saute par-dessus les cartons et ramasse des pièces. La course accélère peu à peu.
+
+- **Commandes** : glisser à gauche ou à droite pour changer de voie, vers le haut pour sauter. Un simple toucher (à gauche, à droite, en haut) marche aussi, ainsi que les flèches du clavier.
+- **5 courses par jour** et **50 pièces par jour au maximum** avec les jeux.
+
+Cette limite est voulue : FormiLife sert à passer moins de temps sur les écrans. Un mini-jeu sans limite pousserait à faire l'inverse, et rapporterait plus que de bien dormir. Les jeux restent donc un bonus, et les vraies récompenses viennent du sommeil, des pas et du temps d'écran.
 
 ### Les monstres
 

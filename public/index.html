@@ -212,17 +212,17 @@ button, input { touch-action: manipulation; }
 
 /* ---------- Le menu du bas, l'atelier et la boutique ---------- */
 .bottombar { flex-direction: column; align-items: stretch; flex-wrap: nowrap; }
-.nav { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 8px; }
+.nav { display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr; gap: 6px; }
 .navb {
   position: relative; min-height: 60px; border: 0; border-radius: 18px; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  background: var(--panel); color: var(--ink); font-family: var(--display); font-weight: 800; font-size: .95rem; line-height: 1.1;
+  background: var(--panel); color: var(--ink); font-family: var(--display); font-weight: 800; font-size: .84rem; line-height: 1.1;
   box-shadow: 0 5px 0 #14172A, 0 10px 18px rgba(0,0,0,.3); transition: transform .08s, box-shadow .08s;
 }
 .navb.main { background: var(--coin); color: var(--dark-ink); box-shadow: 0 5px 0 var(--coin-deep), 0 10px 18px rgba(0,0,0,.3); }
 .navb:active { transform: translateY(4px); box-shadow: 0 1px 0 #14172A; }
 .navb svg { width: 24px; height: 24px; }
 .navb:not(:active) svg { animation: bob 2.6s ease-in-out infinite; }
-.navb:nth-child(2) svg { animation-delay: .4s; } .navb:nth-child(3) svg { animation-delay: .8s; }
+.navb:nth-child(2) svg { animation-delay: .4s; } .navb:nth-child(3) svg { animation-delay: .8s; } .navb:nth-child(4) svg { animation-delay: 1.2s; }
 @keyframes bob { 50% { transform: translateY(-3px) rotate(-4deg); } }
 #shopDot:not([hidden]) { position: absolute; top: 6px; right: 12px; width: 14px; height: 14px; border-radius: 50%; background: #FF6B6B; border: 2px solid var(--night); animation: pulse 1.2s ease-in-out infinite; }
 .pill.pop { animation: pop .35s ease-out; }
@@ -264,6 +264,18 @@ button, input { touch-action: manipulation; }
 .buy:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--coin-deep); }
 .buy:disabled { background: var(--line); color: var(--muted); box-shadow: none; }
 .buy.on { background: var(--mint); box-shadow: 0 4px 0 #3FA890; }
+/* Le mini-jeu de course */
+#runHud { justify-content: space-between; }
+#games .sheet { max-height: 78%; }
+#runHud .topbar { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; padding-right: 0; }
+#runHud .pill { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+#runCount { pointer-events: none; align-self: center; font-family: var(--display); font-weight: 800; font-size: 5rem; line-height: 1; text-shadow: 0 6px 0 rgba(0,0,0,.4); }
+.swipe { pointer-events: none; align-self: center; margin: 0; background: var(--panel); border-radius: 999px; padding: 8px 16px; font-weight: 800; font-size: .9rem; text-align: center; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { background: var(--night); border-radius: 14px; padding: 10px 6px; text-align: center; }
+.stat strong { display: block; font-family: var(--display); font-weight: 800; font-size: 1.5rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: .78rem; font-weight: 800; color: var(--muted); }
+
 /* La bulle de parole de la créature */
 #bubble:not([hidden]) {
   position: absolute; z-index: 4; transform: translate(-50%, -100%); max-width: 220px; pointer-events: none;
@@ -304,6 +316,7 @@ button, input { touch-action: manipulation; }
       </div>
       <nav class="nav" aria-label="Menu">
         <button type="button" class="navb main" id="enter"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M8 13l3 3 5-6"/></svg><span id="enterLab">Ma journée</span></button>
+        <button type="button" class="navb" id="navGames"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="5"/><path d="M8 10.5v4M6 12.5h4M15.5 11.5h.01M18 13.5h.01"/></svg><span>Jeux</span></button>
         <button type="button" class="navb" id="navLook"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l4 3 4-3 5 4-3 3-2-1v10H8V10l-2 1-3-3z"/></svg><span>Atelier</span></button>
         <button type="button" class="navb" id="navShop"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Boutique</span><i id="shopDot" hidden></i></button>
       </nav>
@@ -435,6 +448,40 @@ button, input { touch-action: manipulation; }
     </div>
   </div>
 
+  <div class="ui" id="runHud" hidden>
+    <div class="topbar">
+      <div class="pills"><div class="pill" id="runDist">0 m</div><div class="pill"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#F7C948"/><circle cx="11" cy="11" r="6" fill="none" stroke="#B8860B" stroke-width="2"/></svg><span id="runCoins">0</span></div></div>
+      <button type="button" class="ghost" id="runQuit">Arrêter</button>
+    </div>
+    <div id="runCount" aria-live="assertive"></div>
+    <p class="swipe" id="runTip">Glisse à gauche ou à droite pour changer de voie, vers le haut pour sauter</p>
+  </div>
+  <div class="veil" id="runEnd" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="runEndTitle">
+      <h2 id="runEndTitle"></h2>
+      <div class="stats">
+        <div class="stat"><strong id="reDist"></strong><span>distance</span></div>
+        <div class="stat"><strong id="reCoins"></strong><span>pièces gagnées</span></div>
+        <div class="stat"><strong id="reBest"></strong><span>record</span></div>
+      </div>
+      <p class="small" id="reNote"></p>
+      <button type="button" class="big" id="reAgain">Rejouer</button>
+      <button type="button" class="ghost" id="reBack">Retour</button>
+    </div>
+  </div>
+  <div class="sheetwrap" id="games" hidden>
+    <div class="sheet" role="dialog" aria-labelledby="gamesTitle">
+      <div class="sheethead"><h2 id="gamesTitle">Mini-jeux</h2><button type="button" class="ghost" id="gamesClose">Terminé</button></div>
+      <div class="item"><span class="nm">La course des poubelles<span class="sub">Cours dans la ruelle, évite les poubelles et les cartons, ramasse les pièces.</span></span></div>
+      <div class="stats">
+        <div class="stat"><strong id="gmRuns"></strong><span>courses restantes</span></div>
+        <div class="stat"><strong id="gmCoins"></strong><span>pièces aujourd'hui</span></div>
+        <div class="stat"><strong id="gmBest"></strong><span>record</span></div>
+      </div>
+      <p class="small" id="gmNote"></p>
+      <button type="button" class="big" id="gmPlay">Jouer</button>
+    </div>
+  </div>
   <div class="sheetwrap" id="look" hidden>
     <div class="sheet" role="dialog" aria-labelledby="lookTitle">
       <div class="sheethead"><h2 id="lookTitle">Atelier</h2><button type="button" class="ghost" id="lookClose">Terminé</button></div>
@@ -1048,7 +1095,7 @@ button, input { touch-action: manipulation; }
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
   var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null, back: null, fx: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '' }; }
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0 }, best: 0 }; }
   var G = freshG();
   function load() {
     try {
@@ -1063,6 +1110,7 @@ button, input { touch-action: manipulation; }
       G.decor = G.decors.indexOf(o.decor | 0) >= 0 ? (o.decor | 0) : 0;
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
+      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.best = Math.max(0, o.best | 0);
       G.xpBonus = Math.max(0, Number(o.xpBonus) || 0); G.hpFrom = typeof o.hpFrom === 'string' ? o.hpFrom : ''; G.lvlSeen = Math.max(1, o.lvlSeen | 0); G.dead = o.dead === true; G.born = typeof o.born === 'string' ? o.born : '';
       return !!G.name;
     } catch (e) { return false; }
@@ -1117,7 +1165,7 @@ button, input { touch-action: manipulation; }
     coins += G.bonus - G.spent;                                       /* ce qu'on a gagné, moins ce qu'on a dépensé à la boutique */
     return { n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv, lvl: lvl, xp: rem, need: xpNeed(lvl), hp: hp, age: span + 1 };
   }
-  function show(id) { ['loading', 'title', 'custom', 'hud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; }
+  function show(id) { ['loading', 'title', 'custom', 'hud', 'runHud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; }
   function setColor(i) {
     colorIndex = i; paint();
     Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
@@ -1229,7 +1277,7 @@ button, input { touch-action: manipulation; }
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
+    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
@@ -1263,11 +1311,16 @@ button, input { touch-action: manipulation; }
   var ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
   function rel(ev) { var r = stage.getBoundingClientRect(); return { x: (ev.clientX - r.left) / r.width, y: (ev.clientY - r.top) / r.height }; }
   function hitPet(ev) { var p = rel(ev); ptr.set(p.x * 2 - 1, -(p.y * 2 - 1)); ray.setFromCamera(ptr, camera); return ray.intersectObject(pet, true).length > 0; }
-  stage.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, y: ev.clientY, moved: 0, acc: 0, onPet: phase === 'play' && hitPet(ev) }; });
+  stage.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, y: ev.clientY, sx: ev.clientX, sy: ev.clientY, used: false, moved: 0, acc: 0, onPet: phase === 'play' && hitPet(ev) }; });
   window.addEventListener('pointermove', function (ev) {
     var p = rel(ev); lookX = Math.max(-0.5, Math.min(0.5, p.x - 0.5)); lookY = Math.max(-0.5, Math.min(0.5, p.y - 0.5));
     if (down) {
       var dx = ev.clientX - down.x, dy = ev.clientY - down.y, dist = Math.abs(dx) + Math.abs(dy); down.moved += dist; down.x = ev.clientX; down.y = ev.clientY;
+      if (phase === 'run') {                  /* pendant la course : un glissement = un ordre */
+        var gx = ev.clientX - down.sx, gy = ev.clientY - down.sy;
+        if (!down.used && (Math.abs(gx) > 26 || gy < -26)) { down.used = true; runMove(Math.abs(gx) > Math.abs(gy) ? (gx < 0 ? 'left' : 'right') : 'up'); }
+        return;
+      }
       if (down.onPet) {                       /* le doigt est parti de la créature : c'est une caresse */
         down.acc += dist;
         if (down.acc > 26) { down.acc = 0; heart(); petUntil = clock.getElapsedTime() + 0.6; if (Math.random() < 0.25) sfx('purr', 0.7); try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {} }
@@ -1275,6 +1328,7 @@ button, input { touch-action: manipulation; }
     }
   });
   window.addEventListener('pointerup', function (ev) {
+    if (down && phase === 'run' && !down.used && down.moved < 12) { var rp = rel(ev); runMove(rp.y < 0.45 ? 'up' : rp.x < 0.5 ? 'left' : 'right'); }   /* un simple toucher marche aussi : à gauche, à droite, ou en haut pour sauter */
     if (down && down.moved < 6) {
       if (phase === 'title') openBox();
       else if (phase === 'play' || phase === 'custom') {
@@ -1293,6 +1347,7 @@ button, input { touch-action: manipulation; }
   /* La caméra a une place pour chaque étape et glisse doucement de l'une à l'autre */
   var aspect = 1.6, camP = new THREE.Vector3(), camL = new THREE.Vector3(), camReady = false;
   function camGoal() {
+    if (phase === 'run') return { p: [0, 3.5, 6.9], l: [0, 1.2, -5] };
     var narrow = aspect < 1, p, l;
     if (phase === 'loading' || phase === 'title') { l = [BOX.x, narrow ? 0.9 : 0.75, BOX.z]; p = [BOX.x + 0.9, 2.3, narrow ? 8.5 : 5.6]; }
     else if (phase === 'intro') { l = [-0.7, 1.3, 0]; p = [-0.5, 2.5, narrow ? 12 : 8.2]; }
@@ -1403,7 +1458,7 @@ button, input { touch-action: manipulation; }
         eyeT = (acheLv > 1 ? 0.32 : 0.6) + Math.sin(t * 6) * 0.08;
       }
       var bt = t % 4.2; if (bt < 0.12 || (bt > 0.3 && bt < 0.4)) eyeT *= 0.08;
-      if (!act && !down && !hidden && phase !== 'intro' && phase !== 'dead' && t > nextAuto) autoAct();
+      if (!act && !down && !hidden && phase !== 'intro' && phase !== 'dead' && phase !== 'run' && t > nextAuto) autoAct();
     } else if (ache) { aL = 2.75; aR = 2.75; eyeT = 0.32; }
 
     if (playing && t < petUntil) { eyeT = Math.min(eyeT, 0.12); mouthT = 0.45; tilt += Math.sin(t * 9) * 0.05; aL = aR = 0.9; }   /* elle ferme les yeux de plaisir */
@@ -1465,6 +1520,14 @@ button, input { touch-action: manipulation; }
       }
     }
 
+    if (phase === 'run') {                    /* le monstre court : il rebondit, balance les bras, se penche dans les virages */
+      runTick(dt, t);
+      var running = RUN.state !== 'over';
+      px = RUN.x; pz = 0; y = RUN.y + (running && RUN.y < 0.02 && !reduce ? Math.abs(Math.sin(t * 13)) * 0.14 : 0);
+      tilt = running ? (RUN.x - RUN.lane * LANE) * 0.22 : Math.min(1.3, (t - RUN.t0) * 3); leanT = 0.14; eyeT = running ? 1 : 0.05; mouthT = running ? 0.25 : 0.6;
+      aL = 0.9 + Math.sin(t * 13) * 0.7; aR = 0.9 - Math.sin(t * 13) * 0.7; breath = 0; extraSpin = 0;
+    }
+
     /* 3. Lissage et ressorts : rien ne change d'un coup */
     var f = 1 - Math.pow(0.002, dt), fFast = 1 - Math.pow(0.000001, dt);
     lean += (leanT - lean) * f; droop += (droopT - droop) * f;
@@ -1482,10 +1545,10 @@ button, input { touch-action: manipulation; }
 
     pet.visible = !hidden;
     pet.position.set(px, y, pz);
-    stageK += (sizeGoal - stageK) * f; earK += (STAGE[stageNow].ear - earK) * f;
+    stageK += ((phase === 'run' ? 0.62 : sizeGoal) - stageK) * f; earK += (STAGE[stageNow].ear - earK) * f;
     pet.scale.setScalar(sc * stageK); earL.scale.y = earK; earR.scale.y = earK;
-    pet.rotation.y = spin + lookX * 0.5 + extraSpin;
-    pet.rotation.x = lean + lookY * 0.15;
+    pet.rotation.y = phase === 'run' ? Math.PI : spin + lookX * 0.5 + extraSpin;      /* en course, on le voit de dos */
+    pet.rotation.x = phase === 'run' ? -lean : lean + lookY * 0.15;
     pet.rotation.z = tilt + shake;
     bodyG.scale.set(1 + S * 0.6 - breath * 0.5, 1 - S + breath, 1 + S * 0.6 - breath * 0.5);
     var step = (act || reduce) ? 0 : 0.03;
@@ -1541,7 +1604,7 @@ button, input { touch-action: manipulation; }
       o.position.set(pet.position.x + Math.cos(q.a) * R + Math.sin(L * 6 + q.a) * 0.1, pet.position.y + by * stageK, pet.position.z + Math.sin(q.a) * R * 0.7 + 0.25);
       o.scale.setScalar(E.size * (E.mode === 'fire' ? 1 - L * 0.6 : 1)); o.material.opacity = Math.sin(Math.PI * L); o.visible = true;
     });
-    var tier = (pet.visible && phase !== 'dead' && phase !== 'intro' && phase !== 'custom') ? tierOf(levelNow) : 0;
+    var tier = (pet.visible && phase !== 'dead' && phase !== 'intro' && phase !== 'custom' && phase !== 'run') ? tierOf(levelNow) : 0;
     auraRing.visible = tier > 0;
     if (tier) {
       auraRing.material.color.setHex(AURA[tier]); auraRing.position.set(pet.position.x, 0.04, pet.position.z);
@@ -1570,8 +1633,10 @@ button, input { touch-action: manipulation; }
     camP.x += (goal.p[0] - camP.x) * cf; camP.y += (goal.p[1] - camP.y) * cf; camP.z += (goal.p[2] - camP.z) * cf;
     camL.x += (goal.l[0] - camL.x) * cf; camL.y += (goal.l[1] - camL.y) * cf; camL.z += (goal.l[2] - camL.z) * cf;
     camera.position.copy(camP); camera.lookAt(camL);
+    var wantFov = phase === 'run' ? 64 : 38;      /* pendant la course, la caméra voit plus large pour montrer les 3 voies */
+    if (Math.abs(camera.fov - wantFov) > 0.05) { camera.fov += (wantFov - camera.fov) * cf; camera.updateProjectionMatrix(); }
 
-    if (modelNow) { modelNow.play(phase === 'dead' ? 'Death' : act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) modelNow.mixer.update(dt * (tired ? 0.5 : 1)); }
+    if (modelNow) { modelNow.play(phase === 'dead' ? 'Death' : phase === 'run' ? (RUN.state === 'over' ? 'HitRecieve' : RUN.y > 0.05 ? 'Jump' : 'Walk') : act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) modelNow.mixer.update(dt * (phase === 'run' ? 1.9 : tired ? 0.5 : 1)); }
     renderer.render(scene, camera);
     if (!$('bubble').hidden) {                /* la bulle suit la tête de la créature */
       v3.set(pet.position.x, pet.position.y + (2.75 + (G.look.hat ? 0.45 : 0)) * sc * stageK, pet.position.z).project(camera);
@@ -1703,6 +1768,7 @@ button, input { touch-action: manipulation; }
     sigh:    function (k, at) { voice(430, 270, 0.7, 0.4 * k, at + 0.15, O, U); hiss(900, 400, 0.7, 0.08 * k, at + 0.2); },
     evolve:  function (k, at) { hiss(500, 6000, 0.9, 0.5 * k, at, 3); [523, 659, 784, 1047, 1319].forEach(function (fq, n) { blip(fq, fq, 0.18, 'triangle', 0.24 * k, at + 0.2 + n * 0.12); }); },
     purr:    function (k, at) { voice(300, 350, 0.22, 0.3 * k, at, U, O); voice(350, 310, 0.22, 0.3 * k, at + 0.2, O, U); },
+    coin:    function (k, at) { blip(1568, 2093, 0.08, 'triangle', 0.22 * k, at); },
     cash:    function (k, at) { blip(1319, 1319, 0.09, 'triangle', 0.25 * k, at); blip(1760, 1760, 0.25, 'triangle', 0.25 * k, at + 0.08); hiss(5000, 9000, 0.12, 0.12 * k, at, 3); },
     death:   function (k, at) { [392, 311, 262, 196].forEach(function (fq, n) { blip(fq, fq * 0.97, n === 3 ? 1.2 : 0.5, 'sine', 0.3 * k, at + n * 0.45); }); },
     /* l'interface */
@@ -1832,6 +1898,125 @@ button, input { touch-action: manipulation; }
   function withItem(slot, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null, back: null, fx: null }; l[slot] = id; return l; }
   function withShape(key, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null, back: null, fx: null }; l[key] = id; return l; }
   function picture(url, cls) { var im = document.createElement('img'); im.className = cls || 'th'; im.alt = ''; im.width = 64; im.height = 64; if (url) im.src = url; return im; }
+
+  /* ---------- Mini-jeu : la course des poubelles ----------
+     Le monstre court tout droit sur 3 voies. Le décor avance vers lui : c'est lui qui a l'air de courir.
+     Pour que le jeu ne pousse pas à rester sur l'écran, il y a un nombre de courses et de pièces par jour. */
+  var RUNS_PER_DAY = 5, COINS_PER_DAY = 50, LANE = 1.3;
+  var RUN = { state: '', lane: 0, x: 0, y: 0, vy: 0, v: 9, dist: 0, coins: 0, next: 0, t0: 0, tip: 0 };
+  var runG = new THREE.Group(); runG.visible = false; scene.add(runG);
+  var brick2 = brick.clone(); brick2.needsUpdate = true; brick2.repeat.set(36, 1.4);
+  (function () {
+    var o = mesh(new THREE.PlaneGeometry(8, 180), mat(0x35314C), 0, 0, -75, runG); o.rotation.x = -Math.PI / 2; o.castShadow = false;
+    [-3.6, 3.6].forEach(function (x) { mesh(new THREE.BoxGeometry(0.4, 3.4, 180), mat(0xFFFFFF, { map: brick2 }), x, 1.7, -75, runG).castShadow = false; });
+  })();
+  var dashes = [], posts = [], obst = [], rcoins = [], rn;
+  for (rn = 0; rn < 30; rn++) { var da = mesh(new THREE.BoxGeometry(0.09, 0.02, 1.8), mat(0x6A6590), (rn % 2 ? 1 : -1) * LANE / 2, 0.012, -Math.floor(rn / 2) * 6, runG); da.castShadow = false; dashes.push(da); }
+  for (rn = 0; rn < 8; rn++) {
+    var po = new THREE.Group(); po.position.set((rn % 2 ? 1 : -1) * 3.1, 0, -rn * 11); runG.add(po);
+    mesh(new THREE.CylinderGeometry(0.06, 0.08, 3.4, 8), mat(0x2A2A38), 0, 1.7, 0, po); glow(0.2, 0xF7C948, (rn % 2 ? -0.3 : 0.3), 3.4, 0, po); posts.push(po);
+  }
+  for (rn = 0; rn < 16; rn++) {
+    var ob = new THREE.Group(); ob.visible = false; runG.add(ob);
+    var bin = new THREE.Group(); ob.add(bin); mesh(new THREE.CylinderGeometry(0.52, 0.44, 1.5, 18), binMat, 0, 0.75, 0, bin); mesh(new THREE.CylinderGeometry(0.58, 0.58, 0.12, 18), lidMat, 0, 1.56, 0, bin);
+    var crt = new THREE.Group(); ob.add(crt); mesh(new THREE.BoxGeometry(1.1, 0.6, 0.8), card, 0, 0.3, 0, crt); mesh(new THREE.BoxGeometry(0.16, 0.6, 0.82), mat(0xD8B98A), 0, 0.3, 0, crt);
+    ob.userData = { on: false, bin: bin, crt: crt, type: 'bin' }; obst.push(ob);
+  }
+  var coinMat = mat(0xF7C948, { metalness: 0.7, roughness: 0.25, emissive: 0x5A4208 });
+  for (rn = 0; rn < 28; rn++) { var rc = mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.07, 18), coinMat, 0, 0, 0, runG); rc.rotation.x = Math.PI / 2; rc.visible = false; rc.castShadow = false; rc.userData = { on: false }; rcoins.push(rc); }
+  function gameDay() { if (G.game.day !== dayKey(0)) G.game = { day: dayKey(0), runs: 0, coins: 0 }; return G.game; }
+  function freeOf(list) { for (var n = 0; n < list.length; n++) if (!list[n].userData.on) return list[n]; return null; }
+  function spawnRow() {
+    var lanes = [-1, 0, 1], open = lanes[Math.floor(Math.random() * 3)], z0 = -58;
+    lanes.forEach(function (ln) {
+      if (ln === open || Math.random() < 0.3) return;
+      var o = freeOf(obst); if (!o) return;
+      o.userData.on = true; o.userData.type = Math.random() < 0.45 ? 'crt' : 'bin'; o.userData.lane = ln;
+      o.userData.bin.visible = o.userData.type === 'bin'; o.userData.crt.visible = o.userData.type === 'crt';
+      o.position.set(ln * LANE, 0, z0); o.rotation.y = Math.random() * 0.5 - 0.25; o.visible = true;
+      if (o.userData.type === 'crt' && Math.random() < 0.6) for (var k = 0; k < 3; k++) { var c2 = freeOf(rcoins); if (c2) { c2.userData.on = true; c2.position.set(ln * LANE, 1.3 + (k === 1 ? 0.35 : 0), z0 + (k - 1) * 1.3); c2.visible = true; } }
+    });
+    if (Math.random() < 0.8) for (var m = 0; m < 4; m++) { var c3 = freeOf(rcoins); if (c3) { c3.userData.on = true; c3.position.set(open * LANE, 0.7, z0 - 2 + m * 1.6); c3.visible = true; } }
+  }
+  function runStart() {
+    var gm = gameDay(); if (gm.runs >= RUNS_PER_DAY || phase !== 'play') return;
+    gm.runs++; saveG(); closeSheets(); $('bubble').hidden = true; $('runEnd').hidden = true;
+    applyDecor(0); D.forEach(function (gr) { gr.visible = false; }); wall.visible = ledge.visible = false; box.visible = false; floor.visible = false; runG.visible = true;
+    scene.fog.near = 24; scene.fog.far = 62;
+    obst.concat(rcoins).forEach(function (o) { o.userData.on = false; o.visible = false; });
+    RUN.state = 'ready'; RUN.lane = 0; RUN.x = 0; RUN.y = 0; RUN.vy = 0; RUN.v = 9; RUN.dist = 0; RUN.coins = 0; RUN.next = 2; RUN.t0 = clock.getElapsedTime();
+    act = null; spin = 0; phase = 'run'; show('runHud'); $('gear').hidden = true; $('runCount').hidden = false; $('runTip').hidden = false;
+    $('runDist').textContent = '0 m'; $('runCoins').textContent = '0';
+  }
+  function runOver(crash) {
+    if (RUN.state !== 'go' && RUN.state !== 'ready') return;
+    RUN.state = 'over'; RUN.t0 = clock.getElapsedTime(); if (crash) { sfx('thud'); try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {} }
+    var gm = gameDay(), earned = Math.max(0, Math.min(RUN.coins, COINS_PER_DAY - gm.coins)), dist = Math.floor(RUN.dist), record = dist > G.best;
+    gm.coins += earned; G.bonus += earned; if (record) G.best = dist; saveG();
+    setTimeout(function () {
+      if (phase !== 'run') return;
+      $('runEndTitle').textContent = record && dist > 0 ? 'Nouveau record !' : crash ? 'Aïe !' : 'Course terminée';
+      $('reDist').textContent = dist + ' m'; $('reCoins').textContent = '+' + earned; $('reBest').textContent = G.best + ' m';
+      var left = RUNS_PER_DAY - gm.runs;
+      $('reNote').textContent = (earned < RUN.coins ? 'Tu as ramassé ' + RUN.coins + ' pièces, mais on ne peut en gagner que ' + COINS_PER_DAY + ' par jour avec les jeux. ' : '') + (left > 0 ? 'Il te reste ' + left + (left > 1 ? ' courses' : ' course') + ' aujourd\'hui.' : 'Plus de course pour aujourd\'hui. Reviens demain, ou va marcher pour de vrai !');
+      $('reAgain').hidden = left <= 0; $('runEnd').hidden = false; (left > 0 ? $('reAgain') : $('reBack')).focus();
+      if (record && dist > 0) sfx('fanfare');
+    }, crash ? 900 : 100);
+  }
+  function runStop() {
+    runG.visible = false; box.visible = true; floor.visible = true; scene.fog.near = 12; scene.fog.far = 28; applyDecor(G.decor);
+    RUN.state = ''; $('runEnd').hidden = true; phase = 'play'; show('hud'); refresh(false); nextSay = clock.getElapsedTime() + 5;
+  }
+  function runMove(dir) {
+    if (phase !== 'run' || RUN.state === 'over') return;
+    if (dir === 'up') { if (RUN.y < 0.05 && RUN.state === 'go') { RUN.vy = 8.2; sfx('hop', 0.7); } }
+    else { var nl = Math.max(-1, Math.min(1, RUN.lane + (dir === 'left' ? -1 : 1))); if (nl !== RUN.lane) { RUN.lane = nl; sfx('tick', 0.6); } }
+    $('runTip').hidden = true;
+  }
+  function runTick(dt, t) {
+    if (RUN.state === 'ready') {
+      var left = 1.7 - (t - RUN.t0); $('runCount').textContent = left > 1.15 ? '3' : left > 0.6 ? '2' : left > 0.05 ? '1' : '';
+      if (left <= 0) { RUN.state = 'go'; $('runCount').hidden = true; }
+    }
+    if (RUN.state === 'go') {
+      RUN.v = Math.min(22, 9 + RUN.dist * 0.018); var dz = RUN.v * dt; RUN.dist += dz;
+      RUN.next -= dz; if (RUN.next <= 0) { spawnRow(); RUN.next = Math.max(9, 17 - RUN.dist * 0.01) + Math.random() * 3; }
+      RUN.vy -= 24 * dt; RUN.y += RUN.vy * dt; if (RUN.y <= 0) { RUN.y = 0; RUN.vy = 0; }
+      dashes.forEach(function (o) { o.position.z += dz; if (o.position.z > 8) o.position.z -= 90; });
+      posts.forEach(function (o) { o.position.z += dz; if (o.position.z > 8) o.position.z -= 88; });
+      brick2.offset.x -= dz / 5;
+      obst.forEach(function (o) {
+        if (!o.userData.on) return; o.position.z += dz;
+        if (o.position.z > 8) { o.userData.on = false; o.visible = false; return; }
+        if (Math.abs(o.position.z) < 0.62 && Math.abs(o.position.x - RUN.x) < 0.78 && (o.userData.type === 'bin' || RUN.y < 0.5)) runOver(true);
+      });
+      rcoins.forEach(function (o) {
+        if (!o.userData.on || RUN.state !== 'go') return; o.position.z += dz; o.rotation.z = t * 5;
+        if (o.position.z > 8) { o.userData.on = false; o.visible = false; return; }
+        if (Math.abs(o.position.z) < 0.8 && Math.abs(o.position.x - RUN.x) < 0.75 && Math.abs(o.position.y - 0.7 - RUN.y) < 1.1) { o.userData.on = false; o.visible = false; RUN.coins++; sfx('coin', 0.6); $('runCoins').textContent = RUN.coins; }
+      });
+      $('runDist').textContent = Math.floor(RUN.dist) + ' m';
+    }
+    RUN.x += (RUN.lane * LANE - RUN.x) * (1 - Math.pow(0.00002, dt));
+  }
+  function paintGames() {
+    var gm = gameDay(), left = RUNS_PER_DAY - gm.runs;
+    $('gmRuns').textContent = left + ' / ' + RUNS_PER_DAY; $('gmCoins').textContent = gm.coins + ' / ' + COINS_PER_DAY; $('gmBest').textContent = G.best + ' m';
+    $('gmNote').textContent = left > 0 ? 'Le jeu rapporte un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.' : 'Plus de course pour aujourd\'hui. Reviens demain !';
+    $('gmPlay').disabled = left <= 0; $('gmPlay').textContent = left > 0 ? 'Jouer' : 'À demain';
+  }
+  $('navGames').addEventListener('click', function () { sfx('tick'); closeSheets(); paintGames(); $('games').hidden = false; $('gamesClose').focus(); });
+  $('gamesClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navGames').focus(); });
+  $('games').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSheets(); });
+  $('gmPlay').addEventListener('click', runStart);
+  $('runQuit').addEventListener('click', function () { runOver(false); });
+  $('reAgain').addEventListener('click', function () { $('runEnd').hidden = true; phase = 'play'; runStart(); });
+  $('reBack').addEventListener('click', function () { sfx('tick'); runStop(); });
+  window.addEventListener('keydown', function (ev) {
+    if (phase !== 'run' || !$('runEnd').hidden) return;
+    var d = ev.key === 'ArrowLeft' ? 'left' : ev.key === 'ArrowRight' ? 'right' : (ev.key === 'ArrowUp' || ev.key === ' ') ? 'up' : '';
+    if (d) { ev.preventDefault(); runMove(d); }
+  });
 
   /* ---------- L'atelier : changer l'apparence de la créature, gratuitement ---------- */
   /* Le catalogue : [identifiant, emplacement, nom, prix, rareté (0 à 3), niveau demandé] */
@@ -1966,7 +2151,7 @@ button, input { touch-action: manipulation; }
     useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth);
     var tryOn = JSON.parse(JSON.stringify(G.look)); if (sel) tryOn[slot] = sel.id; buildAcc(tryOn); syncParts(); paint();
   }
-  function closeSheets() { var was = !$('shop').hidden; $('look').hidden = true; $('shop').hidden = true; focusCam = false; shopSel = null; if (was && phase === 'play') dress(); }
+  function closeSheets() { var was = !$('shop').hidden; $('games').hidden = true; $('look').hidden = true; $('shop').hidden = true; focusCam = false; shopSel = null; if (was && phase === 'play') dress(); }
   $('navLook').addEventListener('click', function () { sfx('tick'); closeSheets(); paintLook(); $('look').hidden = false; focusCam = true; $('lookClose').focus(); });
   $('navShop').addEventListener('click', function () { sfx('tick'); closeSheets(); paintShop(); $('shop').hidden = false; focusCam = true; $('shopClose').focus(); });
   $('lookClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navLook').focus(); });
@@ -2067,8 +2252,8 @@ button, input { touch-action: manipulation; }
   $('aLevel').addEventListener('click', function () { if (!needPlay()) return; var c = calc(); G.xpBonus += c.need - c.xp; saveG(); closeAdmin(); refresh(true); });
   $('aHeal').addEventListener('click', function () { if (!needPlay()) return; G.hpFrom = dayKey(0); saveG(); sfx('wave'); refresh(false); paintAdmin(); });
   $('deadNew').addEventListener('click', function () {
-    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins) };          /* le joueur garde ses achats et ses pièces */
-    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; saveG();
+    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins), best: G.best, game: G.game };          /* le joueur garde ses achats et ses pièces */
+    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; G.best = keep.best; G.game = keep.game; saveG();
     $('name').value = ''; act = null; $('dead').hidden = true; goTitle();
   });
   $('aNext').addEventListener('click', function () { if (!needPlay()) return; sfx('tick'); nextDay(); });
@@ -2090,7 +2275,7 @@ button, input { touch-action: manipulation; }
       loader.load('models/' + sp.id + MODEL_EXT, function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
     });
   });
-  if (location.hash === '#reglage') window.__fl = { MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
+  if (location.hash === '#reglage') window.__fl = { RUN: RUN, obst: obst, runMove: runMove, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
   function loadStep() {

@@ -102,6 +102,12 @@ h1, h2 { font-family: var(--display); margin: 0; line-height: 1; text-wrap: bala
 .plate { background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 10px 18px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .plate strong { font-family: var(--display); font-weight: 800; font-size: 1.7rem; line-height: 1; overflow-wrap: anywhere; }
 .plate span { color: var(--muted); font-weight: 700; font-size: .95rem; }
+.bar2 { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar2 .track { flex: 1; min-width: 96px; height: 9px; }
+.bar2 svg { flex: none; }
+.bar2 b { flex: none; width: 18px; font-weight: 800; color: var(--coin); }
+#hpBar { background: #FF6B8B; } #xpBar { background: var(--coin); }
+.plate.low #hpBar { background: var(--warn); animation: pulse 1s ease-in-out infinite; }
 .pills { display: flex; flex-wrap: wrap; gap: 10px; }
 .pill { display: flex; align-items: center; gap: 8px; background: var(--panel); border: 2px solid var(--line); border-radius: 999px; padding: 8px 16px; font-weight: 800; }
 .bottombar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px; }
@@ -175,7 +181,7 @@ body { background: #12141F; }
 button, input { touch-action: manipulation; }
 .hint { display: none; }
 .topbar { flex-direction: column; align-items: flex-start; padding-right: 60px; }
-#toast:not([hidden]) { top: 184px; }
+#toast:not([hidden]) { top: 214px; }
 #title { padding-inline: 56px; }
 #title h1 { font-size: clamp(2.4rem, 11vw, 3.6rem); }
 .pills { gap: 8px; } .pill { padding: 6px 12px; font-size: .9rem; }
@@ -249,6 +255,11 @@ button, input { touch-action: manipulation; }
 .cbtn { min-height: 48px; padding: 6px 14px; border-radius: 14px; border: 3px solid transparent; background: var(--panel-solid); color: var(--ink); font-weight: 800; font-size: .9rem; }
 .cbtn[aria-pressed="true"] { border-color: var(--coin); }
 .tile:active { transform: scale(.96); }
+.tile small { display: block; font-weight: 800; font-size: .78rem; color: var(--muted); }
+.tile.r1 img { box-shadow: inset 0 0 0 3px #6CA8FF; background: #2B3B66; } .tile.r2 img { box-shadow: inset 0 0 0 3px #B58CFF; background: #3A2F66; } .tile.r3 img { box-shadow: inset 0 0 0 3px var(--coin); background: #5A4A1E; }
+.tile.lock img { filter: grayscale(.8) brightness(.7); }
+.item.act { position: sticky; top: 0; z-index: 2; border: 2px solid var(--line); }
+.rar1 { color: #8FBEFF; } .rar2 { color: #C9A8FF; } .rar3 { color: var(--coin); }
 .buy { flex: none; min-height: 44px; padding: 6px 14px; border-radius: 12px; border: 0; background: var(--coin); color: var(--dark-ink); font-weight: 800; font-size: .95rem; box-shadow: 0 4px 0 var(--coin-deep); }
 .buy:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--coin-deep); }
 .buy:disabled { background: var(--line); color: var(--muted); box-shadow: none; }
@@ -273,7 +284,10 @@ button, input { touch-action: manipulation; }
 
   <div class="ui" id="hud" hidden>
     <div class="topbar">
-      <div class="plate"><strong id="hudName"></strong><span id="hudStage"></span></div>
+      <div class="plate" id="plate"><strong id="hudName"></strong><span id="hudStage"></span>
+        <div class="bar2"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 64 64"><path d="M32 56C4 36 6 10 22 10c6 0 10 5 10 10 0-5 4-10 10-10 16 0 18 26-10 46z" fill="#FF6B8B"/></svg><div class="track" role="progressbar" aria-label="Vie" aria-valuemin="0" aria-valuemax="100" id="hpTrack"><i id="hpBar"></i></div><span id="hpTxt"></span></div>
+        <div class="bar2"><b aria-hidden="true">XP</b><div class="track" role="progressbar" aria-label="Expérience" aria-valuemin="0" aria-valuemax="100" id="xpTrack"><i id="xpBar"></i></div><span id="xpTxt"></span></div>
+      </div>
       <div class="pills">
         <div class="pill"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#F7C948"/><circle cx="11" cy="11" r="6" fill="none" stroke="#B8860B" stroke-width="2"/></svg><span id="hudCoins"></span></div>
         <div class="pill"><svg aria-hidden="true" width="18" height="20" viewBox="0 0 20 22"><path d="M10 1c1 4 6 6 6 12a6 6 0 0 1-12 0c0-2 1-4 2-5 0 2 1 3 2 3 0-4 1-7 2-10z" fill="#FF8A4B"/></svg><span id="hudStreak"></span></div>
@@ -411,6 +425,8 @@ button, input { touch-action: manipulation; }
             <button type="button" class="ghost" id="aBadDay">Mauvaise journée + jour suivant</button>
             <button type="button" class="ghost" id="aNext">Jour suivant sans rien entrer</button>
             <button type="button" class="ghost" id="aCoins">+ 500 pièces</button>
+            <button type="button" class="ghost" id="aLevel">+ 1 niveau</button>
+            <button type="button" class="ghost" id="aHeal">Soigner (vie à 100)</button>
           </div>
         </div>
         <div class="row"><button type="button" class="ghost danger" id="aReset">Tout effacer et recommencer</button></div>
@@ -431,6 +447,14 @@ button, input { touch-action: manipulation; }
       <div class="sheethead"><h2 id="shopTitle">Boutique</h2><span class="pill" id="shopCoins"></span><button type="button" class="ghost" id="shopClose">Terminé</button></div>
       <div class="tabs" id="shopTabs" role="tablist" aria-label="Rayons de la boutique"></div>
       <div class="opts" id="shopList"></div>
+    </div>
+  </div>
+  <div class="veil" id="dead" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="deadTitle">
+      <h2 id="deadTitle"></h2>
+      <p id="deadText"></p>
+      <p class="small">Tu gardes tes pièces, tes décors et tes accessoires. Prendre soin de toi, c'est prendre soin de ton monstre.</p>
+      <button type="button" class="big" id="deadNew">Adopter un nouveau monstre</button>
     </div>
   </div>
   <div id="bubble" hidden></div>
@@ -743,7 +767,7 @@ button, input { touch-action: manipulation; }
   };
   var MODELS = {}, modelNow = null, hooked = [];
   var modelG = new THREE.Group(); bodyG.add(modelG);
-  var CLIP = { jump: 'Jump', hop: 'Jump', intro: 'Jump', spin: 'Dance', wiggle: 'Dance', evolve: 'Dance', wave: 'Yes', yawn: 'No', sigh: 'No' };
+  var CLIP = { death: 'Death', jump: 'Jump', hop: 'Jump', intro: 'Jump', spin: 'Dance', wiggle: 'Dance', evolve: 'Dance', wave: 'Yes', yawn: 'No', sigh: 'No' };
   function unhook() { hooked.forEach(function (o) { if (o.parent) o.parent.remove(o); }); hooked = []; }
   function addModel(id, gltf) {
     var hueU = { value: 0 };
@@ -771,7 +795,7 @@ button, input { touch-action: manipulation; }
     /* On mesure le monstre, puis on le met à la même taille que la peluche, les pieds au sol */
     var box = { x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9, z0: 1e9, z1: -1e9 };
     for (n = 0; n < pts.length; n += 3) { box.x0 = Math.min(box.x0, pts[n]); box.x1 = Math.max(box.x1, pts[n]); box.y0 = Math.min(box.y0, pts[n + 1]); box.y1 = Math.max(box.y1, pts[n + 1]); box.z0 = Math.min(box.z0, pts[n + 2]); box.z1 = Math.max(box.z1, pts[n + 2]); }
-    var hgt = box.y1 - box.y0, wid = box.x1 - box.x0, k = 2.3 / Math.max(hgt, wid * 0.75), cx = (box.x0 + box.x1) / 2, cz = (box.z0 + box.z1) / 2;
+    var hgt = box.y1 - box.y0, wid = box.x1 - box.x0, k = 2.05 / Math.max(hgt, wid * 0.75), cx = (box.x0 + box.x1) / 2, cz = (box.z0 + box.z1) / 2;
     root.scale.multiplyScalar(k); root.position.set(-cx * k, -box.y0 * k, -cz * k);
     for (n = 0; n < pts.length; n += 3) { pts[n] = (pts[n] - cx) * k; pts[n + 1] = (pts[n + 1] - box.y0) * k; pts[n + 2] = (pts[n + 2] - cz) * k; }
     var H = hgt * k, f = {}, key; for (key in FIT0) f[key] = (FIT[id] && FIT[id][key] != null) ? FIT[id][key] : FIT0[key];
@@ -781,16 +805,18 @@ button, input { touch-action: manipulation; }
       if (!q.n) q = { x0: -0.6, x1: 0.6, z0: -0.6, z1: 0.6, n: 0 };
       q.cx = (q.x0 + q.x1) / 2; q.cz = (q.z0 + q.z1) / 2; q.w = q.x1 - q.x0; q.d = q.z1 - q.z0; return q;
     }
-    var sh = slice((f.hat - 0.16) * H, f.hat * H), se = slice((f.eye - 0.08) * H, (f.eye + 0.08) * H), sn = slice((f.neck - 0.06) * H, (f.neck + 0.06) * H);
+    var sh = slice((f.hat - 0.16) * H, f.hat * H), se = slice((f.eye - 0.08) * H, (f.eye + 0.08) * H), sn = slice((f.neck - 0.06) * H, (f.neck + 0.06) * H), sb = slice(0.42 * H, 0.62 * H);
     var mixer = new THREE.AnimationMixer(root), actions = {};
     gltf.animations.forEach(function (c) { actions[c.name] = mixer.clipAction(c); });
     MODELS[id] = {
       id: id, holder: holder, hueU: hueU, mats: mats, meshes: meshes, bones: bones, mixer: mixer, actions: actions, cur: '', curA: null, H: H,
       A: { hatX: sh.cx, hatZ: sh.cz, hatY: f.hat * H, hatR: Math.max(0.25, Math.min(0.85, Math.max(sh.w, sh.d) * 0.48 * f.hatR)),
            eyeX: se.cx + f.eyeDX, eyeY: f.eye * H, eyeZ: se.z1, eyeK: Math.max(0.35, Math.min(1.1, se.w * 0.31 / 0.63 * f.eyeW)),
+           backX: sb.cx, backY: 0.52 * H, backZ: sb.z0, backK: Math.max(0.4, Math.min(1.15, sb.w / 2)),
            neckX: sn.cx, neckZ: sn.cz, neckY: f.neck * H, neckRX: sn.w / 2 * f.neckR, neckRZ: sn.d / 2 * f.neckR },
       play: function (name) {
         if (this.cur === name) return; var a = this.actions[name] || this.actions.Idle; if (!a) return;
+        if (name === 'Death') { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; }
         a.reset().fadeIn(0.18).play(); if (this.curA && this.curA !== a) this.curA.fadeOut(0.18); this.cur = name; this.curA = a;
       },
       rest: function () { this.mixer.stopAllAction(); this.cur = ''; this.curA = null; this.meshes.forEach(function (m) { if (m.skeleton) m.skeleton.pose(); }); }
@@ -798,12 +824,13 @@ button, input { touch-action: manipulation; }
   }
   /* Les accessoires sont construits pour la peluche. Ici on les met à la taille du monstre, puis on les accroche
      à l'os le plus proche : comme ça le chapeau suit la tête quand elle bouge. */
-  function fitAcc(M, h, gl, nk) {
+  function fitAcc(M, h, gl, nk, bk) {
     var A = M.A, k = A.hatR / 0.72, sy;
     M.rest(); pet.updateMatrixWorld(true);
     h.scale.setScalar(k); h.position.set(A.hatX, A.hatY - 2.0 * k, A.hatZ);
     gl.scale.setScalar(A.eyeK); gl.position.set(A.eyeX, A.eyeY - 1.52 * A.eyeK, A.eyeZ - 0.97 * A.eyeK);
     sy = (A.neckRX + A.neckRZ) / 1.75; nk.scale.set(A.neckRX / 0.9 * 0.96, sy * 0.8, A.neckRZ / 0.83 * 0.96); nk.position.set(A.neckX, A.neckY - 0.66 * sy, A.neckZ);
+    bk.scale.setScalar(A.backK); bk.position.set(A.backX, A.backY - 1.25 * A.backK, A.backZ + 0.85 * A.backK);
     pet.updateMatrixWorld(true);
     var w = new THREE.Vector3();
     function boneAt(y) {
@@ -812,9 +839,62 @@ button, input { touch-action: manipulation; }
       return best || M.bones[0];
     }
     if (!M.bones.length) return;
-    [[h, A.hatY], [gl, A.eyeY], [nk, A.neckY]].forEach(function (q) { boneAt(q[1]).attach(q[0]); hooked.push(q[0]); });
+    [[h, A.hatY], [gl, A.eyeY], [nk, A.neckY], [bk, A.backY]].forEach(function (q) { boneAt(q[1]).attach(q[0]); hooked.push(q[0]); });
     M.play('Idle');
   }
+  /* ---------- Tous les autres cosmétiques : chacun est un petit assemblage de formes ---------- */
+  var MET = { metalness: 0.6, roughness: 0.35 };
+  function qBox(w, hh, d, col, x, y, z, par, opt) { return mesh(new THREE.BoxGeometry(w, hh, d), mat(col, opt), x, y, z, par); }
+  function qCyl(rt, rb, hh, col, x, y, z, par, opt) { return mesh(new THREE.CylinderGeometry(rt, rb, hh, 22), mat(col, opt), x, y, z, par); }
+  function qSph(r, col, x, y, z, par, opt) { return mesh(new THREE.SphereGeometry(r, 18, 12), mat(col, opt), x, y, z, par); }
+  function qCone(r, hh, col, x, y, z, par, opt) { return mesh(new THREE.ConeGeometry(r, hh, 16), mat(col, opt), x, y, z, par); }
+  function dome(r, col, y, par, sy) { var o = mesh(new THREE.SphereGeometry(r, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(col), 0, y, 0, par); o.scale.set(1, sy || 0.7, 0.94); return o; }
+  function ring(R, r, col, x, y, z, par, opt) { var o = mesh(new THREE.TorusGeometry(R, r, 10, 30), mat(col, opt), x, y, z, par); o.rotation.x = Math.PI / 2; return o; }
+  function hatMore(id, h) {
+    var o, n;
+    if (id === 'cowboy') { o = qCyl(0.95, 0.95, 0.05, 0x8A5A3A, 0, 2.14, 0, h); o.scale.z = 0.85; qCyl(0.42, 0.5, 0.45, 0x8A5A3A, 0, 2.4, 0, h); qCyl(0.51, 0.51, 0.08, 0x3A2A1C, 0, 2.22, 0, h); }
+    else if (id === 'bob') { qCyl(0.55, 0.88, 0.22, 0xB8B078, 0, 2.1, 0, h); qCyl(0.5, 0.55, 0.3, 0xB8B078, 0, 2.34, 0, h); }
+    else if (id === 'viking') { dome(0.75, 0x9AA0B4, 1.95, h, 0.7); ring(0.74, 0.06, 0xE8C55A, 0, 1.98, 0, h, MET); o = qCone(0.14, 0.6, 0xF3E9D2, -0.72, 2.32, 0, h); o.rotation.z = 0.85; o = qCone(0.14, 0.6, 0xF3E9D2, 0.72, 2.32, 0, h); o.rotation.z = -0.85; }
+    else if (id === 'pirate') { dome(0.74, 0x1B1D2B, 1.96, h, 0.62); o = qBox(1.5, 0.5, 0.08, 0x1B1D2B, 0, 2.3, 0.42, h); o.rotation.x = -0.2; qSph(0.1, 0xFFFFFF, 0, 2.32, 0.5, h); qBox(0.3, 0.04, 0.04, 0xFFFFFF, 0, 2.18, 0.5, h).rotation.z = 0.6; qBox(0.3, 0.04, 0.04, 0xFFFFFF, 0, 2.18, 0.5, h).rotation.z = -0.6; }
+    else if (id === 'chef') { qCyl(0.5, 0.46, 0.5, 0xFFFFFF, 0, 2.4, 0, h); qSph(0.62, 0xFFFFFF, 0, 2.82, 0, h).scale.y = 0.6; }
+    else if (id === 'lapin') { o = mesh(new THREE.TorusGeometry(0.72, 0.04, 8, 24, Math.PI), mat(0xFFFFFF), 0, 1.75, 0, h); [-0.28, 0.28].forEach(function (x) { qCyl(0.11, 0.14, 0.95, 0xFFFFFF, x, 2.85, 0, h).rotation.z = -x * 0.5; qCyl(0.06, 0.08, 0.7, 0xFF9DB5, x, 2.85, 0.07, h).rotation.z = -x * 0.5; }); }
+    else if (id === 'aureole') { o = ring(0.48, 0.055, 0xFFE680, 0, 2.9, 0, h, { emissive: 0xB8860B, roughness: 0.3 }); o.rotation.x = Math.PI / 2 - 0.15; }
+    else if (id === 'diable') { o = qCone(0.15, 0.5, 0xD62828, -0.42, 2.42, 0.1, h); o.rotation.z = 0.35; o = qCone(0.15, 0.5, 0xD62828, 0.42, 2.42, 0.1, h); o.rotation.z = -0.35; }
+    else if (id === 'fete') { o = qCone(0.36, 0.85, 0x3FB8AF, 0.12, 2.62, 0, h); o.rotation.z = -0.15; ring(0.3, 0.05, 0xF7C948, 0.1, 2.45, 0, h); ring(0.18, 0.045, 0xFF6B8B, 0.15, 2.72, 0, h); qSph(0.11, 0xF7C948, 0.19, 3.06, 0, h); }
+    else if (id === 'casque') { mesh(new THREE.TorusGeometry(0.88, 0.06, 8, 28, Math.PI), mat(0x1B1D2B), 0, 1.6, 0, h); [-0.9, 0.9].forEach(function (x) { qCyl(0.26, 0.26, 0.18, 0xD62828, x, 1.6, 0, h).rotation.z = Math.PI / 2; }); }
+    else if (id === 'fleur') { for (n = 0; n < 6; n++) qSph(0.13, 0xFF9DB5, 0.38 + Math.cos(n * 1.047) * 0.17, 2.38 + Math.sin(n * 1.047) * 0.17, 0.42, h).scale.z = 0.5; qSph(0.11, 0xF7C948, 0.38, 2.38, 0.46, h); }
+    else if (id === 'magicien') { qCyl(0.8, 0.8, 0.05, 0x4A2F7A, 0, 2.18, 0, h); o = qCone(0.5, 1.2, 0x4A2F7A, 0, 2.8, 0, h); o.rotation.z = -0.1; ring(0.47, 0.05, 0xF7C948, 0, 2.3, 0, h, MET); qSph(0.07, 0xF7C948, 0.1, 2.8, 0.3, h, { emissive: 0x8A6A10 }); }
+    else if (id === 'helice') { dome(0.72, 0xD62828, 1.98, h, 0.6); mesh(new THREE.SphereGeometry(0.73, 24, 12, 0, Math.PI, 0, Math.PI / 2), mat(0x3B6FD9), 0, 1.985, 0, h).scale.set(1, 0.6, 0.94); qCyl(0.03, 0.03, 0.22, 0xF7C948, 0, 2.52, 0, h); qBox(0.7, 0.03, 0.12, 0xF7C948, 0, 2.63, 0, h).rotation.y = 0.5; }
+  }
+  function glassesMore(id, ey, gl) {
+    var o, q = ey[0], q2 = ey[ey.length > 1 ? 1 : 0], mid = (q[0] + q2[0]) / 2, my = (q[1] + q2[1]) / 2, span = Math.abs(q2[0] - q[0]) + q[3] + q2[3];
+    if (id === 'coeur') ey.forEach(function (e) { var z = e[2] + e[3] + 0.02, r = e[3] * 0.62; [-1, 1].forEach(function (s2) { qSph(r, 0xFF4F7B, e[0] + s2 * r * 0.55, e[1] + r * 0.35, z, gl, { roughness: 0.25 }).scale.z = 0.25; }); o = qCone(r * 1.25, r * 1.5, 0xFF4F7B, e[0], e[1] - r * 0.45, z, gl, { roughness: 0.25 }); o.rotation.x = Math.PI; o.scale.z = 0.2; });
+    else if (id === 'etoile') ey.forEach(function (e) { o = mesh(new THREE.OctahedronGeometry(e[3] * 1.15), mat(0xF7C948, { roughness: 0.25, emissive: 0x6A5210 }), e[0], e[1], e[2] + e[3] + 0.02, gl); o.scale.z = 0.18; o.rotation.z = Math.PI / 4; });
+    else if (id === 'monocle') { mesh(new THREE.TorusGeometry(q[3] * 1.0, 0.04, 8, 28), mat(0xE8C55A, MET), q[0], q[1], q[2] + q[3] * 0.55, gl); o = qCyl(0.012, 0.012, 0.9, 0xE8C55A, q[0] - q[3] * 0.9, q[1] - 0.5, q[2] + q[3] * 0.4, gl); o.rotation.z = -0.25; }
+    else if (id === 'cache') { o = qCyl(q[3] * 1.05, q[3] * 1.05, 0.06, 0x14151E, q[0], q[1], q[2] + q[3] + 0.02, gl); o.rotation.x = Math.PI / 2; o = qBox(span + 0.7, 0.05, 0.05, 0x14151E, mid, q[1] + q[3] * 0.4, q[2] + q[3] * 0.7, gl); o.rotation.z = -0.18; }
+    else if (id === 'ski') { o = qBox(span + 0.16, Math.max(q[3], q2[3]) * 1.9, 0.12, 0xFF8A3C, mid, my, Math.max(q[2] + q[3], q2[2] + q2[3]) - 0.02, gl, { roughness: 0.15, metalness: 0.3 }); qBox(span + 0.3, Math.max(q[3], q2[3]) * 2.2, 0.08, 0x1B1D2B, mid, my, Math.max(q[2] + q[3], q2[2] + q2[3]) - 0.08, gl); }
+    else if (id === 'troisd') { var z3 = Math.max(q[2] + q[3], q2[2] + q2[3]) + 0.02, hh = Math.max(q[3], q2[3]) * 1.3; qBox(span + 0.2, hh + 0.16, 0.05, 0xFFFFFF, mid, my, z3 - 0.03, gl); qBox(span * 0.42, hh, 0.06, 0xD62828, mid - span * 0.25, my, z3, gl, { roughness: 0.2 }); qBox(span * 0.42, hh, 0.06, 0x2A6FDB, mid + span * 0.25, my, z3, gl, { roughness: 0.2 }); }
+  }
+  function neckMore(id, nk) {
+    var o, n;
+    if (id === 'cravate') { qSph(0.1, 0xC0392B, 0, 0.74, 0.9, nk); o = qBox(0.2, 0.55, 0.05, 0xC0392B, 0, 0.44, 0.93, nk); o.rotation.x = 0.25; o = qCone(0.14, 0.2, 0xC0392B, 0, 0.1, 0.86, nk); o.rotation.x = Math.PI + 0.25; o.scale.z = 0.3; }
+    else if (id === 'medaille') { qBox(0.08, 0.5, 0.03, 0x2A6FDB, -0.12, 0.6, 0.9, nk).rotation.z = -0.35; qBox(0.08, 0.5, 0.03, 0xD62828, 0.12, 0.6, 0.9, nk).rotation.z = 0.35; o = qCyl(0.17, 0.17, 0.05, 0xE8C55A, 0, 0.33, 0.97, nk, MET); o.rotation.x = Math.PI / 2; }
+    else if (id === 'perles') { for (n = 0; n < 16; n++) qSph(0.075, 0xFFF8F0, Math.cos(n * 0.3927) * 0.92, 0.7, Math.sin(n * 0.3927) * 0.85, nk, { roughness: 0.2 }); }
+    else if (id === 'bavoir') { o = qCyl(0.5, 0.5, 0.05, 0xFFFFFF, 0, 0.52, 0.86, nk); o.rotation.x = Math.PI / 2 - 0.25; o.scale.z = 0.9; qSph(0.07, 0xFF6B8B, 0, 0.5, 0.93, nk); o = ring(0.9, 0.03, 0xFFFFFF, 0, 0.76, 0, nk); o.scale.y = 0.92; }
+    else if (id === 'cloche') { o = ring(0.9, 0.06, 0xC0392B, 0, 0.7, 0, nk); o.scale.y = 0.92; qSph(0.14, 0xE8C55A, 0, 0.56, 0.9, nk, MET); qSph(0.04, 0x3A2A1C, 0, 0.45, 0.93, nk); }
+    else if (id === 'foulard') { o = ring(0.9, 0.08, 0xD62828, 0, 0.72, 0, nk); o.scale.y = 0.92; o = qCone(0.42, 0.5, 0xD62828, 0, 0.45, 0.88, nk); o.rotation.x = Math.PI + 0.2; o.scale.z = 0.15; }
+  }
+  function backMore(id, bk) {
+    var o, n;
+    if (id === 'cape') { o = qBox(1.5, 1.7, 0.06, 0xC0392B, 0, 1.0, -0.98, bk); o.rotation.x = 0.16; qBox(1.2, 0.14, 0.14, 0xE8C55A, 0, 1.82, -0.8, bk, MET); }
+    else if (id === 'ange') [-1, 1].forEach(function (s2) { for (n = 0; n < 3; n++) { o = qSph(0.5 - n * 0.1, 0xFFFFFF, s2 * (0.75 + n * 0.3), 1.5 - n * 0.22, -0.8, bk); o.scale.set(1.2, 0.45, 0.14); o.rotation.z = s2 * (0.5 - n * 0.25); } });
+    else if (id === 'chauve') [-1, 1].forEach(function (s2) { for (n = 0; n < 3; n++) { o = qCone(0.3, 0.9, 0x3A2F4A, s2 * (0.7 + n * 0.3), 1.35, -0.8, bk); o.scale.z = 0.12; o.rotation.z = s2 * (-1.1 + n * 0.25) + Math.PI; } });
+    else if (id === 'sac') { qBox(0.95, 1.0, 0.42, 0x2A6FDB, 0, 1.1, -1.08, bk); qBox(0.6, 0.35, 0.1, 0x1B4FA0, 0, 0.95, -1.32, bk); qBox(0.97, 0.3, 0.44, 0x1B4FA0, 0, 1.52, -1.08, bk); }
+    else if (id === 'jetpack') { [-0.3, 0.3].forEach(function (x) { qCyl(0.2, 0.2, 0.9, 0x9AA0B4, x, 1.2, -1.05, bk, MET); qSph(0.2, 0xD62828, x, 1.65, -1.05, bk); o = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.45, 10), new THREE.MeshBasicMaterial({ color: 0xFF9A3C })); o.position.set(x, 0.55, -1.05); o.rotation.x = Math.PI; bk.add(o); }); }
+    else if (id === 'carapace') { o = qSph(0.85, 0x4F9B4A, 0, 1.2, -0.75, bk); o.scale.set(1, 1.05, 0.55); for (n = 0; n < 5; n++) qSph(0.16, 0x3A7A36, Math.cos(n * 1.257) * 0.4, 1.2 + Math.sin(n * 1.257) * 0.4, -1.2, bk).scale.z = 0.4; }
+    else if (id === 'ballon') { qCyl(0.012, 0.012, 1.6, 0xFFFFFF, 0.75, 2.3, -0.7, bk).rotation.z = -0.12; qSph(0.42, 0xFF4F7B, 0.85, 3.4, -0.7, bk, { roughness: 0.25 }).scale.y = 1.15; }
+  }
+
   /* Montre la peluche ou un monstre téléchargé */
   function useSpecies(id) {
     var M = MODELS[id] || null;
@@ -895,7 +975,8 @@ button, input { touch-action: manipulation; }
   var acc = new THREE.Group(); bodyG.add(acc);
   function buildAcc(look) {
     unhook(); empty(acc);
-    var h = new THREE.Group(), gl = new THREE.Group(), nk = new THREE.Group(), o, n; acc.add(h); acc.add(gl); acc.add(nk);
+    var h = new THREE.Group(), gl = new THREE.Group(), nk = new THREE.Group(), bk = new THREE.Group(), o, n; acc.add(h); acc.add(gl); acc.add(nk); acc.add(bk);
+    fxNow = look.fx || null;
     if (look.hat === 'bonnet') {
       o = mesh(new THREE.SphereGeometry(0.74, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xD64545), 0, 1.95, 0, h); o.scale.set(1, 0.72, 0.94);
       o = mesh(new THREE.TorusGeometry(0.73, 0.09, 10, 28), mat(0xFFFFFF), 0, 1.97, 0, h); o.rotation.x = Math.PI / 2; o.scale.y = 0.94;
@@ -912,13 +993,15 @@ button, input { touch-action: manipulation; }
       mesh(new THREE.CylinderGeometry(0.45, 0.4, 0.25, 24, 1, true), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35, side: THREE.DoubleSide }), 0, 2.36, 0, h);
       for (n = 0; n < 6; n++) mesh(new THREE.ConeGeometry(0.09, 0.24, 4), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), Math.cos(n * 1.047) * 0.44, 2.58, Math.sin(n * 1.047) * 0.44, h);
       [0xD64545, 0x3B6FD9, 0x3FA7A0].forEach(function (col, k) { mesh(new THREE.SphereGeometry(0.05, 10, 8), mat(col, { roughness: 0.2 }), (k - 1) * 0.2, 2.36, 0.4, h); });
-    }
+    } else if (look.hat) hatMore(look.hat, h);
     var ey = modelNow ? EYES.ronds : (EYES[look.eyes] || EYES.bizarres);   /* les autres monstres ont leurs propres yeux : lunettes standard */
-    if (look.glasses) ey.forEach(function (q) {
+    var plain = look.glasses === 'rondes' || look.glasses === 'soleil';
+    if (plain) ey.forEach(function (q) {
       if (look.glasses === 'soleil') { o = mesh(new THREE.CylinderGeometry(q[3] * 1.05, q[3] * 1.05, 0.05, 24), mat(0x14151E, { roughness: 0.15 }), q[0], q[1], q[2] + q[3] + 0.02, gl); o.rotation.x = Math.PI / 2; }
       else mesh(new THREE.TorusGeometry(q[3] * 0.98, 0.035, 8, 28), mat(0x1B1D2B, { roughness: 0.4 }), q[0], q[1], q[2] + q[3] * 0.5, gl);
     });
-    if (look.glasses && ey.length > 1) mesh(new THREE.BoxGeometry(Math.abs(ey[1][0] - ey[0][0]) - ey[0][3] - ey[1][3] + 0.1, 0.045, 0.045), mat(0x1B1D2B), (ey[0][0] + ey[0][3] + ey[1][0] - ey[1][3]) / 2, (ey[0][1] + ey[1][1]) / 2, 0.96, gl);
+    if (look.glasses && !plain) glassesMore(look.glasses, ey, gl);
+    if (plain && ey.length > 1) mesh(new THREE.BoxGeometry(Math.abs(ey[1][0] - ey[0][0]) - ey[0][3] - ey[1][3] + 0.1, 0.045, 0.045), mat(0x1B1D2B), (ey[0][0] + ey[0][3] + ey[1][0] - ey[1][3]) / 2, (ey[0][1] + ey[1][1]) / 2, 0.96, gl);
     if (look.neck === 'noeud') {
       o = mesh(new THREE.ConeGeometry(0.2, 0.32, 12), mat(0xD64545), -0.17, 0.68, 0.9, nk); o.rotation.z = -Math.PI / 2;
       o = mesh(new THREE.ConeGeometry(0.2, 0.32, 12), mat(0xD64545), 0.17, 0.68, 0.9, nk); o.rotation.z = Math.PI / 2;
@@ -929,8 +1012,9 @@ button, input { touch-action: manipulation; }
     } else if (look.neck === 'collier') {
       o = mesh(new THREE.TorusGeometry(0.9, 0.04, 8, 30), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), 0, 0.7, 0, nk); o.rotation.x = Math.PI / 2; o.scale.y = 0.92;
       o = mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 16), mat(0xE8C55A, { metalness: 0.6, roughness: 0.35 }), 0, 0.6, 0.86, nk); o.rotation.x = Math.PI / 2;
-    }
-    if (modelNow) fitAcc(modelNow, h, gl, nk);
+    } else if (look.neck) neckMore(look.neck, nk);
+    if (look.back) backMore(look.back, bk);
+    if (modelNow) fitAcc(modelNow, h, gl, nk, bk);
   }
   [[0.8, 0.35, 0.5, 0.3], [-0.75, -0.15, 0.62, 0.34], [0.35, 0.75, 0.55, 0.26]].forEach(function (q, n) {
     var rp = stick(new THREE.Mesh(new THREE.BoxGeometry(q[3], q[3] * 0.85, 0.05), darkMat), onBody(q[0], q[1], q[2], 0));
@@ -963,13 +1047,13 @@ button, input { touch-action: manipulation; }
   var phase = 'loading', mood = 'forme', acheLv = 1, colorIndex = 0;
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
-  var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0 }; }
+  var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null, back: null, fx: null };
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '' }; }
   var G = freshG();
   function load() {
     try {
-      var o = JSON.parse(localStorage.getItem(SAVE) || 'null'); if (!o || !o.name) return false;
-      G.name = String(o.name).slice(0, 12); G.color = Math.max(0, Math.min(palette.length - 1, o.color | 0));
+      var o = JSON.parse(localStorage.getItem(SAVE) || 'null'); if (!o) return false;
+      G.name = String(o.name || '').slice(0, 12); G.color = Math.max(0, Math.min(palette.length - 1, o.color | 0));
       G.entries = (o.entries && typeof o.entries === 'object') ? o.entries : {}; G.dayOffset = o.dayOffset | 0;
       var lk = (o.look && typeof o.look === 'object') ? o.look : {};
       Object.keys(LOOK0).forEach(function (k) { G.look[k] = (typeof lk[k] === 'string') ? lk[k] : LOOK0[k]; });
@@ -979,7 +1063,8 @@ button, input { touch-action: manipulation; }
       G.decor = G.decors.indexOf(o.decor | 0) >= 0 ? (o.decor | 0) : 0;
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
-      return true;
+      G.xpBonus = Math.max(0, Number(o.xpBonus) || 0); G.hpFrom = typeof o.hpFrom === 'string' ? o.hpFrom : ''; G.lvlSeen = Math.max(1, o.lvlSeen | 0); G.dead = o.dead === true; G.born = typeof o.born === 'string' ? o.born : '';
+      return !!G.name;
     } catch (e) { return false; }
   }
   function saveG() { try { localStorage.setItem(SAVE, JSON.stringify(G)); } catch (e) {} }
@@ -1000,12 +1085,25 @@ button, input { touch-action: manipulation; }
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
   function hm(h) { var m = Math.round(h * 60); return Math.floor(m / 60) + ' h ' + pad(m % 60); }
+  /* Les niveaux : chaque journée remplie donne de l'expérience (XP). Il en faut un peu plus à chaque niveau. */
+  function xpNeed(lvl) { return 50 + 20 * (lvl - 1); }
+  function daysBetween(a, b) { return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5); }
   function calc() {
     var keys = Object.keys(G.entries).sort(), n = keys.length, today = G.entries[dayKey(0)] || null;
-    var coins = 0; keys.forEach(function (k) { coins += Math.floor(score(G.entries[k]).pts / 10); });   /* 100 points = 10 pièces */
+    var coins = 0, xp = G.xpBonus || 0;
+    keys.forEach(function (k) { var p = score(G.entries[k]).pts; coins += Math.floor(p / 10); xp += Math.floor(p / 10) + 10; });   /* 100 points = 10 pièces et 10 XP, plus 10 XP pour avoir rempli sa journée */
+    var lvl = 1, rem = xp; while (rem >= xpNeed(lvl) && lvl < 50) { rem -= xpNeed(lvl); lvl++; }
+    var stage = lvl >= 12 ? 2 : lvl >= 5 ? 1 : 0;                      /* bébé jusqu'au niveau 4, ado jusqu'au 11, adulte ensuite */
+    /* La vie : elle monte avec les bonnes journées, descend avec les mauvaises et les jours oubliés. À zéro, le monstre meurt. */
+    var hp = 100, from = G.hpFrom || G.born || keys[0] || dayKey(0), span = Math.max(0, daysBetween(from, dayKey(0)));
+    for (var d = Math.min(span, 400); d >= 0; d--) {
+      var ed = G.entries[dayKey(d)];
+      if (ed) { var pd = score(ed).pts; hp += pd >= 600 ? 15 : pd >= 300 ? 5 : pd >= 100 ? -10 : -20; }
+      else if (d > 0) hp -= 10;                                        /* un jour passé sans rien remplir */
+      hp = Math.min(100, hp); if (hp <= 0) { hp = 0; break; }
+    }
     var last = keys.slice(-3), sum = 0; last.forEach(function (k) { sum += score(G.entries[k]).pts; });
-    var stage = Math.min(2, Math.floor(n / 3));                       /* elle grandit tous les 3 jours joués */
-    var bad = stage > 0 && last.length > 0 && sum / last.length < 300;  /* mauvaise forme si la moyenne des 3 derniers jours est sous 300 points */
+    var bad = hp <= 40 || (last.length >= 2 && sum / last.length < 300);   /* mauvaise forme si la vie est basse ou si les 3 dernières journées sont mauvaises */
     var streak = 0, back = today ? 0 : 1;                             /* série : jours d'affilée avec les trois mesures au moins « Correct » */
     for (;;) { var e = G.entries[dayKey(back)]; if (!e || Math.min.apply(null, score(e).l) < 1) break; streak++; back++; }
     var m = 'forme', lv = 1, ref = today || (n ? G.entries[keys[n - 1]] : null);   /* tant qu'aujourd'hui n'est pas rempli, elle garde l'état de la dernière journée */
@@ -1017,15 +1115,15 @@ button, input { touch-action: manipulation; }
       else if (sc.l[1] === 0) m = 'triste';                   /* moins de 10 000 pas : pas contente */
     }
     coins += G.bonus - G.spent;                                       /* ce qu'on a gagné, moins ce qu'on a dépensé à la boutique */
-    return { n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv };
+    return { n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv, lvl: lvl, xp: rem, need: xpNeed(lvl), hp: hp, age: span + 1 };
   }
-
   function show(id) { ['loading', 'title', 'custom', 'hud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; }
   function setColor(i) {
     colorIndex = i; paint();
     Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
   }
   function setMood(m) { mood = m; }
+  var hpNow = 100, fallK = 0, fxNow = null;
   var STAGE = [{ k: 0.72, ear: 0.7, name: 'Bébé' }, { k: 0.88, ear: 1, name: 'Ado' }, { k: 1.05, ear: 1.3, name: 'Adulte' }];
   var stageNow = 0, badNow = false, pending = null, forceMood = null, forceStage = null, forceBad = null;
   var grey = new THREE.Color(0x77778A);
@@ -1046,14 +1144,25 @@ button, input { touch-action: manipulation; }
     $(bar).style.width = pct + '%'; $(bar).style.background = lv == null ? '' : ['var(--warn)', 'var(--coin)', 'var(--mint)'][lv];
   }
   /* Recalcule tout à partir des journées enregistrées et met l'écran à jour */
+  var TITLES = ['Bébé', 'Ado', 'Adulte'], levelNow = 1, sizeGoal = 0.72;
+  function sizeOf(lvl) { return 0.72 + Math.min(lvl, 20) / 20 * 0.38; }       /* il grossit un tout petit peu à chaque niveau, jusqu'au niveau 20 */
+  function auraName(lvl) { return lvl >= 20 ? 'Aura dorée' : lvl >= 15 ? 'Aura violette' : lvl >= 10 ? 'Aura bleue' : lvl >= 5 ? 'Aura verte' : ''; }
+  /* Recalcule tout à partir des journées enregistrées et met l'écran à jour */
   function refresh(animate) {
     var c = calc(), t = c.today;
     mood = forceMood || c.mood; acheLv = forceMood ? 2 : c.acheLv;
     var st = forceStage == null ? c.stage : forceStage, bd = forceBad == null ? c.bad : forceBad;
+    /* Monter de niveau rapporte des pièces, une seule fois par niveau */
+    var up = c.lvl > G.lvlSeen, reward = 0, lv2;
+    if (up) { for (lv2 = G.lvlSeen + 1; lv2 <= c.lvl; lv2++) reward += 20 * lv2; G.bonus += reward; G.lvlSeen = c.lvl; saveG(); c.coins += reward; }
+    levelNow = c.lvl; sizeGoal = sizeOf(c.lvl);
     $('hudName').textContent = G.name;
-    $('hudStage').textContent = STAGE[st].name + (st < 2 ? ' · grandit dans ' + (3 - c.n % 3) + (3 - c.n % 3 > 1 ? ' jours' : ' jour') : '') + (bd ? ' · en mauvais état' : '');
-    coinGoal = c.coins; todayDone = !!t;
-    $('shopDot').hidden = !canBuySomething(c.coins);
+    $('hudStage').textContent = 'Niveau ' + c.lvl + ' · ' + TITLES[st] + (bd ? ' · en mauvais état' : '');
+    $('hpBar').style.width = c.hp + '%'; $('hpTxt').textContent = c.hp; $('hpTrack').setAttribute('aria-valuenow', c.hp);
+    $('xpBar').style.width = Math.round(c.xp / c.need * 100) + '%'; $('xpTxt').textContent = c.xp + '/' + c.need; $('xpTrack').setAttribute('aria-valuenow', Math.round(c.xp / c.need * 100));
+    $('plate').className = 'plate' + (c.hp <= 30 ? ' low' : '');
+    coinGoal = c.coins; todayDone = !!t; hpNow = c.hp;
+    $('shopDot').hidden = !canBuySomething(c.coins, c.lvl);
     $('hudStreak').textContent = 'Série : ' + c.streak + (c.streak > 1 ? ' jours' : ' jour');
     if (t) {
       var sc = score(t);
@@ -1067,16 +1176,33 @@ button, input { touch-action: manipulation; }
       gauge('gSleep', 'bSleep', '–', null, 0); gauge('gSteps', 'bSteps', '–', null, 0); gauge('gScreen', 'bScreen', '–', null, 0);
       $('enterLab').textContent = 'Ma journée';
     }
-    stage.setAttribute('aria-label', G.name + ', ta créature en peluche, dans la ruelle aux poubelles');
-    if (st !== stageNow || bd !== badNow) {
-      var msg = st > stageNow ? G.name + ' a grandi !' : st < stageNow ? G.name + ' a rajeuni' : bd ? G.name + ' ne va pas bien…' : G.name + ' va mieux !';
-      if (animate && !reduce && phase === 'play') { pending = { stage: st, bad: bd }; act = null; start('evolve'); toast(msg); }
-      else { stageNow = st; badNow = bd; paint(); }
+    stage.setAttribute('aria-label', G.name + ', ton monstre, dans son décor');
+    if (c.hp <= 0 && phase === 'play' && !G.dead) { stageNow = st; badNow = true; paint(); die(c); return true; }
+    if (st !== stageNow || bd !== badNow || up) {
+      var msg = up ? 'Niveau ' + c.lvl + ' ! +' + reward + ' pièces' : bd ? G.name + ' ne va pas bien…' : G.name + ' va mieux !';
+      if (up && auraName(c.lvl) !== auraName(c.lvl - 1)) msg = 'Niveau ' + c.lvl + ' : ' + auraName(c.lvl) + ' débloquée !';
+      else if (up && st > stageNow) msg = 'Niveau ' + c.lvl + ' : ' + G.name + ' devient ' + TITLES[st].toLowerCase() + ' !';
+      if (animate && !reduce && phase === 'play') { pending = { stage: st, bad: bd }; act = null; start('evolve'); toast(msg); if (up) party(); }
+      else { stageNow = st; badNow = bd; paint(); if (animate && up) toast(msg); }
       return true;
     }
+    if (animate && c.hp <= 30) say('Je ne me sens pas bien du tout…', 4200);
     return false;
   }
-  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; stageNow = 0; badNow = false; pending = null; forceMood = forceStage = forceBad = null; closeSheets(); $('bubble').hidden = true; dress(); applyDecor(0); show('title'); musicSync(); }
+  /* ---------- La mort du monstre : quand sa vie tombe à zéro ---------- */
+  function die(c) {
+    G.dead = true; G.deadLvl = c.lvl; G.deadAge = c.age; saveG();
+    phase = 'dead'; closeSheets(); ['settings', 'entry', 'admin'].forEach(function (id) { $(id).hidden = true; });
+    $('bubble').hidden = true; show(null); $('gear').hidden = true; fallK = 0;
+    act = { type: 'death', t0: clock.getElapsedTime(), dur: 2.6 }; sfx('death');
+    setTimeout(showDead, reduce ? 300 : 3000);
+  }
+  function showDead() {
+    $('deadTitle').textContent = G.name + ' s\'est éteint';
+    $('deadText').textContent = 'Sa vie est tombée à zéro. Il a vécu ' + (G.deadAge || 1) + (G.deadAge > 1 ? ' jours' : ' jour') + ' et atteint le niveau ' + (G.deadLvl || 1) + '.';
+    $('dead').hidden = false; $('deadNew').focus();
+  }
+  function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; stageNow = 0; badNow = false; pending = null; forceMood = forceStage = forceBad = null; levelNow = 1; sizeGoal = 0.72; fallK = 0; $('dead').hidden = true; closeSheets(); $('bubble').hidden = true; dress(); applyDecor(0); show('title'); musicSync(); }
   function goCustom() { phase = 'custom'; paintStrip(); show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
   function goPlay(name) {
     phase = 'play'; flapT = 1; show('hud'); musicSync(); dress(); applyDecor(G.decor); coinShown = -1; refresh(false); nextSay = clock.getElapsedTime() + 4;
@@ -1103,12 +1229,12 @@ button, input { touch-action: manipulation; }
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    var sp0 = G.species; G = freshG(); G.name = name; G.color = colorIndex; G.species = sp0; saveG();
+    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
   var clock = new THREE.Clock();
-  var DUR = { intro: 2.1, jump: 0.95, hop: 0.45, spin: 0.85, wiggle: 0.75, wave: 1.5, yawn: 2.3, sigh: 1.6, evolve: 1.9 };
+  var DUR = { death: 2.6, intro: 2.1, jump: 0.95, hop: 0.45, spin: 0.85, wiggle: 0.75, wave: 1.5, yawn: 2.3, sigh: 1.6, evolve: 1.9 };
   var act = null, nextAuto = 6, lastAuto = '', quietNext = false, lastBp = 0;
   var AUTO = {
     forme: ['wave', 'wave', 'hop', 'hop', 'jump', 'spin', 'wiggle'],
@@ -1118,7 +1244,7 @@ button, input { touch-action: manipulation; }
   };
   function start(type) {
     var loud = quietNext ? 0.4 : 1; quietNext = false;
-    if (act && (act.type === 'intro' || act.type === 'evolve')) return;
+    if (phase === 'dead' || (act && (act.type === 'intro' || act.type === 'evolve'))) return;
     act = { type: type, t0: clock.getElapsedTime(), dur: DUR[type] };
     if (type === 'jump') sfx('boing', loud, DUR.jump * 0.25); else sfx(type, loud);
     nextAuto = act.t0 + act.dur + 1.8 + Math.random() * 3;
@@ -1210,6 +1336,29 @@ button, input { touch-action: manipulation; }
       o.position.set(pet.position.x, pet.position.y + 1.4 * stageK, pet.position.z + 0.3); o.visible = true;
     });
   }
+  /* Les effets : de petites images qui flottent autour du monstre */
+  function drawTex(fn) { var cv = document.createElement('canvas'); cv.width = cv.height = 64; var g2 = cv.getContext('2d'); fn(g2); return { cv: cv, tex: new THREE.CanvasTexture(cv) }; }
+  var FXT = {
+    etincelles: drawTex(function (g2) { g2.fillStyle = '#FFE680'; g2.beginPath(); for (var n = 0; n < 10; n++) { var r = n % 2 ? 11 : 28, a = n * Math.PI / 5 - Math.PI / 2; g2.lineTo(32 + Math.cos(a) * r, 32 + Math.sin(a) * r); } g2.fill(); }),
+    bulles: drawTex(function (g2) { g2.strokeStyle = '#BFE8FF'; g2.lineWidth = 5; g2.beginPath(); g2.arc(32, 32, 24, 0, 7); g2.stroke(); g2.fillStyle = 'rgba(191,232,255,.25)'; g2.fill(); g2.fillStyle = '#FFFFFF'; g2.beginPath(); g2.arc(23, 23, 5, 0, 7); g2.fill(); }),
+    coeurs: { cv: hc, tex: heartTex },
+    flammes: drawTex(function (g2) { g2.fillStyle = '#FF8A3C'; g2.beginPath(); g2.moveTo(32, 4); g2.bezierCurveTo(54, 30, 52, 60, 32, 60); g2.bezierCurveTo(12, 60, 10, 30, 32, 4); g2.fill(); g2.fillStyle = '#FFD25A'; g2.beginPath(); g2.moveTo(32, 26); g2.bezierCurveTo(44, 40, 42, 56, 32, 56); g2.bezierCurveTo(22, 56, 20, 40, 32, 26); g2.fill(); }),
+    flocons: drawTex(function (g2) { g2.strokeStyle = '#FFFFFF'; g2.lineWidth = 5; g2.lineCap = 'round'; for (var n = 0; n < 3; n++) { var a = n * Math.PI / 3; g2.beginPath(); g2.moveTo(32 - Math.cos(a) * 26, 32 - Math.sin(a) * 26); g2.lineTo(32 + Math.cos(a) * 26, 32 + Math.sin(a) * 26); g2.stroke(); } }),
+    notes: drawTex(function (g2) { g2.fillStyle = '#B58CFF'; g2.beginPath(); g2.ellipse(22, 48, 12, 9, -0.3, 0, 7); g2.fill(); g2.fillRect(30, 10, 5, 40); g2.beginPath(); g2.moveTo(35, 10); g2.quadraticCurveTo(56, 14, 50, 32); g2.quadraticCurveTo(48, 22, 35, 22); g2.fill(); })
+  };
+  var FXDEF = {
+    etincelles: { n: 8, dur: 2.2, size: 0.3, mode: 'rise' }, bulles: { n: 8, dur: 3, size: 0.32, mode: 'rise' }, coeurs: { n: 6, dur: 2.6, size: 0.3, mode: 'rise' },
+    flammes: { n: 10, dur: 1.1, size: 0.42, mode: 'fire' }, flocons: { n: 10, dur: 3.2, size: 0.26, mode: 'fall' }, notes: { n: 6, dur: 2.8, size: 0.34, mode: 'rise' }
+  };
+  var fxS = [], fxSeen = null;
+  for (var fn2 = 0; fn2 < 10; fn2++) { var fs = noRay(new THREE.Sprite(new THREE.SpriteMaterial({ map: heartTex, transparent: true, depthWrite: false, opacity: 0 }))); fs.userData = { life: fn2 / 10, a: fn2 * 2.4, r: 0.7 + (fn2 % 3) * 0.3, h: (fn2 * 0.37) % 1 }; fs.visible = false; scene.add(fs); fxS.push(fs); }
+  /* L'aura : un anneau lumineux au sol et des éclats qui tournent autour. Elle arrive au niveau 5 et change au 10, au 15 et au 20. */
+  var AURA = [0, 0x7FE8CF, 0x6CA8FF, 0xB58CFF, 0xF7C948];
+  var auraRing = noRay(new THREE.Mesh(new THREE.RingGeometry(1.2, 1.5, 44), new THREE.MeshBasicMaterial({ color: 0x7FE8CF, transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false })));
+  auraRing.rotation.x = -Math.PI / 2; auraRing.visible = false; scene.add(auraRing);
+  var orbs = []; for (var on = 0; on < 4; on++) { var ob = noRay(new THREE.Mesh(new THREE.OctahedronGeometry(0.11), new THREE.MeshBasicMaterial({ color: 0x7FE8CF }))); ob.visible = false; scene.add(ob); orbs.push(ob); }
+  function tierOf(lvl) { return lvl >= 20 ? 4 : lvl >= 15 ? 3 : lvl >= 10 ? 2 : lvl >= 5 ? 1 : 0; }
+
   var SAY = {
     forme: ['Je suis en pleine forme !', 'On va marcher ?', 'Tu me fais un câlin ?', 'Quelle belle journée !', 'J\'ai trop bien dormi !'],
     fatigue: ['J\'ai sommeil…', 'On se couche tôt ce soir ?', 'Mes yeux se ferment…'],
@@ -1254,11 +1403,16 @@ button, input { touch-action: manipulation; }
         eyeT = (acheLv > 1 ? 0.32 : 0.6) + Math.sin(t * 6) * 0.08;
       }
       var bt = t % 4.2; if (bt < 0.12 || (bt > 0.3 && bt < 0.4)) eyeT *= 0.08;
-      if (!act && !down && !hidden && phase !== 'intro' && t > nextAuto) autoAct();
+      if (!act && !down && !hidden && phase !== 'intro' && phase !== 'dead' && t > nextAuto) autoAct();
     } else if (ache) { aL = 2.75; aR = 2.75; eyeT = 0.32; }
 
     if (playing && t < petUntil) { eyeT = Math.min(eyeT, 0.12); mouthT = 0.45; tilt += Math.sin(t * 9) * 0.05; aL = aR = 0.9; }   /* elle ferme les yeux de plaisir */
     if (playing && !reduce && !act && t > nextSay) { nextSay = t + 11 + Math.random() * 9; chatter(); }
+
+    if (phase === 'dead') {                   /* la peluche tombe doucement sur le côté et ferme les yeux */
+      fallK += (1 - fallK) * (1 - Math.pow(0.15, dt)); eyeT = 0.04; mouthT = 0; y = 0; aL = aR = 0.3; breath = 0;
+      if (!modelNow) { tilt = fallK * 1.45; y = -fallK * 0.25; }
+    }
 
     /* 2. L'action en cours, qui passe par-dessus */
     var boxShake = 0, boxHop = 0;
@@ -1328,7 +1482,7 @@ button, input { touch-action: manipulation; }
 
     pet.visible = !hidden;
     pet.position.set(px, y, pz);
-    stageK += (STAGE[stageNow].k - stageK) * f; earK += (STAGE[stageNow].ear - earK) * f;
+    stageK += (sizeGoal - stageK) * f; earK += (STAGE[stageNow].ear - earK) * f;
     pet.scale.setScalar(sc * stageK); earL.scale.y = earK; earR.scale.y = earK;
     pet.rotation.y = spin + lookX * 0.5 + extraSpin;
     pet.rotation.x = lean + lookY * 0.15;
@@ -1377,6 +1531,27 @@ button, input { touch-action: manipulation; }
     flies.children.forEach(function (o) { var q = o.userData; o.position.set(q.x + Math.sin(t * q.s + q.a) * 0.8, q.y + Math.sin(t * q.s * 1.7 + q.a) * 0.35, q.z + Math.cos(t * q.s + q.a) * 0.6); o.scale.setScalar(0.6 + 0.6 * Math.abs(Math.sin(t * 1.3 + q.a))); });
     if (!reduce) clouds.children.forEach(function (o) { o.position.x += o.userData.v * dt; if (o.position.x > 15) o.position.x = -15; });
     if (flame) { var fk = reduce ? 1 : 0.85 + Math.sin(t * 13) * 0.1 + Math.sin(t * 7.3) * 0.08; flame.scale.set(fk, fk * 1.1, fk); fireLight.intensity = 0.9 * fk; }
+    var E = FXDEF[fxNow], showFx = E && pet.visible && phase !== 'dead';
+    if (fxNow !== fxSeen) { fxSeen = fxNow; if (E) fxS.forEach(function (o) { o.material.map = FXT[fxNow].tex; o.material.needsUpdate = true; }); }
+    fxS.forEach(function (o, n) {
+      if (!showFx || n >= E.n) { o.visible = false; return; }
+      var q = o.userData; if (!reduce) q.life = (q.life + dt / E.dur) % 1;
+      var L = q.life, R = q.r * stageK, by = E.mode === 'fall' ? 3.2 - L * 3.1 : E.mode === 'fire' ? 0.1 + L * 1.5 : 0.3 + q.h * 1.2 + L * 1.5;
+      if (E.mode === 'fire') R *= 0.8;
+      o.position.set(pet.position.x + Math.cos(q.a) * R + Math.sin(L * 6 + q.a) * 0.1, pet.position.y + by * stageK, pet.position.z + Math.sin(q.a) * R * 0.7 + 0.25);
+      o.scale.setScalar(E.size * (E.mode === 'fire' ? 1 - L * 0.6 : 1)); o.material.opacity = Math.sin(Math.PI * L); o.visible = true;
+    });
+    var tier = (pet.visible && phase !== 'dead' && phase !== 'intro' && phase !== 'custom') ? tierOf(levelNow) : 0;
+    auraRing.visible = tier > 0;
+    if (tier) {
+      auraRing.material.color.setHex(AURA[tier]); auraRing.position.set(pet.position.x, 0.04, pet.position.z);
+      auraRing.scale.setScalar(stageK * (1 + Math.sin(t * 2.4) * 0.05)); auraRing.material.opacity = 0.32 + Math.sin(t * 2.4) * 0.14; auraRing.rotation.z = t * 0.4;
+    }
+    orbs.forEach(function (o, n) {
+      o.visible = tier >= 2 && n < tier; if (!o.visible) return;
+      var a = t * 1.3 + n * Math.PI * 2 / tier; o.material.color.setHex(AURA[tier]);
+      o.position.set(pet.position.x + Math.cos(a) * 1.45 * stageK, pet.position.y + (1.2 + Math.sin(t * 2 + n) * 0.5) * stageK, pet.position.z + Math.sin(a) * 1.45 * stageK); o.rotation.y = t * 4;
+    });
     hearts.forEach(function (o) {
       var q = o.userData; if (q.life >= 1) { o.visible = false; return; }
       q.life += dt / 1.1; o.position.set(q.x + Math.sin(q.life * 6 + q.a) * 0.12, q.y + q.life * 1.3, q.z); o.scale.setScalar(0.22 + Math.sin(Math.min(1, q.life * 3) * Math.PI / 2) * 0.2); o.material.opacity = 1 - q.life * q.life;
@@ -1396,12 +1571,12 @@ button, input { touch-action: manipulation; }
     camL.x += (goal.l[0] - camL.x) * cf; camL.y += (goal.l[1] - camL.y) * cf; camL.z += (goal.l[2] - camL.z) * cf;
     camera.position.copy(camP); camera.lookAt(camL);
 
-    if (modelNow) { modelNow.play(act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) modelNow.mixer.update(dt * (tired ? 0.5 : 1)); }
+    if (modelNow) { modelNow.play(phase === 'dead' ? 'Death' : act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) modelNow.mixer.update(dt * (tired ? 0.5 : 1)); }
     renderer.render(scene, camera);
     if (!$('bubble').hidden) {                /* la bulle suit la tête de la créature */
       v3.set(pet.position.x, pet.position.y + (2.75 + (G.look.hat ? 0.45 : 0)) * sc * stageK, pet.position.z).project(camera);
       var bw = stage.clientWidth, bx = (v3.x * 0.5 + 0.5) * bw, by = (-v3.y * 0.5 + 0.5) * stage.clientHeight;
-      $('bubble').style.left = Math.max(118, Math.min(bw - 118, bx)) + 'px'; $('bubble').style.top = Math.max(124, by) + 'px';
+      $('bubble').style.left = Math.max(118, Math.min(bw - 118, bx)) + 'px'; $('bubble').style.top = Math.max(170, by) + 'px';
     }
     requestAnimationFrame(frame);
   }
@@ -1529,6 +1704,7 @@ button, input { touch-action: manipulation; }
     evolve:  function (k, at) { hiss(500, 6000, 0.9, 0.5 * k, at, 3); [523, 659, 784, 1047, 1319].forEach(function (fq, n) { blip(fq, fq, 0.18, 'triangle', 0.24 * k, at + 0.2 + n * 0.12); }); },
     purr:    function (k, at) { voice(300, 350, 0.22, 0.3 * k, at, U, O); voice(350, 310, 0.22, 0.3 * k, at + 0.2, O, U); },
     cash:    function (k, at) { blip(1319, 1319, 0.09, 'triangle', 0.25 * k, at); blip(1760, 1760, 0.25, 'triangle', 0.25 * k, at + 0.08); hiss(5000, 9000, 0.12, 0.12 * k, at, 3); },
+    death:   function (k, at) { [392, 311, 262, 196].forEach(function (fq, n) { blip(fq, fq * 0.97, n === 3 ? 1.2 : 0.5, 'sine', 0.3 * k, at + n * 0.45); }); },
     /* l'interface */
     tick:    function (k, at) { blip(1300, 900, 0.035, 'sine', 0.22 * k, at); blip(2600, 2000, 0.02, 'triangle', 0.07 * k, at); },
     fanfare: function (k, at) {
@@ -1540,7 +1716,7 @@ button, input { touch-action: manipulation; }
   function sfx(name, loud, delay) {
     if (!actx || !prefs.sfx || document.hidden || phase === 'loading' || !SFX[name]) return;
     if (actx.state === 'suspended') actx.resume();
-    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash') ? 1 : 0.94 + Math.random() * 0.12;
+    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash' || name === 'death') ? 1 : 0.94 + Math.random() * 0.12;
     SFX[name](loud == null ? 1 : loud, actx.currentTime + 0.01 + (delay || 0));
   }
   /* Un navigateur refuse de jouer du son avant que le joueur ait touché la page : on attend son premier geste */
@@ -1615,9 +1791,9 @@ button, input { touch-action: manipulation; }
   }
   function focusOf(focus) {
     if (!modelNow) return FOCUS[focus]; var A = modelNow.A;
-    return focus === 'hat' ? [A.hatY + 0.1, 5.4] : focus === 'glasses' ? [A.eyeY, 4.8] : focus === 'neck' ? [A.neckY + 0.35, 5] : [modelNow.H / 2, 7.2];
+    return focus === 'hat' ? [A.hatY + 0.3, 6] : focus === 'back' ? [A.backY + 0.2, 6.6] : focus === 'glasses' ? [A.eyeY, 4.8] : focus === 'neck' ? [A.neckY + 0.35, 5] : [modelNow.H / 2, 7.2];
   }
-  var FOCUS = { all: [1.2, 7.2], hat: [2.25, 5.4], ears: [2.3, 5.6], glasses: [1.55, 4.6], eyes: [1.55, 4.6], teeth: [1.1, 3.9], neck: [0.9, 4.8] };   /* où regarder, et de quelle distance */
+  var FOCUS = { all: [1.2, 7.2], back: [1.4, 6.6], hat: [2.45, 6], ears: [2.3, 5.6], glasses: [1.55, 4.6], eyes: [1.55, 4.6], teeth: [1.1, 3.9], neck: [0.9, 4.8] };   /* où regarder, et de quelle distance */
   function thumbLook(look, focus) {
     var key = focus + '|' + (modelNow ? modelNow.id + (G.hue || 0) : 'p') + '|' + colorIndex + '|' + badNow + '|' + JSON.stringify(look);
     if (thumbCache[key]) return thumbCache[key];
@@ -1625,7 +1801,7 @@ button, input { touch-action: manipulation; }
       buildEars(look.ears); buildEyes(look.eyes); buildTeeth(look.teeth); buildAcc(look); syncParts();
       tuft.children.forEach(function (o) { o.visible = false; });
       var par = pet.parent, shown = pet.visible; studio.add(pet); pet.visible = true;
-      pet.position.set(0, 0, 0); pet.rotation.set(0, -0.3, 0); pet.scale.setScalar(1); bodyG.scale.set(1, 1, 1);
+      pet.position.set(0, 0, 0); pet.rotation.set(0, focus === 'back' ? Math.PI * 0.8 : -0.3, 0); pet.scale.setScalar(1); bodyG.scale.set(1, 1, 1);
       eyes.forEach(function (e) { e.scale.y = 1; });
       var fc = focusOf(focus); thumbCam.position.set(0, fc[0] + 0.15, fc[1]); thumbCam.lookAt(0, fc[0], 0);
       var url = snap(studio, thumbCam);
@@ -1645,36 +1821,48 @@ button, input { touch-action: manipulation; }
   }
   function thumbHue(n) {
     var keep = G.hue, url; G.hue = n; paint();
-    url = thumbLook({ ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }, 'all');
+    url = thumbLook(withItem('hat', null), 'all');
     G.hue = keep; return url;
   }
   function thumbSpecies(id) {
     var keep = G.species, keepH = G.hue, url; G.species = id; G.hue = (id === keep) ? keepH : 0; useSpecies(id); paint();
-    url = thumbLook({ ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }, 'all');
+    url = thumbLook(withItem('hat', null), 'all');
     G.species = keep; G.hue = keepH; return url;
   }
-  function withItem(slot, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }; l[slot] = id; return l; }
-  function withShape(key, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null }; l[key] = id; return l; }
+  function withItem(slot, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null, back: null, fx: null }; l[slot] = id; return l; }
+  function withShape(key, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null, back: null, fx: null }; l[key] = id; return l; }
   function picture(url, cls) { var im = document.createElement('img'); im.className = cls || 'th'; im.alt = ''; im.width = 64; im.height = 64; if (url) im.src = url; return im; }
 
   /* ---------- L'atelier : changer l'apparence de la créature, gratuitement ---------- */
+  /* Le catalogue : [identifiant, emplacement, nom, prix, rareté (0 à 3), niveau demandé] */
+  var RAR = ['Commun', 'Rare', 'Épique', 'Légendaire'];
   var SHOP = [
-    { id: 'bonnet', slot: 'hat', name: 'Bonnet à pompon', price: 80 }, { id: 'casquette', slot: 'hat', name: 'Casquette', price: 120 },
-    { id: 'hdf', slot: 'hat', name: 'Chapeau haut-de-forme', price: 250 }, { id: 'couronne', slot: 'hat', name: 'Couronne', price: 600 },
-    { id: 'rondes', slot: 'glasses', name: 'Lunettes rondes', price: 100 }, { id: 'soleil', slot: 'glasses', name: 'Lunettes de soleil', price: 180 },
-    { id: 'noeud', slot: 'neck', name: 'Nœud papillon', price: 90 }, { id: 'echarpe', slot: 'neck', name: 'Écharpe', price: 140 }, { id: 'collier', slot: 'neck', name: 'Collier doré', price: 300 }
-  ];
+    ['bonnet', 'hat', 'Bonnet à pompon', 80, 0, 1], ['casquette', 'hat', 'Casquette', 120, 0, 1], ['bob', 'hat', 'Bob', 120, 0, 1], ['fete', 'hat', 'Chapeau de fête', 150, 0, 1],
+    ['fleur', 'hat', 'Fleur', 160, 0, 2], ['cowboy', 'hat', 'Chapeau de cow-boy', 220, 1, 3], ['hdf', 'hat', 'Haut-de-forme', 250, 1, 3], ['chef', 'hat', 'Toque de chef', 260, 1, 4],
+    ['casque', 'hat', 'Casque audio', 300, 1, 4], ['helice', 'hat', 'Casquette à hélice', 320, 1, 5], ['lapin', 'hat', 'Oreilles de lapin', 350, 1, 6], ['pirate', 'hat', 'Chapeau de pirate', 420, 2, 7],
+    ['viking', 'hat', 'Casque viking', 480, 2, 8], ['magicien', 'hat', 'Chapeau de magicien', 520, 2, 9], ['diable', 'hat', 'Cornes de diablotin', 550, 2, 10], ['couronne', 'hat', 'Couronne', 600, 2, 12], ['aureole', 'hat', 'Auréole', 900, 3, 15],
+    ['rondes', 'glasses', 'Lunettes rondes', 100, 0, 1], ['soleil', 'glasses', 'Lunettes de soleil', 180, 0, 2], ['troisd', 'glasses', 'Lunettes 3D', 200, 1, 3], ['monocle', 'glasses', 'Monocle', 240, 1, 4],
+    ['cache', 'glasses', 'Cache-œil de pirate', 280, 1, 5], ['ski', 'glasses', 'Masque de ski', 340, 2, 7], ['coeur', 'glasses', 'Lunettes cœur', 400, 2, 9], ['etoile', 'glasses', 'Lunettes étoile', 650, 3, 13],
+    ['noeud', 'neck', 'Nœud papillon', 90, 0, 1], ['foulard', 'neck', 'Foulard', 110, 0, 1], ['echarpe', 'neck', 'Écharpe', 140, 0, 2], ['bavoir', 'neck', 'Bavoir', 150, 0, 2], ['cravate', 'neck', 'Cravate', 200, 1, 3],
+    ['cloche', 'neck', 'Collier à clochette', 260, 1, 5], ['collier', 'neck', 'Collier doré', 300, 1, 6], ['perles', 'neck', 'Collier de perles', 420, 2, 8], ['medaille', 'neck', 'Médaille de champion', 700, 3, 14],
+    ['sac', 'back', 'Sac à dos', 180, 0, 2], ['ballon', 'back', 'Ballon', 200, 0, 2], ['carapace', 'back', 'Carapace', 320, 1, 5], ['cape', 'back', 'Cape de héros', 450, 2, 8],
+    ['chauve', 'back', 'Ailes de chauve-souris', 600, 2, 11], ['jetpack', 'back', 'Jetpack', 800, 3, 14], ['ange', 'back', 'Ailes d\'ange', 1000, 3, 18],
+    ['bulles', 'fx', 'Bulles', 250, 1, 3], ['notes', 'fx', 'Notes de musique', 300, 1, 5], ['flocons', 'fx', 'Flocons', 350, 1, 6], ['coeurs', 'fx', 'Cœurs', 450, 2, 9],
+    ['etincelles', 'fx', 'Étincelles', 600, 2, 12], ['flammes', 'fx', 'Flammes', 1200, 3, 20]
+  ].map(function (q) { return { id: q[0], slot: q[1], name: q[2], price: q[3], rar: q[4], lvl: q[5] }; });
+  var SLOTS = [['hat', 'Chapeaux'], ['glasses', 'Lunettes'], ['neck', 'Cou'], ['back', 'Dos'], ['fx', 'Effets']];
+  function thumbItem(slot, id) { return (slot === 'fx' && id) ? FXT[id].cv.toDataURL('image/png') : thumbLook(withItem(slot, id), slot === 'fx' ? 'all' : slot); }
   var LOOKS = [
     { key: 'species', name: 'Monstre' },
     { key: 'color', name: 'Couleur' },
     { key: 'ears', name: 'Oreilles', native: true, opts: [['pointues', 'Pointues'], ['rondes', 'Rondes'], ['longues', 'Longues'], ['cornes', 'Cornes'], ['antennes', 'Antennes']] },
     { key: 'eyes', name: 'Yeux', native: true, opts: [['bizarres', 'Dépareillés'], ['ronds', 'Ronds'], ['cyclope', 'Cyclope'], ['trois', 'Trois yeux'], ['petits', 'Tout petits']] },
     { key: 'teeth', name: 'Dents', native: true, opts: [['trois', 'Trois dents'], ['crocs', 'Crocs'], ['une', 'Une grosse dent'], ['sourire', 'Grand sourire'], ['aucune', 'Sans dents']] },
-    { key: 'hat', name: 'Chapeau', slot: true }, { key: 'glasses', name: 'Lunettes', slot: true }, { key: 'neck', name: 'Cou', slot: true }
+    { key: 'hat', name: 'Chapeau', slot: true }, { key: 'glasses', name: 'Lunettes', slot: true }, { key: 'neck', name: 'Cou', slot: true }, { key: 'back', name: 'Dos', slot: true }, { key: 'fx', name: 'Effet', slot: true }
   ];
   var lookTab = 0, shopTab = 0;
-  function canBuySomething(coins) {
-    return SHOP.some(function (it) { return G.owned.indexOf(it.id) < 0 && it.price <= coins; }) || DECORS.some(function (d, n) { return G.decors.indexOf(n) < 0 && d.price <= coins; });
+  function canBuySomething(coins, lvl) {
+    return SHOP.some(function (it) { return G.owned.indexOf(it.id) < 0 && it.price <= coins && it.lvl <= lvl; }) || DECORS.some(function (d, n) { return G.decors.indexOf(n) < 0 && d.price <= coins; });
   }
   function tabs(box, names, cur, pick) {
     empty2($(box));
@@ -1725,8 +1913,8 @@ button, input { touch-action: manipulation; }
     } else if (L.slot) {
       var mine = SHOP.filter(function (it) { return it.slot === L.key && G.owned.indexOf(it.id) >= 0; });
       if (!mine.length) { dress(); var pm = document.createElement('p'); pm.className = 'small'; pm.textContent = 'Tu n\'en as pas encore. Va voir la boutique !'; box.appendChild(pm); return; }
-      chipOpt(box, 'Rien', !G.look[L.key], function () { G.look[L.key] = null; changed(); }, thumbLook(withItem(L.key, null), L.key));
-      mine.forEach(function (it) { chipOpt(box, it.name, G.look[L.key] === it.id, function () { G.look[L.key] = it.id; changed(); }, thumbLook(withItem(L.key, it.id), L.key)); });
+      chipOpt(box, 'Rien', !G.look[L.key], function () { G.look[L.key] = null; changed(); }, thumbItem(L.key, null));
+      mine.forEach(function (it) { chipOpt(box, it.name, G.look[L.key] === it.id, function () { G.look[L.key] = it.id; changed(); }, thumbItem(L.key, it.id)); });
     } else L.opts.forEach(function (o2) { chipOpt(box, o2[1], G.look[L.key] === o2[0], function () { G.look[L.key] = o2[0]; changed(); }, thumbLook(withShape(L.key, o2[0]), L.key)); });
     dress();                                  /* les photos ont changé son apparence un instant : on lui remet la vraie */
   }
@@ -1739,26 +1927,46 @@ button, input { touch-action: manipulation; }
     row.appendChild(nm); row.appendChild(b); box.appendChild(row);
   }
   function pay(price) { G.spent += price; saveG(); sfx('cash'); party(); refresh(false); }
+  /* La boutique : un onglet pour les décors, puis un par type de cosmétique.
+     On touche un article pour l'essayer sur son monstre, puis on décide de l'acheter ou non. */
+  var shopSel = null;
   function paintShop() {
-    tabs('shopTabs', ['Décors', 'Accessoires'], shopTab, function (n) { shopTab = n; paintShop(); });
-    var box = $('shopList'), coins = calc().coins; empty2(box);
-    if (shopTab === 0) DECORS.forEach(function (d, n) {
-      var have = G.decors.indexOf(n) >= 0;
-      if (have) shopRow(box, d.name, G.decor === n ? 'Installé' : 'Acheté', G.decor === n ? 'Installé' : 'Installer', 'on', G.decor === n, function () { G.decor = n; saveG(); applyDecor(n); sfx('pop'); paintShop(); }, thumbDecor(n), true);
-      else shopRow(box, d.name, d.price <= coins ? d.price + ' pièces' : 'Il te manque ' + (d.price - coins) + ' pièces', 'Acheter · ' + d.price, '', d.price > coins, function () {
-        G.decors.push(n); G.decor = n; pay(d.price); applyDecor(n); say('Trop bien, ma nouvelle maison !'); start('jump'); paintShop();
-      }, thumbDecor(n), true);
+    tabs('shopTabs', ['Décors'].concat(SLOTS.map(function (q) { return q[1]; })), shopTab, function (n) { shopTab = n; shopSel = null; paintShop(); });
+    var box = $('shopList'), c = calc(), coins = c.coins; empty2(box);
+    if (shopTab === 0) {
+      DECORS.forEach(function (d, n) {
+        var have = G.decors.indexOf(n) >= 0;
+        if (have) shopRow(box, d.name, G.decor === n ? 'Installé' : 'Acheté', G.decor === n ? 'Installé' : 'Installer', 'on', G.decor === n, function () { G.decor = n; saveG(); applyDecor(n); sfx('pop'); paintShop(); }, thumbDecor(n), true);
+        else shopRow(box, d.name, d.price <= coins ? d.price + ' pièces' : 'Il te manque ' + (d.price - coins) + ' pièces', 'Acheter · ' + d.price, '', d.price > coins, function () {
+          G.decors.push(n); G.decor = n; pay(d.price); applyDecor(n); say('Trop bien, ma nouvelle maison !'); start('jump'); paintShop();
+        }, thumbDecor(n), true);
+      });
+      dress(); return;
+    }
+    var slot = SLOTS[shopTab - 1][0], items = SHOP.filter(function (it) { return it.slot === slot; });
+    var sel = null; items.forEach(function (it) { if (it.id === shopSel) sel = it; });
+    if (sel) {                                /* la barre d'action de l'article essayé */
+      var have = G.owned.indexOf(sel.id) >= 0, worn = G.look[slot] === sel.id, sub = RAR[sel.rar], label, off = false, fn;
+      if (have) { label = worn ? 'Enlever' : 'Porter'; sub += worn ? ' · porté' : ' · à toi'; fn = function () { G.look[slot] = worn ? null : sel.id; saveG(); start('wiggle'); paintShop(); }; }
+      else if (sel.lvl > c.lvl) { label = 'Niveau ' + sel.lvl + ' requis'; off = true; sub += ' · tu es niveau ' + c.lvl; }
+      else if (sel.price > coins) { label = 'Il manque ' + (sel.price - coins); off = true; sub += ' · ' + sel.price + ' pièces'; }
+      else { label = 'Acheter · ' + sel.price; sub += ' · ' + sel.price + ' pièces'; fn = function () { G.owned.push(sel.id); G.look[slot] = sel.id; pay(sel.price); say('Ça me va bien, non ?'); start('spin'); paintShop(); }; }
+      shopRow(box, sel.name, sub, label, have ? 'on' : '', off, fn || function () {}, thumbItem(slot, sel.id));
+      box.lastChild.className += ' act'; box.lastChild.querySelector('.sub').className = 'sub rar' + sel.rar;
+    } else { var hint = document.createElement('p'); hint.className = 'small'; hint.textContent = 'Touche un article pour l\'essayer sur ' + G.name + '.'; hint.style.width = '100%'; box.appendChild(hint); }
+    items.forEach(function (it) {
+      var have = G.owned.indexOf(it.id) >= 0, locked = !have && it.lvl > c.lvl;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'tile r' + it.rar + (locked ? ' lock' : ''); b.setAttribute('aria-pressed', it.id === shopSel ? 'true' : 'false');
+      b.appendChild(picture(thumbItem(slot, it.id), 'tp')); var nm = document.createElement('span'); nm.textContent = it.name; b.appendChild(nm);
+      var sm = document.createElement('small'); sm.textContent = have ? (G.look[slot] === it.id ? 'Porté' : 'À toi') : locked ? 'Niveau ' + it.lvl : it.price + ' pièces'; b.appendChild(sm);
+      b.addEventListener('click', function () { sfx('tick'); shopSel = it.id; paintShop(); box.scrollTop = 0; $('shop').querySelector('.sheet').scrollTop = 0; });
+      box.appendChild(b);
     });
-    else SHOP.forEach(function (it) {
-      var have = G.owned.indexOf(it.id) >= 0, worn = G.look[it.slot] === it.id;
-      if (have) shopRow(box, it.name, worn ? 'Porté' : 'Acheté', worn ? 'Enlever' : 'Porter', 'on', false, function () { G.look[it.slot] = worn ? null : it.id; saveG(); dress(); start('wiggle'); paintShop(); }, thumbLook(withItem(it.slot, it.id), it.slot));
-      else shopRow(box, it.name, it.price <= coins ? it.price + ' pièces' : 'Il te manque ' + (it.price - coins) + ' pièces', 'Acheter · ' + it.price, '', it.price > coins, function () {
-        G.owned.push(it.id); G.look[it.slot] = it.id; pay(it.price); dress(); say('Ça me va bien, non ?'); start('spin'); paintShop();
-      }, thumbLook(withItem(it.slot, it.id), it.slot));
-    });
-    dress();
+    /* L'essayage : le monstre porte l'article choisi tant que la boutique est ouverte, même s'il n'est pas acheté */
+    useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth);
+    var tryOn = JSON.parse(JSON.stringify(G.look)); if (sel) tryOn[slot] = sel.id; buildAcc(tryOn); syncParts(); paint();
   }
-  function closeSheets() { $('look').hidden = true; $('shop').hidden = true; focusCam = false; }
+  function closeSheets() { var was = !$('shop').hidden; $('look').hidden = true; $('shop').hidden = true; focusCam = false; shopSel = null; if (was && phase === 'play') dress(); }
   $('navLook').addEventListener('click', function () { sfx('tick'); closeSheets(); paintLook(); $('look').hidden = false; focusCam = true; $('lookClose').focus(); });
   $('navShop').addEventListener('click', function () { sfx('tick'); closeSheets(); paintShop(); $('shop').hidden = false; focusCam = true; $('shopClose').focus(); });
   $('lookClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navLook').focus(); });
@@ -1807,6 +2015,7 @@ button, input { touch-action: manipulation; }
   function logDay(e) {
     G.entries[dayKey(0)] = e; saveG();
     var sc = score(e), grew = refresh(true);
+    if (phase === 'dead') return;
     if (!grew) {
       toast('+' + sc.pts + ' points · +' + Math.floor(sc.pts / 10) + ' pièces');
       if (sc.pts >= 600) { sfx('fanfare'); start('jump'); party(); say('Bravo, super journée !'); } else if (sc.pts < 300) { start('sigh'); say('On fera mieux demain…'); } else { start('wave'); say('Pas mal du tout !'); }
@@ -1834,7 +2043,7 @@ button, input { touch-action: manipulation; }
   function paintAdmin() {
     ['aMood', 'aStage', 'aBad'].forEach(function (box) { Array.prototype.forEach.call($(box).children, function (b) { b.setAttribute('aria-pressed', b._get() === b._v ? 'true' : 'false'); }); });
     var c = calc();
-    $('adminDay').textContent = 'Jour simulé : ' + dayKey(0).split('-').reverse().join('/') + ' · ' + c.n + (c.n > 1 ? ' journées enregistrées' : ' journée enregistrée');
+    $('adminDay').textContent = 'Jour simulé : ' + dayKey(0).split('-').reverse().join('/') + ' · ' + c.n + (c.n > 1 ? ' journées enregistrées' : ' journée enregistrée') + ' · niveau ' + c.lvl + ' · vie ' + c.hp;
     $('adminLock').hidden = adminOK; $('adminTools').hidden = !adminOK;
     $('aReset').textContent = 'Tout effacer et recommencer'; resetArmed = false;
   }
@@ -1855,6 +2064,13 @@ button, input { touch-action: manipulation; }
   $('aGood').addEventListener('click', function () { if (!needPlay()) return; closeAdmin(); logDay({ sleep: 8.5, steps: 16000, screen: 2 }); G.dayOffset++; saveG(); setTimeout(function () { refresh(false); }, 2200); });
   $('aBadDay').addEventListener('click', function () { if (!needPlay()) return; closeAdmin(); logDay({ sleep: 5, steps: 3000, screen: 7 }); G.dayOffset++; saveG(); setTimeout(function () { refresh(false); }, 2200); });
   $('aCoins').addEventListener('click', function () { if (!needPlay()) return; G.bonus += 500; saveG(); sfx('cash'); refresh(false); });
+  $('aLevel').addEventListener('click', function () { if (!needPlay()) return; var c = calc(); G.xpBonus += c.need - c.xp; saveG(); closeAdmin(); refresh(true); });
+  $('aHeal').addEventListener('click', function () { if (!needPlay()) return; G.hpFrom = dayKey(0); saveG(); sfx('wave'); refresh(false); paintAdmin(); });
+  $('deadNew').addEventListener('click', function () {
+    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins) };          /* le joueur garde ses achats et ses pièces */
+    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; saveG();
+    $('name').value = ''; act = null; $('dead').hidden = true; goTitle();
+  });
   $('aNext').addEventListener('click', function () { if (!needPlay()) return; sfx('tick'); nextDay(); });
   var resetArmed = false;
   $('aReset').addEventListener('click', function () {
@@ -1889,7 +2105,7 @@ button, input { touch-action: manipulation; }
       setTimeout(function () {
         $('loading').classList.add('out');
         setTimeout(function () {
-          if (load()) { setColor(G.color); goPlay(G.name); if (!reduce) start('wave'); }
+          if (load()) { setColor(G.color); goPlay(G.name); if (G.dead) { phase = 'dead'; fallK = 1; show(null); $('gear').hidden = true; showDead(); } else if (!reduce) start('wave'); }
           else goTitle();
         }, 480);
       }, 450);

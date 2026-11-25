@@ -134,6 +134,9 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Boutique : les 7 décors et 9 accessoires à acheter avec ses pièces | Fait |
 | Atelier : couleur, oreilles, yeux, dents, chapeau, lunettes, tour de cou | Fait |
 | 18 monstres au choix : la peluche d'origine et 17 monstres animés d'un pack gratuit | Fait |
+| Niveaux et expérience, avec récompenses et auras | Fait |
+| Barre de vie, et mort du monstre s'il est vraiment négligé | Fait |
+| 47 cosmétiques dans 5 catégories, avec raretés, niveaux requis et essayage | Fait |
 | La créature parle (bulles), aime les caresses (cœurs), fête les bonnes journées (confettis) | Fait |
 | Quêtes bonus et cadeaux hebdomadaires | À faire |
 | Export de l'appli Santé | À faire |
@@ -145,6 +148,32 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 - **Bonne ou mauvaise forme** : on regarde la moyenne des 3 dernières journées. En dessous de 300 points, elle passe en mauvais état ; dès que la moyenne remonte, elle redevient belle. Le bébé est toujours en forme.
 - **Son état du jour**, dans cet ordre : plus de 5 h d'écran → gros mal de tête ; moins de 7 h de sommeil → fatiguée ; entre 3 et 5 h d'écran → petit mal de tête ; moins de 10 000 pas → pas contente ; sinon en forme.
 - **Les données restent dans le navigateur** du joueur : rien n'est envoyé au serveur pour l'instant.
+
+### Les niveaux : améliorer son monstre petit à petit
+
+Cette règle remplace « il grandit tous les 3 jours ».
+
+- **Chaque journée remplie donne de l'expérience (XP)** : 10 XP pour l'avoir remplie, plus 10 XP par tranche de 100 points. Une journée parfaite donne 100 XP.
+- **Il faut un peu plus d'XP à chaque niveau** : 50 pour le niveau 2, 70 pour le niveau 3, puis 20 de plus à chaque fois.
+- **Chaque niveau rapporte des pièces** (20 × le niveau) et fait grossir le monstre un tout petit peu, jusqu'au niveau 20.
+- **Les étapes** : bébé jusqu'au niveau 4, ado du niveau 5 au 11, adulte à partir du niveau 12.
+- **Les auras** : un anneau lumineux au niveau 5 (vert), 10 (bleu, avec des éclats qui tournent), 15 (violet) et 20 (doré).
+- **Certains cosmétiques demandent un niveau**, même si on a les pièces.
+
+### La vie du monstre
+
+| Ce qui se passe | Effet sur la vie |
+|---|---|
+| Journée à 600 points ou plus | + 15 |
+| Journée entre 300 et 599 points | + 5 |
+| Journée entre 100 et 299 points | − 10 |
+| Journée à moins de 100 points | − 20 |
+| Jour passé sans rien remplir | − 10 |
+
+- La vie commence à 100 et ne dépasse jamais 100.
+- **À 40 ou moins**, le monstre passe en mauvais état. **À 30 ou moins**, sa barre clignote et il dit qu'il ne va pas bien.
+- **À zéro, il meurt.** Il faut donc 5 journées catastrophiques d'affilée, ou 10 jours sans ouvrir l'appli.
+- Le joueur adopte alors un nouveau monstre, qui repart au niveau 1. **Il garde ses pièces, ses décors et ses cosmétiques.**
 
 ### Les monstres
 
@@ -159,17 +188,18 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 - **Chaque article a son image** : l'appli prend une photo en 3D de la créature du joueur avec l'objet, et une photo de chaque décor. Aucun fichier image à dessiner.
 - **La boutique est payante**, avec les pièces gagnées : les 7 décors (aux prix décidés pendant l'atelier) et 9 accessoires.
 
-| Accessoire | Prix |
-|---|---|
-| Bonnet à pompon | 80 pièces |
-| Nœud papillon | 90 pièces |
-| Lunettes rondes | 100 pièces |
-| Casquette | 120 pièces |
-| Écharpe | 140 pièces |
-| Lunettes de soleil | 180 pièces |
-| Chapeau haut-de-forme | 250 pièces |
-| Collier doré | 300 pièces |
-| Couronne | 600 pièces |
+Les cosmétiques sont rangés en 5 catégories : 17 chapeaux, 8 lunettes, 9 tours de cou, 7 objets dans le dos et 6 effets (des bulles, des flammes ou des cœurs qui flottent autour du monstre).
+
+Chacun a une **rareté** qui fixe à peu près son prix et son niveau :
+
+| Rareté | Prix | Niveau demandé | Exemples |
+|---|---|---|---|
+| Commun | 80 à 200 pièces | 1 ou 2 | Bonnet, foulard, sac à dos |
+| Rare | 200 à 350 pièces | 3 à 6 | Chapeau de cow-boy, monocle, bulles |
+| Épique | 340 à 600 pièces | 7 à 12 | Casque viking, cape de héros, étincelles |
+| Légendaire | 650 à 1 200 pièces | 13 à 20 | Auréole, ailes d'ange, flammes |
+
+Dans la boutique, on touche un article pour **l'essayer sur son monstre** avant de l'acheter.
 
 Ces prix sont une proposition : une journée parfaite rapporte 90 pièces, donc le bonnet se gagne en un jour et la couronne en une semaine. Le chef de projet peut les changer.
 

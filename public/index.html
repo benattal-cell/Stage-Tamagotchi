@@ -326,6 +326,8 @@ button, input { touch-action: manipulation; }
 .dots i { width: 12px; height: 4px; border-radius: 2px; background: rgba(27, 29, 43, .22); }
 .dots i.lvd2 { background: #1E8F6F; } .dots i.lvd1 { background: #8A6A10; } .dots i.lvd0 { background: #C0392B; }
 #entry .day { background: var(--night); border: 0; }
+.why:not([hidden]) { align-self: flex-start; max-width: calc(100% - 64px); min-height: 34px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 8px; border-radius: 999px; border: 2px solid var(--warn); background: var(--panel); color: var(--warn); font-family: var(--body); font-weight: 800; font-size: .82rem; text-align: left; line-height: 1.15; animation: pop .35s ease-out; }
+.why svg { flex: none; }
 </style>
 </head>
 <body>
@@ -339,6 +341,7 @@ button, input { touch-action: manipulation; }
         <div class="bar2"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 64 64"><path d="M32 56C4 36 6 10 22 10c6 0 10 5 10 10 0-5 4-10 10-10 16 0 18 26-10 46z" fill="#FF6B8B"/></svg><div class="track" role="progressbar" aria-label="Vie" aria-valuemin="0" aria-valuemax="100" id="hpTrack"><i id="hpBar"></i></div><span id="hpTxt"></span></div>
         <div class="bar2"><b aria-hidden="true">XP</b><div class="track" role="progressbar" aria-label="Expérience" aria-valuemin="0" aria-valuemax="100" id="xpTrack"><i id="xpBar"></i></div><span id="xpTxt"></span></div>
       </div>
+      <button type="button" class="why" id="why" hidden><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg><span id="whyTxt"></span></button>
       <div class="pills" id="hudPills">
         <div class="pill" id="coinPill"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#F7C948"/><circle cx="11" cy="11" r="6" fill="none" stroke="#B8860B" stroke-width="2"/></svg><span id="hudCoins"></span></div>
         <div class="pill" id="streakPill"><svg aria-hidden="true" width="18" height="20" viewBox="0 0 20 22"><path d="M10 1c1 4 6 6 6 12a6 6 0 0 1-12 0c0-2 1-4 2-5 0 2 1 3 2 3 0-4 1-7 2-10z" fill="#FF8A4B"/></svg><span id="hudStreak"></span></div>
@@ -768,6 +771,7 @@ button, input { touch-action: manipulation; }
     sun.intensity = d.sun; sun.color.setHex(d.sunC); lamp.intensity = d.amb === 'night' ? 0.7 : 0;
     starsG.forEach(function (o) { o.visible = d.amb === 'night'; }); flies.visible = d.amb === 'night'; clouds.visible = d.amb === 'day';
     moon.visible = d.amb !== 'in'; moon.material.color.setHex(d.amb === 'day' ? 0xFFE680 : 0xF3E9C6);
+    box.visible = n === 0;                    /* le carton reste dans la ruelle de départ : le monstre a déménagé */
   }
 
   /* Le carton, avec deux rabats qui s'ouvrent sur leurs charnières */
@@ -865,7 +869,7 @@ button, input { touch-action: manipulation; }
     { id: 'Dog', name: 'Chien' }, { id: 'Fish', name: 'Poisson' }, { id: 'Orc', name: 'Orc' }, { id: 'Ninja', name: 'Ninja' }, { id: 'Wizard', name: 'Sorcier' }
   ];
   /* Où poser les accessoires sur chaque monstre, en fraction de sa hauteur. Les valeurs par défaut vont à la plupart. */
-  var FIT0 = { hat: 0.9, hatR: 1, eye: 0.62, eyeW: 1, eyeDX: 0, neck: 0.3, neckR: 1 };
+  var FIT0 = { hat: 0.9, hatR: 1, eye: 0.62, eyeW: 1, eyeDX: 0, mouth: 0.17, neck: 0.3, neckR: 1 };
   var FIT = {
     Fish: { eye: 0.5, eyeW: 0.6, neckR: 0.45, hatR: 0.9 },          /* tout fin : il lui faut de petits accessoires */
     Alien: { hat: 0.74, eye: 0.5 },                                  /* le chapeau se pose sous ses antennes */
@@ -912,12 +916,13 @@ button, input { touch-action: manipulation; }
       if (!q.n) q = { x0: -0.6, x1: 0.6, z0: -0.6, z1: 0.6, n: 0 };
       q.cx = (q.x0 + q.x1) / 2; q.cz = (q.z0 + q.z1) / 2; q.w = q.x1 - q.x0; q.d = q.z1 - q.z0; return q;
     }
-    var sh = slice((f.hat - 0.16) * H, f.hat * H), se = slice((f.eye - 0.08) * H, (f.eye + 0.08) * H), sn = slice((f.neck - 0.06) * H, (f.neck + 0.06) * H), sb = slice(0.42 * H, 0.62 * H);
+    var sh = slice((f.hat - 0.16) * H, f.hat * H), se = slice((f.eye - 0.08) * H, (f.eye + 0.08) * H), sn = slice((f.neck - 0.06) * H, (f.neck + 0.06) * H), sb = slice(0.42 * H, 0.62 * H), sm = slice((f.eye - f.mouth - 0.05) * H, (f.eye - f.mouth + 0.05) * H);
     var mixer = new THREE.AnimationMixer(root), actions = {};
     gltf.animations.forEach(function (c) { actions[c.name] = mixer.clipAction(c); });
     MODELS[id] = {
       id: id, holder: holder, hueU: hueU, mats: mats, meshes: meshes, bones: bones, mixer: mixer, actions: actions, cur: '', curA: null, H: H,
       A: { hatX: sh.cx, hatZ: sh.cz, hatY: f.hat * H, hatR: Math.max(0.25, Math.min(0.85, Math.max(sh.w, sh.d) * 0.48 * f.hatR)),
+           mouthX: sm.cx + f.eyeDX, mouthY: (f.eye - f.mouth) * H, mouthZ: sm.z1,
            eyeX: se.cx + f.eyeDX, eyeY: f.eye * H, eyeZ: se.z1, eyeK: Math.max(0.35, Math.min(1.1, se.w * 0.31 / 0.63 * f.eyeW)),
            backX: sb.cx, backY: 0.52 * H, backZ: sb.z0, backK: Math.max(0.4, Math.min(1.15, sb.w / 2)),
            neckX: sn.cx, neckZ: sn.cz, neckY: f.neck * H, neckRX: sn.w / 2 * f.neckR, neckRZ: sn.d / 2 * f.neckR },
@@ -1007,9 +1012,74 @@ button, input { touch-action: manipulation; }
     var M = MODELS[id] || null;
     if (M !== modelNow) { unhook(); empty(modelG); modelNow = M; if (M) { modelG.add(M.holder); M.play('Idle'); } }
   }
+  /* ---------- Ce qui montre son âge ----------
+     Bébé : une tétine, des joues roses, une couche et un biberon. Ado : un skate et une mèche rebelle. Adulte : une moustache et une mallette.
+     Ça marche sur tous les monstres : l'appli se sert du repère « bouche » mesuré sur chacun. */
+  var stageOwn = [], stageKey = '', standY = 0, face = { x: 0, y: 0.98, z: 0.98, k: 1 }, headTop = 2.4;
+  function boneNear(M, y) {
+    var w = new THREE.Vector3(), best = null, by = -1e9;
+    M.bones.forEach(function (bn) { bn.getWorldPosition(w); bodyG.worldToLocal(w); if (w.y <= y + 0.01 && w.y > by) { by = w.y; best = bn; } });
+    return best || M.bones[0];
+  }
+  function buildStage() {
+    var M = modelNow, st = stageNow, key = (M ? M.id : 'p') + '|' + st + '|' + (G.look.hat || '') + '|' + (G.look.neck || ''); if (key === stageKey) return;
+    stageKey = key; stageOwn.forEach(function (o) { if (o.parent) o.parent.remove(o); }); stageOwn = [];
+    if (M) { face = { x: M.A.mouthX, y: M.A.mouthY, z: M.A.mouthZ, k: Math.max(0.55, M.A.eyeK) }; headTop = M.H + 0.05; } else { face = { x: 0, y: 0.98, z: 0.98, k: 1 }; headTop = 2.4; }
+    var fg = new THREE.Group(), gr = new THREE.Group(), o, n; fg.position.set(face.x, face.y, face.z); fg.scale.setScalar(face.k * 1.3); bodyG.add(fg); pet.add(gr); stageOwn.push(fg, gr);
+    standY = 0;
+    if (st === 0) {
+      o = qSph(0.24, 0x5CC8FF, 0, 0, 0.06, fg, { roughness: 0.4 }); o.scale.set(1.15, 0.85, 0.3);                      /* la tétine */
+      o = mesh(new THREE.TorusGeometry(0.13, 0.03, 8, 20), mat(0xFFFFFF), 0, -0.06, 0.2, fg); o.rotation.x = 0.5; qSph(0.07, 0xFFE680, 0, 0, 0.14, fg);
+      if (!M) {
+        [-0.62, 0.62].forEach(function (x) { o = qSph(0.17, 0xFF9DB5, x, 1.12, 0.74, bodyG); o.scale.set(1, 0.7, 0.25); stageOwn.push(o); });   /* les joues roses */
+        o = mesh(new THREE.SphereGeometry(1.03, 32, 16, 0, Math.PI * 2, Math.PI * 0.64, Math.PI * 0.36), mat(0xFFFFFF), 0, 1.2, 0, bodyG); o.scale.set(1, 1.12, 0.94); stageOwn.push(o);   /* la couche */
+        o = qSph(0.07, 0xF7C948, 0, 0.62, 0.9, bodyG, MET); stageOwn.push(o);
+      }
+      qCyl(0.16, 0.16, 0.42, 0xFFFFFF, 1.25, 0.21, 0.45, gr, { roughness: 0.3 }); qCyl(0.17, 0.17, 0.08, 0x5CC8FF, 1.25, 0.46, 0.45, gr); qCone(0.08, 0.16, 0xF4C7A0, 1.25, 0.58, 0.45, gr);   /* le biberon */
+      qCyl(0.14, 0.14, 0.2, 0xFFE9A8, 1.25, 0.14, 0.45, gr);
+    } else if (st === 1) {
+      standY = 0.16;                           /* le skate : le monstre est posé dessus */
+      o = bx2(2.1, 0.09, 0.78, 0xE2725B, 0, 0.13, 0.2, gr); bx2(2.12, 0.02, 0.62, 0x1B1D2B, 0, 0.18, 0.2, gr); bx2(0.3, 0.021, 0.8, 0xFFE680, 0.6, 0.18, 0.2, gr);
+      [[-0.72, -0.1], [-0.72, 0.5], [0.72, -0.1], [0.72, 0.5]].forEach(function (q) { var wh = qCyl(0.09, 0.09, 0.12, 0xFFE680, q[0], 0.08, q[1], gr); wh.rotation.x = Math.PI / 2; });
+      if (M && !G.look.hat) { var tg = new THREE.Group(); tg.position.set(M.A.hatX, M.A.hatY + 0.05, M.A.hatZ); tg.scale.setScalar(Math.max(0.6, M.A.hatR / 0.72)); bodyG.add(tg); stageOwn.push(tg);   /* la mèche rebelle */
+        [[0, 0.2, 0.2, 0], [-0.16, 0.14, 0.2, 0.5], [0.16, 0.14, 0.2, -0.5]].forEach(function (q) { o = qCone(0.09, 0.42, 0x2A2A38, q[0], q[1], q[2], tg); o.rotation.z = q[3]; o.rotation.x = 0.35; }); }
+    } else {
+      [-1, 1].forEach(function (s2) { o = qCone(0.1, 0.5, 0x2A2A38, s2 * 0.24, 0.2, 0.06, fg); o.rotation.z = s2 * 1.75; o.scale.z = 0.5; });   /* la moustache */
+      qSph(0.09, 0x2A2A38, 0, 0.22, 0.07, fg).scale.z = 0.5;
+      bx2(0.85, 0.58, 0.22, 0x8A5A3A, 1.3, 0.31, 0.4, gr); bx2(0.87, 0.07, 0.24, 0x5A3A22, 1.3, 0.5, 0.4, gr); bx2(0.12, 0.1, 0.24, 0xE8C55A, 1.3, 0.42, 0.42, gr, MET);   /* la mallette */
+      o = mesh(new THREE.TorusGeometry(0.14, 0.03, 8, 16, Math.PI), mat(0x5A3A22), 1.3, 0.6, 0.4, gr);
+    }
+    bodyG.position.y = standY;
+    if (M && M.bones.length) {                 /* sur un monstre téléchargé, on accroche tout au squelette pour suivre ses mouvements */
+      M.rest(); pet.updateMatrixWorld(true);
+      stageOwn.forEach(function (g2) { if (g2.parent === bodyG) boneNear(M, g2.position.y).attach(g2); });
+      M.play('Idle');
+    }
+  }
+  function bx2(w, hh, d, col, x, y, z, par, opt) { return mesh(new THREE.BoxGeometry(w, hh, d), mat(col, opt), x, y, z, par); }
+  /* ---------- Ce qui montre qu'il ne va pas bien ---------- */
+  var moodG = new THREE.Group(); bodyG.add(moodG);
+  var cloud = new THREE.Group(), drops = [], bolts = new THREE.Group(), sweat = [], md;
+  moodG.add(cloud); moodG.add(bolts);
+  [[0, 0, 0.5], [-0.45, -0.06, 0.38], [0.45, -0.06, 0.4], [0.18, 0.2, 0.36], [-0.2, 0.18, 0.3]].forEach(function (q) { noRay(qSph(q[2], 0x6E7389, q[0], q[1], 0, cloud)).castShadow = false; });   /* le nuage de pluie de la tristesse */
+  for (md = 0; md < 5; md++) { var dr = noRay(new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), new THREE.MeshBasicMaterial({ color: 0x5CC8FF }))); dr.scale.y = 1.8; cloud.add(dr); drops.push(dr); }
+  for (md = 0; md < 4; md++) {                 /* les éclairs du mal de tête */
+    var bo = new THREE.Group(), bm = new THREE.MeshBasicMaterial({ color: md % 2 ? 0xFF5A5A : 0xFFE680 });
+    [[0.08, 0.12, -0.5], [-0.02, 0, 0.6], [0.08, -0.12, -0.5]].forEach(function (q) { var sgm = noRay(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.2, 0.04), bm)); sgm.position.set(q[0], q[1], 0); sgm.rotation.z = q[2]; bo.add(sgm); });
+    bolts.add(bo);
+  }
+  var ice = new THREE.Group(); moodG.add(ice);  /* la poche de glace sur la tête */
+  noRay(qSph(0.42, 0x8FD3F4, 0, 0.08, 0, ice, { roughness: 0.35 })).scale.set(1, 0.55, 0.9); noRay(qCyl(0.1, 0.13, 0.12, 0x3B6FD9, 0, 0.32, 0, ice));
+  var thermo = new THREE.Group(); moodG.add(thermo);   /* le thermomètre dans la bouche */
+  md = noRay(qCyl(0.035, 0.035, 0.6, 0xFFFFFF, 0, 0, 0.3, thermo)); md.rotation.x = Math.PI / 2; noRay(qSph(0.07, 0xD62828, 0, 0, 0.62, thermo)); md = noRay(qCyl(0.02, 0.02, 0.3, 0xD62828, 0, 0, 0.42, thermo)); md.rotation.x = Math.PI / 2;
+  thermo.rotation.set(-0.25, 0.5, 0);
+  for (md = 0; md < 3; md++) { var sw2 = noRay(new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), new THREE.MeshBasicMaterial({ color: 0x9FE3FF }))); sw2.scale.y = 1.6; moodG.add(sw2); sweat.push(sw2); }
+  var snot = noRay(new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), new THREE.MeshBasicMaterial({ color: 0xBFE8FF, transparent: true, opacity: 0.6, depthWrite: false }))); moodG.add(snot);   /* la bulle du dormeur */
+  var TINT = { fatigue: new THREE.Color(0x8792C0), tete: new THREE.Color(0xE87A7A), triste: new THREE.Color(0x7F96C2), sick: new THREE.Color(0x9BC49A) };
+
   function syncParts() {
     var native = !modelNow;
-    bodyG.children.forEach(function (c) { if (c !== modelG && c !== acc) c.visible = native; });
+    bodyG.children.forEach(function (c) { if (c !== modelG && c !== acc && c !== moodG) c.visible = native; });
     modelG.visible = !native; footL.visible = footR.visible = native;
   }
 
@@ -1223,7 +1293,17 @@ button, input { touch-action: manipulation; }
       else if (sc.l[1] === 0) m = 'triste';                   /* moins de 10 000 pas : pas contente */
     }
     coins += G.bonus - G.spent;                                       /* ce qu'on a gagné, moins ce qu'on a dépensé à la boutique */
-    return { n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv, lvl: lvl, xp: rem, need: xpNeed(lvl), hp: hp, age: span + 1 };
+    /* Pourquoi il ne va pas bien : une phrase courte pour l'écran, une longue pour sa bulle */
+    var whys = [], when = today ? 'aujourd\'hui' : 'la dernière fois';
+    if (hp <= 40) whys.push({ s: 'Malade · vie à ' + hp + ' sur 100', l: 'Ma vie est tombée à ' + hp + ' sur 100. Si ça continue, je ne tiendrai pas… Une bonne journée me soignerait.' });
+    if (ref) {
+      if (ref.screen > 5) whys.push({ s: 'Gros mal de tête · ' + hm(ref.screen) + ' d\'écran', l: hm(ref.screen) + ' d\'écran ' + when + ', c\'est beaucoup trop : j\'ai très mal à la tête !' });
+      else if (ref.screen > 3) whys.push({ s: 'Mal de tête · ' + hm(ref.screen) + ' d\'écran', l: hm(ref.screen) + ' d\'écran ' + when + '. Au-dessus de 3 h, ça me donne mal à la tête.' });
+      if (ref.sleep < 7) whys.push({ s: 'Fatigué · ' + hm(ref.sleep) + ' de sommeil', l: 'Je n\'ai dormi que ' + hm(ref.sleep) + ' ' + when + '. Il m\'en faut au moins 7 pour être en forme.' });
+      if (ref.steps < 10000) whys.push({ s: 'Pas en forme · ' + ref.steps.toLocaleString('fr-FR') + ' pas', l: 'Seulement ' + ref.steps.toLocaleString('fr-FR') + ' pas ' + when + '. J\'ai besoin de bouger : il m\'en faut 10 000 !' });
+    }
+    if (!whys.length && bad) whys.push({ s: 'En mauvais état', l: 'Ça fait plusieurs jours que ça ne va pas fort. Quelques bonnes journées et ça ira mieux.' });
+    return { whys: whys, n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv, lvl: lvl, xp: rem, need: xpNeed(lvl), hp: hp, age: span + 1 };
   }
   function show(id) { ['loading', 'title', 'custom', 'hud', 'runHud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; $('rankBtn').hidden = id !== 'hud'; }
   function setColor(i) {
@@ -1231,7 +1311,7 @@ button, input { touch-action: manipulation; }
     Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
   }
   function setMood(m) { mood = m; }
-  var hpNow = 100, fallK = 0, fxNow = null;
+  var hpNow = 100, fallK = 0, fxNow = null, whyNow = [], whyTurn = 0;
   var STAGE = [{ k: 0.72, ear: 0.7, name: 'Bébé' }, { k: 0.88, ear: 1, name: 'Ado' }, { k: 1.05, ear: 1.3, name: 'Adulte' }];
   var stageNow = 0, badNow = false, pending = null, forceMood = null, forceStage = null, forceBad = null;
   var grey = new THREE.Color(0x77778A);
@@ -1241,10 +1321,13 @@ button, input { touch-action: manipulation; }
     if (modelNow) modelNow.mats.forEach(function (m) {   /* la teinte d'un monstre téléchargé se règle dans le shader */
       m.color.setHex(0xFFFFFF); if (badNow) m.color.lerp(grey, 0.5);
     });
+    var tint = phase !== 'play' ? null : hpNow <= 40 ? TINT.sick : TINT[mood] || null;        /* malade : verdâtre ; fatigué : bleuté ; mal de tête : rouge */
+    if (tint) { furMat.color.lerp(tint, 0.3); darkMat.color.lerp(tint, 0.3); if (modelNow) modelNow.mats.forEach(function (m) { m.color.lerp(tint, 0.38); }); }
     if (modelNow) modelNow.hueU.value = (G.hue || 0) * Math.PI / 4;
-    rag.visible = badNow && !modelNow; tuft.children.forEach(function (o, i) { o.visible = !G.look.hat && (stageNow === 2 || (stageNow === 1 && i === 0)); });
+    buildStage();
+    rag.visible = badNow && !modelNow; tuft.children.forEach(function (o) { o.visible = !G.look.hat && stageNow >= 1; });
   }
-  function dress() { useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth); buildAcc(G.look); syncParts(); paint(); }
+  function dress() { useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth); buildAcc(G.look); syncParts(); stageKey = ''; paint(); }
   var toastT = null;
   function toast(msg) { $('toast').textContent = msg; $('toast').hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { $('toast').hidden = true; }, 3200); }
   function gauge(id, bar, txt, lv, pct) {
@@ -1253,7 +1336,7 @@ button, input { touch-action: manipulation; }
   }
   /* Recalcule tout à partir des journées enregistrées et met l'écran à jour */
   var TITLES = ['Bébé', 'Ado', 'Adulte'], levelNow = 1, sizeGoal = 0.72;
-  function sizeOf(lvl) { return 0.72 + Math.min(lvl, 20) / 20 * 0.38; }       /* il grossit un tout petit peu à chaque niveau, jusqu'au niveau 20 */
+  function sizeOf(lvl) { return 0.68 + Math.min(lvl, 20) / 20 * 0.28; }       /* il grossit un tout petit peu à chaque niveau, jusqu'au niveau 20 */
   function auraName(lvl) { return lvl >= 20 ? 'Aura dorée' : lvl >= 15 ? 'Aura violette' : lvl >= 10 ? 'Aura bleue' : lvl >= 5 ? 'Aura verte' : ''; }
   /* Recalcule tout à partir des journées enregistrées et met l'écran à jour */
   function refresh(animate) {
@@ -1270,6 +1353,8 @@ button, input { touch-action: manipulation; }
     $('xpBar').style.width = Math.round(c.xp / c.need * 100) + '%'; $('xpTxt').textContent = c.xp + '/' + c.need; $('xpTrack').setAttribute('aria-valuenow', Math.round(c.xp / c.need * 100));
     $('plate').className = 'plate' + (c.hp <= 30 ? ' low' : '');
     coinGoal = c.coins; todayDone = !!t; hpNow = c.hp;
+    whyNow = c.whys; if (forceMood && forceMood !== 'forme' && !whyNow.length) whyNow = [{ s: { fatigue: 'Fatigué', tete: 'Mal de tête', triste: 'Pas en forme' }[forceMood] + ' (test)', l: 'C\'est l\'administrateur qui m\'a mis dans cet état, pour tester.' }];
+    $('why').hidden = !whyNow.length; if (whyNow.length) $('whyTxt').textContent = whyNow[0].s + (whyNow.length > 1 ? ' (+' + (whyNow.length - 1) + ')' : '');
     $('shopDot').hidden = !canBuySomething(c.coins, c.lvl);
     $('hudStreak').textContent = c.streak; $('streakPill').setAttribute('aria-label', 'Série : ' + c.streak + (c.streak > 1 ? ' jours' : ' jour') + ' d\'affilée'); $('streakPill').title = 'Jours réussis d\'affilée';
     if (t) {
@@ -1296,7 +1381,8 @@ button, input { touch-action: manipulation; }
       else { stageNow = st; badNow = bd; paint(); if (animate && up) toast(msg); }
       return true;
     }
-    if (animate && c.hp <= 30) say('Je ne me sens pas bien du tout…', 4200);
+    paint();
+    if (animate && whyNow.length) say(whyNow[0].l, 5600);
     return false;
   }
   /* ---------- La mort du monstre : quand sa vie tombe à zéro ---------- */
@@ -1489,7 +1575,11 @@ button, input { touch-action: manipulation; }
     $('bubble').hidden = true; void $('bubble').offsetWidth; $('bubble').textContent = txt; $('bubble').hidden = false;
     clearTimeout(sayT); sayT = setTimeout(function () { $('bubble').hidden = true; }, dur || 3400);
   }
-  function chatter() { var list = (!todayDone && Math.random() < 0.5) ? SAY.ask : (SAY[mood] || SAY.forme); say(list[Math.floor(Math.random() * list.length)]); }
+  function chatter() {
+    if (whyNow.length && Math.random() < 0.65) { say(whyNow[whyTurn++ % whyNow.length].l, 5600); return; }     /* quand ça ne va pas, il dit surtout pourquoi */
+    var list = (!todayDone && Math.random() < 0.5) ? SAY.ask : (SAY[mood] || SAY.forme); say(list[Math.floor(Math.random() * list.length)]);
+  }
+  $('why').addEventListener('click', function () { if (whyNow.length) { sfx('tick'); say(whyNow[whyTurn++ % whyNow.length].l, 6000); } });
   var last = 0, lean = 0, open = 1, droop = 0, aLs = 0.3, aRs = 0.3, mouthO = 0, earLag = 0, prevY = 0, starK = 0, zK = 0;
 
   function frame() {
@@ -1615,8 +1705,8 @@ button, input { touch-action: manipulation; }
     pet.rotation.z = tilt + shake;
     bodyG.scale.set(1 + S * 0.6 - breath * 0.5, 1 - S + breath, 1 + S * 0.6 - breath * 0.5);
     var step = (act || reduce) ? 0 : 0.03;
-    footL.position.y = 0.16 + Math.max(0, Math.sin(t * 2.2 * sp)) * step;
-    footR.position.y = 0.16 + Math.max(0, -Math.sin(t * 2.2 * sp)) * step;
+    footL.position.y = standY + 0.16 + Math.max(0, Math.sin(t * 2.2 * sp)) * step;
+    footR.position.y = standY + 0.16 + Math.max(0, -Math.sin(t * 2.2 * sp)) * step;
 
     armL.rotation.z = -aLs; armR.rotation.z = aRs;
     eyes.forEach(function (e) {
@@ -1636,6 +1726,16 @@ button, input { touch-action: manipulation; }
     starK += ((ache ? 1 : 0) - starK) * f; stars.scale.setScalar(Math.max(0.001, starK));
     stars.rotation.y = t * 3; stars.position.y = 2.75 + Math.sin(t * 4) * 0.05;
     stars.children.forEach(function (o, i) { o.rotation.y = t * 5 + i; o.rotation.x = t * 3; o.visible = acheLv > 1 || i % 2 === 0; });
+    var sick = playing && hpNow <= 40, top = headTop + (G.look.hat ? 0.55 : 0);
+    moodG.visible = playing;
+    cloud.visible = sad;
+    if (sad) { cloud.position.set(0, top + 0.75 + Math.sin(t * 1.5) * 0.05, 0.1); drops.forEach(function (o, n) { var ph = (t * 0.9 + n / 5) % 1; o.position.set(-0.5 + n * 0.25, -0.35 - ph * 1.15, 0.1); o.visible = ph < 0.9; }); }
+    bolts.visible = ache;
+    if (ache) bolts.children.forEach(function (o, n) { var a2 = n * Math.PI / 2 + 0.6 + Math.sin(t * 3 + n) * 0.15, r2 = 1.0 + Math.abs(Math.sin(t * 9 + n * 2)) * 0.15; o.position.set(Math.cos(a2) * r2, top - 0.75 + Math.sin(a2) * 0.55 + 0.4, 0.55); o.rotation.z = a2 - Math.PI / 2; o.scale.setScalar(acheLv > 1 ? 1.5 : 1); o.visible = acheLv > 1 || n < 2 ? Math.sin(t * 13 + n * 1.7) > -0.5 : false; });
+    ice.visible = ache && acheLv > 1; ice.position.set(0.1, top - 0.02, 0.05); ice.rotation.z = -0.12;
+    thermo.visible = sick; thermo.position.set(face.x + 0.12 * face.k, face.y + 0.02, face.z - 0.05); thermo.scale.setScalar(face.k);
+    sweat.forEach(function (o, n) { var ph = (t * 0.7 + n / 3) % 1; o.visible = sick || (ache && acheLv > 1); o.position.set((n === 1 ? 1 : -1) * (0.75 + n * 0.08), top - 0.35 - ph * 0.9, 0.55); });
+    snot.visible = tired; snot.position.set(face.x + 0.2 * face.k, face.y + 0.22 * face.k, face.z + 0.12); snot.scale.setScalar((0.1 + (0.5 + 0.5 * Math.sin(t * 1.5)) * 0.14) * face.k);
     zK += ((tired ? 1 : 0) - zK) * f;
     zs.forEach(function (o, i) {
       var ph = (t * 0.3 + i / 3) % 1;
@@ -1930,7 +2030,7 @@ button, input { touch-action: manipulation; }
     if (thumbCache[key]) return thumbCache[key];
     try {
       buildEars(look.ears); buildEyes(look.eyes); buildTeeth(look.teeth); buildAcc(look); syncParts();
-      tuft.children.forEach(function (o) { o.visible = false; });
+      tuft.children.forEach(function (o) { o.visible = false; }); stageOwn.forEach(function (o) { o.visible = false; }); moodG.visible = false;
       var par = pet.parent, shown = pet.visible; studio.add(pet); pet.visible = true;
       pet.position.set(0, 0, 0); pet.rotation.set(0, focus === 'back' ? Math.PI * 0.8 : -0.3, 0); pet.scale.setScalar(1); bodyG.scale.set(1, 1, 1);
       eyes.forEach(function (e) { e.scale.y = 1; });
@@ -2489,7 +2589,7 @@ button, input { touch-action: manipulation; }
     if (phase === 'dead') return;
     if (!grew) {
       toast('+' + sc.pts + ' points · +' + Math.floor(sc.pts / 10) + ' pièces');
-      if (sc.pts >= 600) { sfx('fanfare'); start('jump'); party(); say('Bravo, super journée !'); } else if (sc.pts < 300) { start('sigh'); say('On fera mieux demain…'); } else { start('wave'); say('Pas mal du tout !'); }
+      if (sc.pts >= 600) { sfx('fanfare'); start('jump'); party(); say('Bravo, super journée !'); } else if (sc.pts < 300) { start('sigh'); say(whyNow.length ? whyNow[0].l : 'On fera mieux demain…', 5600); } else { start('wave'); say(whyNow.length ? whyNow[0].l : 'Pas mal du tout !', whyNow.length ? 5600 : 3400); }
     } else { sfx('evolve'); party(); }
   }
   $('dayForm').addEventListener('submit', function (ev) {
@@ -2561,7 +2661,7 @@ button, input { touch-action: manipulation; }
       loader.load('models/' + sp.id + MODEL_EXT, function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
     });
   });
-  if (location.hash === '#reglage') window.__fl = { RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
+  if (location.hash === '#reglage') window.__fl = { stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
   function loadStep() {

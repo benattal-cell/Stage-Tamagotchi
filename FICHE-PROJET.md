@@ -161,6 +161,29 @@ Cette règle remplace « il grandit tous les 3 jours ».
 - **Les auras** : un anneau lumineux au niveau 5 (vert), 10 (bleu, avec des éclats qui tournent), 15 (violet) et 20 (doré).
 - **Certains cosmétiques demandent un niveau**, même si on a les pièces.
 
+### Ce qu'on voit sur le monstre
+
+**Son âge**, sur les 18 monstres :
+
+| Âge | Ce qu'il porte |
+|---|---|
+| Bébé (niveaux 1 à 4) | Une grosse tétine et un biberon à côté de lui. La peluche a aussi des joues roses et une couche |
+| Ado (niveaux 5 à 11) | Il est debout sur un skate, avec une mèche rebelle |
+| Adulte (niveau 12 et plus) | Une moustache, et une mallette posée à côté |
+
+**Son état**, pour qu'on le remarque tout de suite :
+
+| État | Ce qu'on voit |
+|---|---|
+| Fatigué | Il devient bleuté, une bulle gonfle à son nez, des « z » montent |
+| Mal de tête | Il rougit, des éclairs clignotent autour de sa tête. S'il est fort : une poche de glace et de la sueur |
+| Pas assez bougé | Un nuage de pluie au-dessus de lui |
+| Malade (vie à 40 ou moins) | Il verdit, un thermomètre dans la bouche, des gouttes de sueur |
+
+**Il explique pourquoi**, avec les vrais chiffres. Une pastille sous son nom résume la raison (« Fatigué · 5 h 30 de sommeil »), et sa bulle la dit en entier (« Je n'ai dormi que 5 h 30 aujourd'hui. Il m'en faut au moins 7 pour être en forme. »). Toucher la pastille lui fait répéter. S'il y a plusieurs raisons, il les donne l'une après l'autre.
+
+Le carton d'origine n'apparaît que dans le premier décor, la ruelle aux poubelles.
+
 ### La vie du monstre
 
 | Ce qui se passe | Effet sur la vie |

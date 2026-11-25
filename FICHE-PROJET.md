@@ -178,9 +178,23 @@ Cette règle remplace « il grandit tous les 3 jours ».
 
 ### Les mini-jeux
 
-Le premier mini-jeu est **« La course des poubelles »** : le monstre court tout droit sur trois voies, évite les poubelles, saute par-dessus les cartons et ramasse des pièces. La course accélère peu à peu.
+Le premier mini-jeu est **« La course des poubelles »** : le monstre court tout droit sur trois voies et ramasse des pièces.
 
-- **Commandes** : glisser à gauche ou à droite pour changer de voie, vers le haut pour sauter. Un simple toucher (à gauche, à droite, en haut) marche aussi, ainsi que les flèches du clavier.
+| Obstacle | Ce qu'il faut faire | Il arrive à partir de |
+|---|---|---|
+| Poubelle | Changer de voie | Le début |
+| Carton | Changer de voie ou sauter | Le début |
+| Barrière sur une voie | Changer de voie ou glisser dessous | 150 m |
+| Trois cartons de front | Sauter | 150 m |
+| Barrière sur toute la largeur | Glisser dessous | 150 m |
+| Tonneau qui roule, plus rapide que le reste | Changer de voie ou sauter | 400 m |
+| Pneu qui traverse la route | Sauter au bon moment | 400 m |
+
+- **Le parcours n'est jamais régulier** : l'écart entre deux rangées change tout le temps, avec parfois une pause et parfois deux rangées collées.
+- **Il existe toujours un chemin.** Le programme garde une « voie sûre » qui ne se déplace que d'une voie à la fois ; c'est ce qui rend le jeu dur mais jamais injuste.
+- **La difficulté monte par paliers** (150 m, 400 m, 800 m) : les rangées se rapprochent, se remplissent, et la vitesse passe de 9 à 34.
+- **Cinq zones** de 320 m chacune changent les couleurs : la ruelle, le quartier néon, l'aube, la zone toxique, minuit rouge.
+- **Commandes** : glisser à gauche ou à droite pour changer de voie, vers le haut pour sauter, vers le bas pour glisser. Un simple toucher marche aussi, ainsi que les flèches du clavier.
 - **5 courses par jour** et **50 pièces par jour au maximum** avec les jeux.
 
 Cette limite est voulue : FormiLife sert à passer moins de temps sur les écrans. Un mini-jeu sans limite pousserait à faire l'inverse, et rapporterait plus que de bien dormir. Les jeux restent donc un bonus, et les vraies récompenses viennent du sommeil, des pas et du temps d'écran.

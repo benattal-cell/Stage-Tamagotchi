@@ -374,12 +374,20 @@ textarea.inp { min-height: 56px; resize: vertical; font-size: 1rem; line-height:
 button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-events: auto; min-height: 36px; }
 #questPill.todo { border-color: var(--coin); }
 @media (prefers-reduced-motion: reduce) { .pads .bin { transition: none; } }
+#nightTint { position: absolute; inset: 0; background: rgba(8, 12, 48, .45); pointer-events: none; }
+.bins.grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } .bins.grid4 .bin { min-height: 52px; }
+.bins.letters { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bins.letters .bin { font-size: 1.4rem; }
+.bin:disabled { opacity: .28; box-shadow: none; }
+.gcard.wk { flex-direction: column; align-items: stretch; }
+.days i.lvd { width: 24px; height: 24px; font-style: normal; font-size: .8rem; font-weight: 800; color: var(--dark-ink); display: grid; place-items: center; }
+.days i.l0 { background: #FF8FA5; } .days i.l1 { background: var(--coin); } .days i.l2 { background: var(--mint); }
 </style>
 </head>
 <body>
 
 <div id="app">
   <div id="stage" role="img" aria-label="Une ruelle la nuit, avec des poubelles et un carton abandonné"></div>
+  <div id="nightTint" hidden></div>
 
   <div class="ui" id="hud" hidden>
     <div class="topbar">
@@ -483,6 +491,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
         <input type="range" id="setSfxVol" min="0" max="100" step="5">
       </div>
       <div class="row">
+        <button type="button" class="ghost" id="tutoOpen">Comment jouer</button>
         <button type="button" class="ghost" id="adminOpen">Administrateur</button>
       </div>
       <button type="button" class="big" id="setClose">Fermer</button>
@@ -551,6 +560,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
             <button type="button" class="ghost" id="aCoins">+ 500 pièces</button>
             <button type="button" class="ghost" id="aLevel">+ 1 niveau</button>
             <button type="button" class="ghost" id="aHeal">Soigner (vie à 100)</button>
+            <button type="button" class="ghost" id="aNight">Nuit : selon l'heure</button>
           </div>
         </div>
         <div class="row"><button type="button" class="ghost danger" id="aReset">Tout effacer et recommencer</button></div>
@@ -611,6 +621,14 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       <button type="button" class="ghost" id="triClose">Fermer</button>
     </div>
   </div>
+  <div class="veil" id="tuto" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="tutoTitle">
+      <div class="sheethead"><h2 id="tutoTitle"></h2><span class="pill" id="tutoStep"></span></div>
+      <p id="tutoText"></p>
+      <button type="button" class="big" id="tutoNext">Suivant</button>
+      <button type="button" class="ghost" id="tutoSkip">Passer</button>
+    </div>
+  </div>
   <div class="veil" id="brain" hidden>
     <div class="card" role="dialog" aria-modal="true" aria-labelledby="brainTitle">
       <div class="sheethead"><h2 id="brainTitle"></h2><span class="pill" id="brainScore">0</span></div>
@@ -634,6 +652,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   <div class="sheetwrap" id="quests" hidden>
     <div class="sheet" role="dialog" aria-labelledby="questsTitle">
       <div class="sheethead"><h2 id="questsTitle">Défis</h2><button type="button" class="ghost" id="questsClose">Terminé</button></div>
+      <div class="tabs" id="questTabs" role="tablist" aria-label="Ce que tu veux voir"></div>
       <div class="opts" id="questList"></div>
     </div>
   </div>
@@ -1585,7 +1604,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
   var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null, back: null, fx: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0, calc: 0, suite: 0, stroop: 0 }, stats: { well: 0, quiz: 0, quests: 0, brain: 0, gifts: 0 }, quest: { day: '', done: {}, all: false, brain: 0, stars: 0 }, quiz: { day: '', n: 0, ans: -1 }, trophies: [], well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0, calc: 0, suite: 0, stroop: 0, mots: 0, ordre: 0 }, tuto: false, stats: { well: 0, quiz: 0, quests: 0, brain: 0, gifts: 0 }, quest: { day: '', done: {}, all: false, brain: 0, stars: 0 }, quiz: { day: '', n: 0, ans: -1 }, trophies: [], well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
   var G = freshG();
   function load() {
     try {
@@ -1600,7 +1619,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       G.decor = G.decors.indexOf(o.decor | 0) >= 0 ? (o.decor | 0) : 0;
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
-      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0), calc: Math.max(0, rc0.calc | 0), suite: Math.max(0, rc0.suite | 0), stroop: Math.max(0, rc0.stroop | 0) };
+      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0), calc: Math.max(0, rc0.calc | 0), suite: Math.max(0, rc0.suite | 0), stroop: Math.max(0, rc0.stroop | 0), mots: Math.max(0, rc0.mots | 0), ordre: Math.max(0, rc0.ordre | 0) }; G.tuto = o.tuto === true || Object.keys(G.entries).length > 0;
       var s0 = (o.stats && typeof o.stats === 'object') ? o.stats : {}; G.stats = { well: Math.max(0, s0.well | 0), quiz: Math.max(0, s0.quiz | 0), quests: Math.max(0, s0.quests | 0), brain: Math.max(0, s0.brain | 0), gifts: Math.max(0, s0.gifts | 0) };
       var q0 = (o.quest && typeof o.quest === 'object') ? o.quest : {}; G.quest = { day: typeof q0.day === 'string' ? q0.day : '', done: (q0.done && typeof q0.done === 'object') ? q0.done : {}, all: q0.all === true, brain: Math.max(0, q0.brain | 0), stars: Math.max(0, Math.min(5, q0.stars | 0)) };
       var z0 = (o.quiz && typeof o.quiz === 'object') ? o.quiz : {}; G.quiz = { day: typeof z0.day === 'string' ? z0.day : '', n: Math.max(0, z0.n | 0), ans: typeof z0.ans === 'number' ? Math.max(-1, Math.min(2, z0.ans | 0)) : -1 };
@@ -1634,7 +1653,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   function calc() {
     var keys = Object.keys(G.entries).sort(), n = keys.length, today = G.entries[dayKey(0)] || null;
     var coins = 0, xp = G.xpBonus || 0;
-    keys.forEach(function (k) { var p = score(G.entries[k]).pts; coins += Math.floor(p / 10); xp += Math.floor(p / 10) + 10; });   /* 100 points = 10 pièces et 10 XP, plus 10 XP pour avoir rempli sa journée */
+    keys.forEach(function (k) { var p = score(G.entries[k]).pts; coins += Math.floor(p / 5); xp += Math.floor(p / 10) + 10; });   /* 100 points = 20 pièces et 10 XP, plus 10 XP pour avoir rempli sa journée */
     var lvl = 1, rem = xp; while (rem >= xpNeed(lvl) && lvl < 50) { rem -= xpNeed(lvl); lvl++; }
     var stage = lvl >= 12 ? 2 : lvl >= 5 ? 1 : 0;                      /* bébé jusqu'au niveau 4, ado jusqu'au 11, adulte ensuite */
     /* La vie : elle monte avec les bonnes journées, descend avec les mauvaises et les jours oubliés. À zéro, le monstre meurt. */
@@ -1670,7 +1689,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     if (!whys.length && bad) whys.push({ s: 'En mauvais état', l: 'Ça fait plusieurs jours que ça ne va pas fort. Quelques bonnes journées et ça ira mieux.' });
     return { whys: whys, n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv, lvl: lvl, xp: rem, need: xpNeed(lvl), hp: hp, age: span + 1 };
   }
-  function show(id) { ['loading', 'title', 'custom', 'hud', 'runHud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; $('rankBtn').hidden = id !== 'hud'; }
+  function show(id) { ['loading', 'title', 'custom', 'hud', 'runHud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; $('rankBtn').hidden = id !== 'hud'; if (id !== 'hud') $('nightTint').hidden = true; }
   function setColor(i) {
     colorIndex = i; paint();
     Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
@@ -1706,7 +1725,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   function auraName(lvl) { return lvl >= 20 ? 'Aura dorée' : lvl >= 15 ? 'Aura violette' : lvl >= 10 ? 'Aura bleue' : lvl >= 5 ? 'Aura verte' : ''; }
   /* Recalcule tout à partir des journées enregistrées et met l'écran à jour */
   function refresh(animate) {
-    var c = calc(); if (progressCheck(c)) c = calc(); var t = c.today;
+    var c = calc(); if (progressCheck(c)) c = calc(); var t = c.today; nightSync();
     mood = forceMood || c.mood; acheLv = forceMood ? 2 : c.acheLv;
     var st = forceStage == null ? c.stage : forceStage, bd = forceBad == null ? c.bad : forceBad;
     /* Monter de niveau rapporte des pièces, une seule fois par niveau */
@@ -1767,7 +1786,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; stageNow = 0; badNow = false; pending = null; forceMood = forceStage = forceBad = null; levelNow = 1; sizeGoal = 0.72; fallK = 0; $('dead').hidden = true; closeSheets(); $('bubble').hidden = true; dress(); applyDecor(0); show('title'); musicSync(); }
   function goCustom() { phase = 'custom'; paintStrip(); show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
   function goPlay(name) {
-    phase = 'play'; flapT = 1; show('hud'); musicSync(); dress(); applyDecor(G.decor); coinShown = -1; refresh(false); nextSay = clock.getElapsedTime() + 4;
+    phase = 'play'; flapT = 1; show('hud'); musicSync(); dress(); applyDecor(G.decor); coinShown = -1; refresh(false); nextSay = clock.getElapsedTime() + 9; setTimeout(welcome, 900);
   }
   function openBox() {
     if (phase !== 'title') return;
@@ -1791,7 +1810,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.well = old.well; G.stats = old.stats; G.quest = old.quest; G.quiz = old.quiz; G.trophies = old.trophies; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
+    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.well = old.well; G.stats = old.stats; G.quest = old.quest; G.quiz = old.quiz; G.trophies = old.trophies; G.tuto = old.tuto === true; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
@@ -1946,6 +1965,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     talkUntil = clock.getElapsedTime() + Math.min((dur || 3400) / 1000 * 0.7, 0.8 + txt.length * 0.05);      /* sa bouche bouge le temps de dire la phrase */
   }
   function chatter() {
+    if (isNight()) { say('Zzz… zzz…', 3000); return; }
     if (whyNow.length && Math.random() < 0.65) { say(whyNow[whyTurn++ % whyNow.length].l, 5600); return; }     /* quand ça ne va pas, il dit surtout pourquoi */
     var list = (!todayDone && Math.random() < 0.5) ? SAY.ask : (SAY[mood] || SAY.forme); say(list[Math.floor(Math.random() * list.length)]);
   }
@@ -2791,8 +2811,9 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   /* ---------- Ce que les jeux ont en commun : le nombre de parties et de pièces par jour ---------- */
   var curGame = 'run';
   function playsLeft() { return RUNS_PER_DAY - gameDay().runs; }
-  function usePlay() { if (playsLeft() <= 0 || phase !== 'play') return false; gameDay().runs++; saveG(); setTimeout(function () { refresh(false); }, 0); return true; }
+  function usePlay() { if (playsLeft() <= 0 || phase !== 'play' || isNight()) return false; gameDay().runs++; saveG(); return true; }
   function earn(n) { var gm = gameDay(), e = Math.max(0, Math.min(Math.floor(n), COINS_PER_DAY - gm.coins)); gm.coins += e; G.bonus += e; saveG(); if (e) sfx('cash'); refresh(false); return e; }
+  function giveBack() { var gm = gameDay(); gm.runs = Math.max(0, gm.runs - 1); saveG(); toast('Partie arrêtée avant la fin : elle ne compte pas.'); }
   function capNote(got, e) { var left = playsLeft(); return (e < got ? 'Tu as atteint le maximum de ' + COINS_PER_DAY + ' pièces par jour avec les jeux. ' : '') + (left > 0 ? 'Il te reste ' + left + (left > 1 ? ' parties' : ' partie') + ' aujourd\'hui.' : 'Plus de partie pour aujourd\'hui. Reviens demain !'); }
 
   /* ---------- Mini-jeu : attrape les bons aliments ----------
@@ -2892,7 +2913,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     $('memAgain').hidden = playsLeft() <= 0; sfx('fanfare'); party(); start('jump');
   }
   $('memAgain').addEventListener('click', memStart);
-  $('memClose').addEventListener('click', function () { sfx('tick'); $('mem').hidden = true; });
+  $('memClose').addEventListener('click', function () { sfx('tick'); if (MEM.cards.length && MEM.found < 8) { giveBack(); MEM.cards = []; } $('mem').hidden = true; });
 
   /* ---------- Mini-jeu : le tri des déchets ---------- */
   var BINS = [['jaune', 'Poubelle jaune', 'emballages, papier', '#F7C948'], ['verre', 'Verre', 'bouteilles, bocaux', '#5FCB8A'], ['compost', 'Compost', 'restes de fruits et légumes', '#C89A62'], ['gris', 'Ordures', 'le reste', '#A9AEC6']];
@@ -2922,7 +2943,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     $('triNote').textContent = (record && TRI.score > 0 ? 'Nouveau record ! ' : '') + '+' + e + ' pièces. ' + capNote(got, e); $('triAgain').hidden = playsLeft() <= 0; if (record && TRI.score > 0) sfx('fanfare');
   }
   $('triAgain').addEventListener('click', triStart);
-  $('triClose').addEventListener('click', function () { sfx('tick'); TRI.on = false; clearInterval(TRI.timer); $('tri').hidden = true; });
+  $('triClose').addEventListener('click', function () { sfx('tick'); if (TRI.on) giveBack(); TRI.on = false; clearInterval(TRI.timer); $('tri').hidden = true; });
 
   ['mem', 'tri'].forEach(function (id) { $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Escape') $(id + 'Close').click(); }); });
 
@@ -3053,7 +3074,8 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   /* ---------- Jeux de cerveau : calcul, mémoire de suite, attention ----------
      Ils partagent le même écran et la même limite de parties que les autres jeux. */
   var BR = { game: '', on: false, score: 0, left: 0, total: 0, timer: null, ans: null, seq: [], pos: 0, tok: 0, lock: false };
-  var BRN = { calc: ['Calcul éclair', 'Trouve le bon résultat. Une erreur coûte 3 secondes.', 'Bons calculs : '], suite: ['La suite lumineuse', 'Regarde la suite, puis refais-la dans le même ordre.', 'Plus longue suite retenue : '], stroop: ['Couleurs pièges', 'Appuie sur la COULEUR de l\'encre, pas sur le mot écrit. Une erreur coûte 3 secondes.', 'Bonnes couleurs : '] };
+  var BRN = { calc: ['Calcul éclair', 'Trouve le bon résultat. Une erreur coûte 3 secondes.', 'Bons calculs : '], suite: ['La suite lumineuse', 'Regarde la suite, puis refais-la dans le même ordre.', 'Plus longue suite retenue : '], stroop: ['Couleurs pièges', 'Appuie sur la COULEUR de l\'encre, pas sur le mot écrit. Une erreur coûte 3 secondes.', 'Bonnes couleurs : '],
+    mots: ['Le mot mélangé', 'Les lettres sont dans le désordre : touche-les dans le bon ordre pour refaire le mot.', 'Mots retrouvés : '], ordre: ['Chasse aux nombres', 'Touche les nombres dans l\'ordre : 1, 2, 3… Une erreur coûte 2 secondes.', 'Nombres trouvés : '] };
   var COLS = [['ROUGE', '#FF6B6B'], ['BLEU', '#5BA8FF'], ['VERT', '#5FCB8A'], ['JAUNE', '#F7C948']];
   var PADS = [['#FF6B6B', '●', 'Rond rouge'], ['#5BA8FF', '▲', 'Triangle bleu'], ['#5FCB8A', '■', 'Carré vert'], ['#F7C948', '★', 'Étoile jaune']];
   function brInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
@@ -3105,6 +3127,39 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     BR.pos++;
     if (BR.pos === BR.seq.length) { BR.score = BR.seq.length; $('brainScore').textContent = BR.score; BR.lock = true; $('brainQ').textContent = 'Bravo !'; var tok = BR.tok; setTimeout(function () { if (tok === BR.tok) suiteRound(); }, 800); }
   }
+  /* Le mot mélangé : des mots courts d'abord, plus longs ensuite. ALT : d'autres mots qu'on peut former avec les mêmes lettres, acceptés aussi. */
+  var MOTS = ['CHAT', 'LUNE', 'VELO', 'REVE', 'PAIN', 'SOIR', 'LION', 'NUIT', 'MAIN', 'PIED', 'CHIEN', 'POMME', 'ARBRE', 'FLEUR', 'LIVRE', 'ECOLE', 'PLAGE', 'NUAGE', 'PLUIE', 'NEIGE', 'ROUTE', 'TRAIN', 'DANSE', 'SPORT', 'NAGER', 'MATIN', 'FRUIT', 'TIGRE', 'LAPIN', 'FORET', 'FUSEE', 'ROBOT',
+    'SOLEIL', 'MAISON', 'JARDIN', 'BALLON', 'COURIR', 'DORMIR', 'LEGUME', 'SALADE', 'BANANE', 'ORANGE', 'CERISE', 'CHEVAL', 'OISEAU', 'ETOILE'];
+  var ALT = ['NICHE', 'CHINE', 'BARRE', 'ROIS', 'LOIN', 'VOLE', 'GENIE', 'OUTRE', 'RIANT', 'PORTS', 'RANGE', 'PLAIN', 'ORGANE', 'ONAGRE', 'AIMONS'];
+  function motPaint() {
+    var gaps = ''; while (gaps.length < BR.word.length - BR.built.length) gaps += '_';
+    $('brainQ').textContent = (BR.built + gaps).split('').join(' ');
+    brChoices(BR.letters.map(function (ch, n) { return { label: ch, v: n }; }).concat([{ label: 'Effacer', v: -1 }]), motTap, 'letters');
+    BR.used.forEach(function (u, n) { if (u) $('brainA').children[n].disabled = true; });
+  }
+  function motNext() {
+    var len = BR.score < 3 ? 4 : BR.score < 7 ? 5 : 6, pool = MOTS.filter(function (w) { return w.length === len && w !== BR.word; }), w = pick(pool), L;
+    do { L = mix(w.split('')); } while (L.join('') === w || MOTS.indexOf(L.join('')) >= 0 || ALT.indexOf(L.join('')) >= 0);
+    BR.word = w; BR.letters = L; BR.built = ''; BR.used = []; motPaint();
+  }
+  function motTap(v) {
+    if (!BR.on) return;
+    if (v === -1) { BR.built = ''; BR.used = []; sfx('tick'); motPaint(); return; }
+    if (BR.used[v]) return; BR.used[v] = true; BR.built += BR.letters[v]; sfx('tick');
+    if (BR.built.length < BR.word.length) { motPaint(); return; }
+    if (BR.built === BR.word || MOTS.indexOf(BR.built) >= 0 || ALT.indexOf(BR.built) >= 0) { BR.score++; sfx('coin', 0.7); $('brainScore').textContent = BR.score; $('brainNote').textContent = 'Bravo : ' + BR.built + ' !'; motNext(); }
+    else { BR.left -= 3; sfx('thud', 0.6); var it = $('brainQ'); it.classList.remove('bad'); void it.offsetWidth; it.classList.add('bad'); $('brainNote').textContent = 'Ce n\'est pas le mot que je cherche. 3 secondes de moins !'; BR.built = ''; BR.used = []; motPaint(); }
+  }
+  /* La chasse aux nombres : une grille de 16 nombres mélangés à toucher dans l'ordre */
+  function ordreGrid() {
+    var nums = [], n; for (n = 1; n <= 16; n++) nums.push(BR.pos + n); BR.base = BR.pos;
+    brChoices(mix(nums).map(function (v) { return { label: String(v), v: v }; }), ordreTap, 'grid4'); $('brainQ').textContent = 'Cherche le ' + (BR.pos + 1);
+  }
+  function ordreTap(v, b) {
+    if (!BR.on) return;
+    if (v === BR.pos + 1) { BR.pos++; BR.score++; b.disabled = true; sfx('tick'); $('brainScore').textContent = BR.score; if (BR.pos - BR.base === 16) ordreGrid(); else $('brainQ').textContent = 'Cherche le ' + (BR.pos + 1); }
+    else { BR.left -= 2; sfx('thud', 0.5); var it = $('brainQ'); it.classList.remove('bad'); void it.offsetWidth; it.classList.add('bad'); }
+  }
   function brStart(k) {
     if (!usePlay()) return;
     closeSheets(); questDay().brain++; BR.game = k; BR.on = true; BR.score = 0; BR.tok++; BR.lock = false;
@@ -3112,17 +3167,19 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     $('brainBarWrap').hidden = k === 'suite'; $('brainBar').style.width = '100%'; $('brain').hidden = false; $('brainClose').focus();
     if (k === 'calc') { brTimer(45); calcNext(); }
     else if (k === 'stroop') { brTimer(30); brChoices(COLS.map(function (c, n) { return { label: c[0].charAt(0) + c[0].slice(1).toLowerCase(), v: n }; }), brAnswer); stroopNext(); }
+    else if (k === 'mots') { BR.word = ''; brTimer(60); motNext(); }
+    else if (k === 'ordre') { BR.pos = 0; brTimer(40); ordreGrid(); }
     else { clearInterval(BR.timer); BR.seq = [brInt(0, 3)]; brChoices(PADS.map(function (q, n) { return { label: q[1], bg: q[0], v: n, aria: q[2] }; }), suiteTap, 'pads'); suiteRound(); }
   }
   function brEnd() {
     if (!BR.on) return; BR.on = false; clearInterval(BR.timer); BR.tok++;
-    var k = BR.game, got = k === 'suite' ? Math.min(15, Math.floor(BR.score * 1.5)) : Math.floor(BR.score / (k === 'calc' ? 2 : 3)), record = BR.score > G.rec[k]; if (record) G.rec[k] = BR.score;
+    var k = BR.game, got = (k === 'suite' || k === 'mots') ? Math.min(15, Math.floor(BR.score * 1.5)) : Math.floor(BR.score / (k === 'calc' ? 2 : k === 'ordre' ? 4 : 3)), record = BR.score > G.rec[k]; if (record) G.rec[k] = BR.score;
     G.stats.brain++; var e = earn(got);
     $('brainQ').style.color = ''; $('brainQ').textContent = BRN[k][2] + BR.score; $('brainA').hidden = true;
     $('brainNote').textContent = (record && BR.score > 0 ? 'Nouveau record ! ' : '') + '+' + e + ' pièces. ' + capNote(got, e); $('brainAgain').hidden = playsLeft() <= 0; if (record && BR.score > 0) sfx('fanfare');
   }
   $('brainAgain').addEventListener('click', function () { brStart(BR.game); });
-  $('brainClose').addEventListener('click', function () { sfx('tick'); BR.on = false; BR.tok++; clearInterval(BR.timer); $('brain').hidden = true; });
+  $('brainClose').addEventListener('click', function () { sfx('tick'); if (BR.on) { giveBack(); questDay().brain = Math.max(0, questDay().brain - 1); saveG(); } BR.on = false; BR.tok++; clearInterval(BR.timer); $('brain').hidden = true; });
 
   /* ---------- La question du jour ----------
      Une question par jour sur le cerveau, le sommeil, le sport et les écrans. Chaque ligne : question, trois réponses, numéro de la bonne, explication. */
@@ -3186,6 +3243,8 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     ['calc15', 'Calculatrice', '15 bons calculs en une partie', function () { return G.rec.calc >= 15; }],
     ['suite8', 'Mémoire d\'éléphant', 'Retiens une suite de 8', function () { return G.rec.suite >= 8; }],
     ['stroop20', 'Œil de lynx', '20 bonnes couleurs en une partie', function () { return G.rec.stroop >= 20; }],
+    ['mots8', 'Dico vivant', '8 mots retrouvés en une partie', function () { return G.rec.mots >= 8; }],
+    ['ordre24', 'Regard laser', '24 nombres trouvés en une partie', function () { return G.rec.ordre >= 24; }],
     ['run500', 'Sprinteur', '500 mètres à la course', function () { return G.best >= 500; }],
     ['defi10', 'Relève-défis', '10 défis réussis', function () { return G.stats.quests >= 10; }],
     ['defi50', 'Champion des défis', '50 défis réussis', function () { return G.stats.quests >= 50; }],
@@ -3210,7 +3269,9 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     return true;
   }
   function paintQuests() {
-    var q = questDay(), list = questList(), box = $('questList'); empty2(box);
+    var q = questDay(), list = questList(), box = $('questList'); empty2(box); paintQTabs();
+    if (questTab === 'semaine') { paintWeek(box); return; }
+    if (questTab !== 'trophees') {
     box.appendChild(el('h3', 'ghead', 'Défis du jour'));
     list.forEach(function (it, n) {
       var done = !!q.done[n], row = el('div', 'gcard' + (done ? ' ok' : '')), nm = el('span', 'nm', it[0]);
@@ -3223,9 +3284,71 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     box.appendChild(el('h3', 'ghead', 'Le savais-tu ?'));
     var z = quizDay(), qr = el('div', 'gcard' + (z.ans >= 0 ? ' ok' : '')), qn = el('span', 'nm', 'La question du jour'); qn.appendChild(el('span', 'sub', z.ans >= 0 ? 'Répondu. Nouvelle question demain.' : 'Une question sur ton cerveau. 5 pièces si tu trouves.'));
     qr.appendChild(qn); var qb = btn('buy' + (z.ans >= 0 ? ' on' : ''), z.ans >= 0 ? 'Revoir' : 'Répondre', function () { closeSheets(); quizPaint(); $('quiz').hidden = false; $('quizClose').focus(); }); qb.id = 'quizOpen'; qr.appendChild(qb); box.appendChild(qr);
+    }
+    if (questTab !== 'trophees') return;
     box.appendChild(el('h3', 'ghead', 'Trophées : ' + G.trophies.length + ' sur ' + TROPHIES.length));
     var grid = el('div', 'trophies'); TROPHIES.forEach(function (t) { var got = G.trophies.indexOf(t[0]) >= 0, d = el('div', 'trophy' + (got ? ' got' : '')); d.appendChild(el('strong', '', (got ? '★ ' : '') + t[1])); d.appendChild(el('small', '', t[2] + (got ? '' : ' · à gagner'))); grid.appendChild(d); });
     box.appendChild(grid);
+  }
+  var questTab = 'defis';
+  function paintQTabs() {
+    var tb = $('questTabs'); empty2(tb);
+    [['defis', 'Défis'], ['semaine', 'Ma semaine'], ['trophees', 'Trophées']].forEach(function (q) { var b = btn('tab', q[1], function () { sfx('tick'); questTab = q[0]; paintQuests(); }); b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', questTab === q[0] ? 'true' : 'false'); tb.appendChild(b); });
+  }
+  /* Ma semaine : les sept derniers jours d'un coup d'œil, et un conseil sur le point le plus faible */
+  function paintWeek(box) {
+    var rows = [['Sommeil', 'sleep'], ['Pas', 'steps'], ['Temps d\'écran', 'screen']], filled = 0, avgLv = [0, 0, 0], n;
+    for (n = 0; n < 7; n++) if (G.entries[dayKey(n)]) filled++;
+    box.appendChild(el('h3', 'ghead', 'Tes sept derniers jours : ' + filled + ' sur 7 remplis'));
+    rows.forEach(function (r, ri) {
+      var card = el('div', 'gcard wk'), nm = el('span', 'nm', r[0]), dy = el('div', 'days'), sum = 0;
+      for (n = 6; n >= 0; n--) {
+        var k = dayKey(n), e = G.entries[k], sp = el('span'), d = el('i', 'lvd');
+        if (e) { var lv = score(e).l[ri]; d.className = 'lvd l' + lv; d.textContent = ['!', '✓', '★'][lv]; sum += e[r[1]]; avgLv[ri] += lv; }
+        sp.setAttribute('aria-label', (n === 0 ? 'Aujourd\'hui' : k.slice(8) + '/' + k.slice(5, 7)) + ' : ' + (e ? LVL[score(e).l[ri]] : 'pas rempli'));
+        sp.appendChild(d); sp.appendChild(document.createTextNode(n === 0 ? 'auj.' : k.slice(8) + '/' + k.slice(5, 7))); dy.appendChild(sp);
+      }
+      nm.appendChild(el('span', 'sub', filled ? 'Moyenne : ' + (r[1] === 'steps' ? Math.round(sum / filled).toLocaleString('fr-FR') + ' pas' : hm(sum / filled)) + ' par jour' : 'Rien de rempli pour l\'instant'));
+      card.appendChild(nm); card.appendChild(dy); box.appendChild(card);
+    });
+    box.appendChild(el('p', 'small', '★ idéal · ✓ correct · ! à améliorer · rond vide : jour pas rempli'));
+    var tip, worst = 0; if (avgLv[1] < avgLv[worst]) worst = 1; if (avgLv[2] < avgLv[worst]) worst = 2;
+    if (!filled) tip = 'Remplis ta journée pour voir ta semaine ici.';
+    else if (avgLv[worst] === 2 * filled) tip = 'Semaine au top : tout est idéal. Continue comme ça !';
+    else tip = ['Ton point à travailler : le sommeil. Essaie de te coucher 30 minutes plus tôt et de poser ton téléphone avant d\'aller au lit.',
+      'Ton point à travailler : les pas. Fais un bout de chemin à pied, ou un tour du quartier après les cours.',
+      'Ton point à travailler : l\'écran. Choisis des moments sans téléphone, par exemple les repas et l\'heure avant de dormir.'][worst];
+    var tc = el('div', 'gcard'), tn = el('span', 'nm', 'Le conseil de ' + G.name); tn.appendChild(el('span', 'sub', tip)); tc.appendChild(tn); box.appendChild(tc);
+  }
+  /* ---------- La nuit : de 22 h à 6 h, le monstre dort et les jeux sont fermés ---------- */
+  var forceNight = null;
+  function isNight() { if (forceNight != null) return forceNight; var h = new Date().getHours(); return h >= 22 || h < 6; }
+  function nightSync() {
+    var n = isNight() && phase === 'play', tint = $('nightTint'); if (tint.hidden !== n) return;
+    tint.hidden = !n; if (n) say('Il est tard… je dors. Toi aussi, file au lit ! Les jeux rouvrent à 6 h.', 6500);
+  }
+  setInterval(nightSync, 30000);
+  $('aNight').addEventListener('click', function () { forceNight = forceNight == null ? true : forceNight ? false : null; $('aNight').textContent = 'Nuit : ' + (forceNight == null ? 'selon l\'heure' : forceNight ? 'forcée' : 'désactivée'); sfx('tick'); nightSync(); });
+  /* ---------- Le tutoriel : cinq écrans, montrés une seule fois ---------- */
+  var TUTO = [['Bienvenue !', 'Voici ton monstre. Il vit dans ton téléphone, mais sa forme dépend de ta vraie vie.'],
+    ['Ma journée', 'Chaque jour, note ton sommeil, tes pas et ton temps d\'écran. Plus ta journée est bonne, plus il gagne de vie, d\'expérience et de pièces.'],
+    ['Il grandit… ou pas', 'Avec de bonnes journées, il monte de niveau et se transforme. Si tu l\'oublies trop longtemps, sa vie tombe à zéro.'],
+    ['Bien-être, jeux et défis', 'Respire, joue, entraîne ton cerveau et relève trois défis par jour. La cible en haut à droite ouvre les défis, ta semaine et tes trophées.'],
+    ['Boutique et nuit', 'Tes pièces servent à acheter des décors et des accessoires. De 22 h à 6 h, ton monstre dort et les jeux sont fermés : toi aussi, va dormir !']], tutoN = 0;
+  function tutoPaint() { $('tutoTitle').textContent = TUTO[tutoN][0]; $('tutoText').textContent = TUTO[tutoN][1]; $('tutoStep').textContent = (tutoN + 1) + ' / ' + TUTO.length; $('tutoNext').textContent = tutoN === TUTO.length - 1 ? 'C\'est parti !' : 'Suivant'; $('tutoSkip').hidden = tutoN === TUTO.length - 1; }
+  function tutoShow() { closeSheets(); tutoN = 0; tutoPaint(); $('tuto').hidden = false; $('tutoNext').focus(); }
+  function tutoEnd() { $('tuto').hidden = true; if (!G.tuto) { G.tuto = true; saveG(); } }
+  $('tutoNext').addEventListener('click', function () { sfx('tick'); if (tutoN === TUTO.length - 1) tutoEnd(); else { tutoN++; tutoPaint(); } });
+  $('tutoSkip').addEventListener('click', function () { sfx('tick'); tutoEnd(); });
+  $('tuto').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') tutoEnd(); });
+  $('tutoOpen').addEventListener('click', function () { $('setClose').click(); if (phase === 'play') tutoShow(); else toast('Adopte d\'abord une créature'); });
+  /* En arrivant : le tutoriel la première fois, sinon un petit mot d'accueil */
+  function welcome() {
+    if (phase !== 'play') return;
+    if (!G.tuto) { tutoShow(); return; }
+    if (isNight()) return;
+    var q = questDay(), left = 3 - Object.keys(q.done).length;
+    say(left > 0 ? 'Coucou ! Il te reste ' + left + (left > 1 ? ' défis' : ' défi') + ' aujourd\'hui.' : 'Coucou ! Tous tes défis du jour sont réussis, bravo !', 4500);
   }
   function openQuests() { closeSheets(); paintQuests(); $('quests').hidden = false; focusCam = true; $('questsClose').focus(); }
   $('questPill').addEventListener('click', function () { sfx('tick'); openQuests(); });
@@ -3249,7 +3372,9 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     { name: 'Tri des déchets', sub: '45 secondes pour mettre chaque déchet dans la bonne poubelle.', rec: function () { return G.rec.tri ? 'Record : ' + G.rec.tri : ''; }, go: triStart },
     { head: 'Jeux de cerveau', name: 'Calcul éclair', sub: '45 secondes de calcul mental, de plus en plus corsé.', rec: function () { return G.rec.calc ? 'Record : ' + G.rec.calc : ''; }, go: function () { brStart('calc'); } },
     { name: 'La suite lumineuse', sub: 'Retiens la suite et refais-la. Elle s\'allonge à chaque tour.', rec: function () { return G.rec.suite ? 'Record : suite de ' + G.rec.suite : ''; }, go: function () { brStart('suite'); } },
-    { name: 'Couleurs pièges', sub: 'Appuie sur la couleur de l\'encre, pas sur le mot écrit.', rec: function () { return G.rec.stroop ? 'Record : ' + G.rec.stroop : ''; }, go: function () { brStart('stroop'); } }
+    { name: 'Couleurs pièges', sub: 'Appuie sur la couleur de l\'encre, pas sur le mot écrit.', rec: function () { return G.rec.stroop ? 'Record : ' + G.rec.stroop : ''; }, go: function () { brStart('stroop'); } },
+    { name: 'Le mot mélangé', sub: 'Remets les lettres dans l\'ordre pour retrouver le mot.', rec: function () { return G.rec.mots ? 'Record : ' + G.rec.mots + ' mots' : ''; }, go: function () { brStart('mots'); } },
+    { name: 'Chasse aux nombres', sub: 'Touche les nombres dans l\'ordre, le plus vite possible.', rec: function () { return G.rec.ordre ? 'Record : ' + G.rec.ordre : ''; }, go: function () { brStart('ordre'); } }
   ];
   function paintGames() {
     var gm = gameDay(), left = playsLeft(), box = $('gmList'); empty2(box);
@@ -3257,9 +3382,9 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     GAMES.forEach(function (gq) {
       if (gq.head) box.appendChild(el('h3', 'ghead', gq.head));
       var row = el('div', 'gcard'), nm = el('span', 'nm', gq.name); nm.appendChild(el('span', 'sub', gq.sub)); var rc = gq.rec(); if (rc) nm.appendChild(el('span', 'sub rar3', rc));
-      var b = btn('buy', 'Jouer', gq.go); b.disabled = !gq.free && left <= 0; row.appendChild(nm); row.appendChild(b); box.appendChild(row);
+      var b = btn('buy', 'Jouer', gq.go); b.disabled = (!gq.free && left <= 0) || isNight(); row.appendChild(nm); row.appendChild(b); box.appendChild(row);
     });
-    $('gmNote').textContent = left > 0 ? 'Les jeux rapportent un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.' : 'Plus de partie pour aujourd\'hui. L\'espace bien-être reste ouvert. Reviens demain !';
+    $('gmNote').textContent = isNight() ? 'Ton monstre dort : les jeux sont fermés de 22 h à 6 h. Le bien-être reste ouvert. Bonne nuit !' : left > 0 ? 'Les jeux rapportent un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.' : 'Plus de partie pour aujourd\'hui. L\'espace bien-être reste ouvert. Reviens demain !';
   }
   $('navGames').addEventListener('click', function () { sfx('tick'); closeSheets(); paintGames(); $('games').hidden = false; focusCam = true; $('gamesClose').focus(); });
   $('gamesClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navGames').focus(); });
@@ -3458,7 +3583,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     var sc = score(e), grew = refresh(true); pushScore();
     if (phase === 'dead') return;
     if (!grew) {
-      toast('+' + sc.pts + ' points · +' + Math.floor(sc.pts / 10) + ' pièces');
+      toast('+' + sc.pts + ' points · +' + Math.floor(sc.pts / 5) + ' pièces');
       if (sc.pts >= 600) { sfx('fanfare'); start('jump'); party(); say('Bravo, super journée !'); } else if (sc.pts < 300) { start('sigh'); say(whyNow.length ? whyNow[0].l : 'On fera mieux demain…', 5600); } else { start('wave'); say(whyNow.length ? whyNow[0].l : 'Pas mal du tout !', whyNow.length ? 5600 : 3400); }
     } else { sfx('evolve'); party(); }
   }
@@ -3509,7 +3634,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   $('aHeal').addEventListener('click', function () { if (!needPlay()) return; G.hpFrom = dayKey(0); saveG(); sfx('wave'); refresh(false); paintAdmin(); });
   $('deadNew').addEventListener('click', function () {
     var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins), best: G.best, game: G.game, rec: G.rec, well: G.well, stats: G.stats, quest: G.quest, quiz: G.quiz, trophies: G.trophies };          /* le joueur garde ses achats et ses pièces */
-    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; G.best = keep.best; G.game = keep.game; G.rec = keep.rec; G.well = keep.well; G.stats = keep.stats; G.quest = keep.quest; G.quiz = keep.quiz; G.trophies = keep.trophies; saveG();
+    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; G.best = keep.best; G.game = keep.game; G.rec = keep.rec; G.well = keep.well; G.stats = keep.stats; G.quest = keep.quest; G.quiz = keep.quiz; G.trophies = keep.trophies; G.tuto = true; saveG();
     $('name').value = ''; act = null; $('dead').hidden = true; goTitle();
   });
   $('aNext').addEventListener('click', function () { if (!needPlay()) return; sfx('tick'); nextDay(); });
@@ -3531,7 +3656,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       loader.load('models/' + sp.id + MODEL_EXT, function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
     });
   });
-  if (location.hash === '#reglage') window.__fl = { BR: BR, breakCheck: breakCheck, state: function () { return G; }, CT: CT, foods: foods, MEM: MEM, TRI: TRI, WS: WS, AMB: AMB, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
+  if (location.hash === '#reglage') window.__fl = { night: function (v) { forceNight = v; nightSync(); }, MOTS: MOTS, BR: BR, breakCheck: breakCheck, state: function () { return G; }, CT: CT, foods: foods, MEM: MEM, TRI: TRI, WS: WS, AMB: AMB, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
   function loadStep() {

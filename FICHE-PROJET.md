@@ -65,7 +65,7 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 
 ### Les pièces
 
-- **100 points = 10 pièces.** Une journée parfaite rapporte 90 pièces, une semaine parfaite 630.
+- **100 points = 20 pièces.** Une journée parfaite rapporte 180 pièces, une semaine parfaite 1 260. (Au début c'était 10 pièces : on a doublé pour que la vraie vie rapporte plus que les jeux.)
 - On en gagne aussi avec les **cadeaux hebdomadaires** et les **quêtes bonus** (des petits défis).
 - Exemples de quêtes : faire 20 000 pas dans la journée, rester à 1 h d'écran seulement.
 - Les pièces servent à acheter des décors.
@@ -137,8 +137,11 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Niveaux et expérience, avec récompenses et auras | Fait |
 | Barre de vie, et mort du monstre s'il est vraiment négligé | Fait |
 | 47 cosmétiques dans 5 catégories, avec raretés, niveaux requis et essayage | Fait |
-| Sept mini-jeux, dont trois jeux de cerveau : calcul, suite à retenir, couleurs pièges | Fait |
-| Défis du jour, étoiles, cadeau, question du jour et 18 trophées | Fait |
+| Neuf mini-jeux, dont cinq jeux de cerveau : calcul, suite à retenir, couleurs pièges, mot mélangé, chasse aux nombres | Fait |
+| Ma semaine : les sept derniers jours et un conseil | Fait |
+| Mode nuit : de 22 h à 6 h le monstre dort, les jeux sont fermés | Fait |
+| Tutoriel en cinq écrans à la première ouverture | Fait |
+| Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
 | Comptes (pseudo et mot de passe), amis, classement mondial et classement entre amis | Fait |
@@ -279,13 +282,15 @@ Ces fonctions ont besoin du serveur : elles marchent sur la version en ligne (Ra
 
 ### Les jeux de cerveau
 
-Trois jeux de plus dans la liste des mini-jeux. Ils comptent dans les 8 parties et les 50 pièces par jour.
+Cinq jeux de plus dans la liste des mini-jeux. Une partie quittée avant la fin ne compte pas. Ils comptent dans les 8 parties et les 50 pièces par jour.
 
 | Jeu | Ce qu'on fait | Ce que ça entraîne |
 |---|---|---|
 | Calcul éclair | 45 secondes de calcul mental. Tous les 4 bons résultats, un nouveau type de calcul arrive | Le calcul et la rapidité |
 | La suite lumineuse | Quatre touches s'allument dans un ordre. On refait la suite, qui s'allonge à chaque tour | La mémoire à court terme |
 | Couleurs pièges | Le mot « ROUGE » est écrit en bleu : il faut appuyer sur la couleur de l'encre | L'attention |
+| Le mot mélangé | Les lettres d'un mot sont dans le désordre : on les touche dans le bon ordre | Le vocabulaire |
+| Chasse aux nombres | Une grille de 16 nombres mélangés à toucher dans l'ordre | La recherche visuelle |
 
 ### Les défis, les étoiles et les trophées
 
@@ -294,7 +299,19 @@ Un bouton rond en haut à droite (la cible) ouvre l'écran des défis.
 - **Trois défis par jour**, choisis d'après la date : un pour prendre soin de soi, un pour jouer, un pour apprendre. Chacun rapporte 10 pièces.
 - **Une étoile** et 15 pièces quand les trois défis du jour sont réussis. **À 5 étoiles, un cadeau de 100 pièces.**
 - **La question du jour** : une question sur le cerveau, le sommeil, le sport ou les écrans, avec l'explication. 5 pièces si la réponse est bonne. Il y a 20 questions.
-- **18 trophées** à collectionner (séries de jours, niveaux, records, bien-être...). Chacun rapporte 20 pièces.
+- **20 trophées** à collectionner (séries de jours, niveaux, records, bien-être...). Chacun rapporte 20 pièces.
+
+### Ma semaine
+
+Dans l'écran des défis, l'onglet « Ma semaine » montre les sept derniers jours pour le sommeil, les pas et l'écran (★ idéal, ✓ correct, ! à améliorer), la moyenne de chacun, et un conseil sur le point le plus faible.
+
+### La nuit
+
+De 22 h à 6 h, le monstre dort : l'écran s'assombrit et les mini-jeux sont fermés. Le bien-être reste ouvert (respirer aide à s'endormir). L'administrateur peut forcer ou désactiver la nuit pour tester.
+
+### L'équilibre des pièces
+
+**Règle : la vraie vie doit toujours rapporter plus que le temps passé dans l'appli.** Une journée parfaite rapporte 180 pièces (100 points = 20 pièces). Les jeux, le bien-être et les défis réunis en rapportent au plus 150 environ.
 
 ### La pause écran
 

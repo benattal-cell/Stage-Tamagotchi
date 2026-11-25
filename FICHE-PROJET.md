@@ -190,6 +190,17 @@ Ce qui se pose tout en haut de la tête est caché quand le monstre porte un cha
 
 **Le rendu.** Tous les monstres ont un contour sombre, un liseré de lumière sur les bords et une ombre douce au sol, comme dans un dessin animé. La peluche a en plus des sourcils qui bougent selon son humeur, un reflet dans les yeux et une petite queue.
 
+**Son visage est vivant**, sur les 18 monstres :
+
+| Partie | Ce qu'elle fait |
+|---|---|
+| Les yeux | Ils clignent, suivent le doigt, et regardent ailleurs tout seuls quand rien ne bouge. Ils s'écarquillent de surprise, se ferment à moitié de fatigue. Les pupilles grossissent quand il est content et rétrécissent quand il a mal à la tête |
+| Les sourcils | Ils tombent quand il est triste, se froncent quand il a mal |
+| La bouche | Elle s'ouvre et se ferme quand il parle. Sur la peluche, les coins montent pour sourire et descendent pour faire la moue |
+| Les oreilles | Chacune frétille à son rythme. Elles se dressent quand on le touche, remuent quand il parle, tombent quand il est triste |
+
+Les monstres du pack n'avaient pas d'yeux animables : ils étaient fondus dans le corps. L'appli les retrouve à leur couleur, les efface, et pose à la place les mêmes yeux animés que ceux de la peluche. Leur bouche, elle, est peinte : quand ils parlent, c'est leur tête qui hoche.
+
 **Son état**, pour qu'on le remarque tout de suite :
 
 | État | Ce qu'on voit |

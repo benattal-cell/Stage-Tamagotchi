@@ -820,11 +820,11 @@ button, input { touch-action: manipulation; }
     for (n = 0; n < pa.count; n++) { a2 = map[keys[n]]; l = Math.sqrt(a2[0] * a2[0] + a2[1] * a2[1] + a2[2] * a2[2]) || 1; out[n * 3] = a2[0] / l; out[n * 3 + 1] = a2[1] / l; out[n * 3 + 2] = a2[2] / l; }
     geo.setAttribute('snormal', new THREE.BufferAttribute(out, 3));
   }
-  function hullMat(width, skinned) {
+  function hullMat(width, skinned, earU, earB, earV) {
     var m = new THREE.MeshBasicMaterial({ color: 0x1B1D2B, side: THREE.BackSide, skinning: !!skinned });
     m.onBeforeCompile = function (sh) {
-      sh.uniforms.uOut = { value: width };
-      sh.vertexShader = sh.vertexShader.replace('void main() {', 'attribute vec3 snormal;\nuniform float uOut;\nvoid main() {').replace('#include <begin_vertex>', 'vec3 transformed = vec3( position ) + snormal * uOut;');
+      sh.uniforms.uOut = { value: width }; if (earU) { sh.uniforms.uEar = earU; sh.uniforms.uEarB = earB; }
+      sh.vertexShader = sh.vertexShader.replace('void main() {', 'attribute vec3 snormal;\nuniform float uOut;\nuniform float uEar;\nuniform vec3 uEarB;\nvoid main() {').replace('#include <begin_vertex>', 'vec3 transformed = vec3( position ) + snormal * uOut;' + (earU ? earV : ''));
     };
     return m;
   }
@@ -872,6 +872,7 @@ button, input { touch-action: manipulation; }
     return e;
   }
   var mouth = mesh(new THREE.SphereGeometry(0.5, 28, 16), black, 0, 0.98, 0.8, bodyG); mouth.scale.set(1.1, 0.3, 0.42);
+  var cornerL = mesh(new THREE.SphereGeometry(0.075, 12, 10), black, -0.53, 0.98, 0.8, bodyG), cornerR = mesh(new THREE.SphereGeometry(0.075, 12, 10), black, 0.53, 0.98, 0.8, bodyG);   /* les coins de la bouche : ils montent pour sourire, descendent pour faire la moue */
   var teeth = new THREE.Group(); bodyG.add(teeth);
   function buildTeeth(kind) {
     empty(teeth);
@@ -902,14 +903,44 @@ button, input { touch-action: manipulation; }
     Fish: { eye: 0.5, eyeW: 0.6, neckR: 0.45, hatR: 0.9 },          /* tout fin : il lui faut de petits accessoires */
     Alien: { hat: 0.74, eye: 0.5 },                                  /* le chapeau se pose sous ses antennes */
     Mushnub: { eye: 0.42 }, Mushnub_Evolved: { eye: 0.42 },          /* les yeux sont sous le chapeau du champignon */
-    Cactoro: { eye: 0.42, eyeDX: 0.3, neck: 0.25 }, Wizard: { eye: 0.42, hatR: 0.8 }
+    Cactoro: { eye: 0.42, eyeDX: 0.3, neck: 0.25 }, Wizard: { eye: 0.42, hatR: 0.8 }, Ninja: { hat: 0.76 }
   };
   var MODELS = {}, modelNow = null, hooked = [];
   var modelG = new THREE.Group(); bodyG.add(modelG);
   var CLIP = { death: 'Death', jump: 'Jump', hop: 'Jump', intro: 'Jump', spin: 'Dance', wiggle: 'Dance', evolve: 'Dance', wave: 'Yes', yawn: 'No', sigh: 'No' };
   function unhook() { hooked.forEach(function (o) { if (o.parent) o.parent.remove(o); }); hooked = []; }
   function addModel(id, gltf) {
-    var hueU = { value: 0 };
+    var hueU = { value: 0 }, earU = { value: 0 }, earB = { value: new THREE.Vector3(1e9, 1e9, 1) }, spotsRaw = [], texPix = null;
+    /* Dans ce pack, tous les globes des yeux ont le même gris et leur fente le même noir. On s'en sert pour les retrouver.
+       Chaque globe est une boule d'environ 344 faces : on cherche les groupes de faces grises collées entre elles qui ont cette taille. */
+    function findEyes(o) {
+      var geo = o.geometry, pa = geo.attributes.position, uv = geo.attributes.uv, ix = geo.index, map = o.material.map; if (!uv || !map || !map.image) return;
+      if (!texPix) { try { var cv = document.createElement('canvas'); cv.width = map.image.width; cv.height = map.image.height; var cg = cv.getContext('2d'); cg.drawImage(map.image, 0, 0); texPix = { d: cg.getImageData(0, 0, cv.width, cv.height).data, w: cv.width, h: cv.height }; } catch (e) { return; } }
+      var N = pa.count, kind = new Uint8Array(N), weld = new Int32Array(N), ids = {}, nW = 0, n, q;
+      for (n = 0; n < N; n++) {
+        var px = Math.min(texPix.w - 1, Math.floor(((uv.getX(n) % 1) + 1) % 1 * texPix.w)), py = Math.min(texPix.h - 1, Math.floor(((uv.getY(n) % 1) + 1) % 1 * texPix.h)), at = (py * texPix.w + px) * 4, r = texPix.d[at], g = texPix.d[at + 1], bl = texPix.d[at + 2];
+        kind[n] = (Math.abs(r - 143) + Math.abs(g - 146) + Math.abs(bl - 160) < 14) ? 1 : (r + g + bl < 110 && Math.abs(r - bl) < 12) ? 2 : 0;
+        q = Math.round(pa.getX(n) * 1e3) + '_' + Math.round(pa.getY(n) * 1e3) + '_' + Math.round(pa.getZ(n) * 1e3); if (ids[q] == null) ids[q] = nW++; weld[n] = ids[q];
+      }
+      var par = new Int32Array(nW); for (n = 0; n < nW; n++) par[n] = n;
+      function root(a) { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; }
+      var F = ix ? ix.count : N, at3 = function (k) { return ix ? ix.getX(k) : k; }, grey = [];
+      for (n = 0; n < F; n += 3) { var a = at3(n), b = at3(n + 1), c = at3(n + 2); if (kind[a] === 1 && kind[b] === 1 && kind[c] === 1) { grey.push(n); par[root(weld[a])] = root(weld[b]); par[root(weld[b])] = root(weld[c]); } }
+      var comps = {}; grey.forEach(function (f0) { var rt = root(weld[at3(f0)]); (comps[rt] || (comps[rt] = [])).push(f0); });
+      Object.keys(comps).forEach(function (rt) {
+        var fs = comps[rt]; if (fs.length < 290 || fs.length > 400) return;
+        var vs = {}, bb = [1e9, -1e9, 1e9, -1e9, 1e9, -1e9]; fs.forEach(function (f0) { for (var m = 0; m < 3; m++) { var vi = at3(f0 + m); vs[vi] = 1; bb[0] = Math.min(bb[0], pa.getX(vi)); bb[1] = Math.max(bb[1], pa.getX(vi)); bb[2] = Math.min(bb[2], pa.getY(vi)); bb[3] = Math.max(bb[3], pa.getY(vi)); bb[4] = Math.min(bb[4], pa.getZ(vi)); bb[5] = Math.max(bb[5], pa.getZ(vi)); } });
+        var w0 = bb[1] - bb[0], h0 = bb[3] - bb[2]; if (w0 / h0 < 0.7 || w0 / h0 > 1.4) return;
+        var cx0 = (bb[0] + bb[1]) / 2, cy0 = (bb[2] + bb[3]) / 2, cz0 = (bb[4] + bb[5]) / 2, rad = Math.max(w0, h0) / 2;
+        for (n = 0; n < N; n++) {                 /* on efface l'ancien œil : tous ses points sont ramenés au centre, il devient invisible */
+          var inEye = vs[n] || (kind[n] !== 0 && Math.pow(pa.getX(n) - cx0, 2) + Math.pow(pa.getY(n) - cy0, 2) + Math.pow(pa.getZ(n) - cz0, 2) < rad * rad * 1.3);
+          if (inEye) pa.setXYZ(n, cx0, cy0, cz0);
+        }
+        var wp = new THREE.Vector3(cx0, cy0, cz0).applyMatrix4(o.matrixWorld); spotsRaw.push({ x: wp.x, y: wp.y, z: wp.z, r: rad * o.matrixWorld.getMaxScaleOnAxis() });
+      });
+      pa.needsUpdate = true;
+    }
+    var EARV = '\n\tfloat earW = smoothstep(uEarB.x, uEarB.y, position.y) * smoothstep(uEarB.z * 0.42, uEarB.z * 0.9, abs(position.x));\n\ttransformed.x += sign(position.x) * uEar * earW * uEarB.z * 0.3;\n\ttransformed.y -= abs(uEar) * earW * uEarB.z * 0.08;';
     var root = gltf.scene, holder = new THREE.Group(), mats = [], meshes = [], bones = [], pts = [], v = new THREE.Vector3(), n;
     holder.add(root); holder.updateMatrixWorld(true);
     root.traverse(function (o) {
@@ -921,7 +952,8 @@ button, input { touch-action: manipulation; }
         o.material.emissive.setHex(0xFFFFFF); o.material.emissiveMap = o.material.map; o.material.emissiveIntensity = 0.28;   /* un peu de lumière propre, pour qu'ils restent colorés la nuit */
         /* Changer la teinte : on fait tourner les couleurs de sa texture sur le cercle des couleurs (le rose devient orange, puis jaune…) */
         o.material.onBeforeCompile = function (sh) {
-          sh.uniforms.uHue = hueU;
+          sh.uniforms.uHue = hueU; sh.uniforms.uEar = earU; sh.uniforms.uEarB = earB;
+          sh.vertexShader = sh.vertexShader.replace('void main() {', 'uniform float uEar;\nuniform vec3 uEarB;\nvoid main() {').replace('#include <begin_vertex>', '#include <begin_vertex>' + EARV);
           sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', RIM)
             .replace('void main() {', 'uniform float uHue;\nvec3 hueRot(vec3 c, float a) { const vec3 k = vec3(0.57735); float ca = cos(a); return c * ca + cross(k, c) * sin(a) + k * dot(k, c) * (1.0 - ca); }\nvoid main() {')
             .replace('#include <map_fragment>', '#include <map_fragment>\n\tdiffuseColor.rgb = hueRot(diffuseColor.rgb, uHue);')
@@ -930,6 +962,9 @@ button, input { touch-action: manipulation; }
       }
       var pa = o.geometry.attributes.position;
       for (n = 0; n < pa.count; n++) { v.fromBufferAttribute(pa, n); if (o.isSkinnedMesh) o.boneTransform(n, v); v.applyMatrix4(o.matrixWorld); pts.push(v.x, v.y, v.z); }
+      o.geometry.computeBoundingBox(); var gb = o.geometry.boundingBox;                       /* la zone « oreilles » : le haut du corps, sur les côtés */
+      if (pa.count > (earB.n || 0)) { earB.n = pa.count; earB.value.set(gb.min.y + (gb.max.y - gb.min.y) * 0.66, gb.min.y + (gb.max.y - gb.min.y) * 0.94, Math.max(gb.max.x, -gb.min.x)); }
+      findEyes(o); smoothNormals(o.geometry);
     });
     /* On mesure le monstre, puis on le met à la même taille que la peluche, les pieds au sol */
     var box = { x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9, z0: 1e9, z1: -1e9 };
@@ -945,15 +980,23 @@ button, input { touch-action: manipulation; }
       q.cx = (q.x0 + q.x1) / 2; q.cz = (q.z0 + q.z1) / 2; q.w = q.x1 - q.x0; q.d = q.z1 - q.z0; return q;
     }
     var sh = slice((f.hat - 0.16) * H, f.hat * H), se = slice((f.eye - 0.08) * H, (f.eye + 0.08) * H), sn = slice((f.neck - 0.06) * H, (f.neck + 0.06) * H), sb = slice(0.42 * H, 0.62 * H), sm = slice((f.eye - f.mouth - 0.05) * H, (f.eye - f.mouth + 0.05) * H);
+    var eyeFix = null;
+    if (spotsRaw.length) {
+      var sp2 = spotsRaw.map(function (q) { return { x: (q.x - cx) * k, y: (q.y - box.y0) * k, z: (q.z - cz) * k, r: q.r * k }; }), ex = 0, ey = 0, ez = -1e9, er = 0, x0 = 1e9, x1 = -1e9;
+      sp2.forEach(function (q) { ex += q.x / sp2.length; ey += q.y / sp2.length; er += q.r / sp2.length; ez = Math.max(ez, q.z + q.r * 0.75); x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); });
+      var my = ey - Math.max(1.75 * er, 0.1 * H), sm2 = slice(my - 0.05 * H, my + 0.05 * H);
+      eyeFix = { eyeX: ex, eyeY: ey, eyeZ: ez, eyeK: Math.max(0.35, Math.min(1.3, sp2.length > 1 ? (x1 - x0) / 2 / 0.36 : er / 0.3)), mouthX: ex, mouthY: my, mouthZ: sm2.z1 };
+    }
     var mixer = new THREE.AnimationMixer(root), actions = {};
     gltf.animations.forEach(function (c) { actions[c.name] = mixer.clipAction(c); });
     meshes.forEach(function (o) {             /* le contour : la même forme, gonflée, en noir, vue de l'intérieur */
-      var hull = o.isSkinnedMesh ? new THREE.SkinnedMesh(o.geometry, hullMat(0.032 / k, true)) : new THREE.Mesh(o.geometry, hullMat(0.032 / k, false));
+      var hull = o.isSkinnedMesh ? new THREE.SkinnedMesh(o.geometry, hullMat(0.032 / k, true, earU, earB, EARV)) : new THREE.Mesh(o.geometry, hullMat(0.032 / k, false, earU, earB, EARV));
       hull.position.copy(o.position); hull.quaternion.copy(o.quaternion); hull.scale.copy(o.scale); hull.frustumCulled = false; hull.raycast = function () {};
       o.parent.add(hull); if (o.isSkinnedMesh) hull.bind(o.skeleton, o.bindMatrix);
     });
     MODELS[id] = {
-      id: id, holder: holder, hueU: hueU, mats: mats, meshes: meshes, bones: bones, mixer: mixer, actions: actions, cur: '', curA: null, H: H,
+      id: id, holder: holder, hueU: hueU, earU: earU, eyes: null, headBone: bones.filter(function (bn) { return bn.name === 'Head2'; })[0] || bones[1] || null,
+      spots: spotsRaw.map(function (q) { return { x: (q.x - cx) * k, y: (q.y - box.y0) * k, z: (q.z - cz) * k, r: q.r * k }; }).sort(function (a, b) { return a.x - b.x; }), mats: mats, meshes: meshes, bones: bones, mixer: mixer, actions: actions, cur: '', curA: null, H: H,
       A: { hatX: sh.cx, hatZ: sh.cz, hatY: f.hat * H, hatR: Math.max(0.25, Math.min(0.85, Math.max(sh.w, sh.d) * 0.48 * f.hatR)),
            mouthX: sm.cx + f.eyeDX, mouthY: (f.eye - f.mouth) * H, mouthZ: sm.z1,
            eyeX: se.cx + f.eyeDX, eyeY: f.eye * H, eyeZ: se.z1, eyeK: Math.max(0.35, Math.min(1.1, se.w * 0.31 / 0.63 * f.eyeW)),
@@ -966,7 +1009,9 @@ button, input { touch-action: manipulation; }
       },
       rest: function () { this.mixer.stopAllAction(); this.cur = ''; this.curA = null; this.meshes.forEach(function (m) { if (m.skeleton) m.skeleton.pose(); }); }
     };
+    if (eyeFix) { var fx2; for (fx2 in eyeFix) MODELS[id].A[fx2] = eyeFix[fx2]; }
   }
+  /* (les repères du visage mesurés sur les vrais yeux remplacent les estimations) */
   /* Les accessoires sont construits pour la peluche. Ici on les met à la taille du monstre, puis on les accroche
      à l'os le plus proche : comme ça le chapeau suit la tête quand elle bouge. */
   function fitAcc(M, h, gl, nk, bk) {
@@ -1048,6 +1093,14 @@ button, input { touch-action: manipulation; }
   function useSpecies(id) {
     var M = MODELS[bodyOf(id)] || null;
     if (M !== modelNow) { unhook(); empty(modelG); modelNow = M; if (M) { modelG.add(M.holder); M.play('Idle'); } }
+    if (M && !M.eyes) {                        /* la première fois : on pose de vrais yeux animés là où étaient les yeux d'origine */
+      M.eyes = [];
+      if (M.spots.length && M.bones.length) {
+        M.holder.scale.set(1, 1, 1); M.rest(); pet.updateMatrixWorld(true);
+        M.spots.forEach(function (q) { var e = eye(q.x, q.y, q.z, q.r * 1.02); e.userData.side = M.spots.length > 1 ? (q.x < M.A.eyeX ? -1 : 1) : 0; e.traverse(function (x) { x.raycast = function () {}; }); boneNear(M, q.y).attach(e); M.eyes.push(e); });
+        shape(M); M.play('Idle');
+      }
+    }
   }
   /* ---------- Ce qui montre son âge ----------
      Bébé : tous ont une tétine et un biberon (la peluche a aussi des joues roses et une couche).
@@ -1303,12 +1356,14 @@ button, input { touch-action: manipulation; }
     petits: [[-0.3, 1.5, 0.84, 0.14], [0.3, 1.5, 0.84, 0.14]]
   };
   var eyes = [], eyeBags = new THREE.Group(); rag.add(eyeBags);
+  var pelEyes = [];
   function buildEyes(kind) {
-    eyes.forEach(function (e) { bodyG.remove(e); }); eyes = []; empty(eyeBags);
+    pelEyes.forEach(function (e) { bodyG.remove(e); }); pelEyes = []; empty(eyeBags);
     (EYES[kind] || EYES.bizarres).forEach(function (q) {
-      eyes.push(eye(q[0], q[1], q[2], q[3]));
+      pelEyes.push(eye(q[0], q[1], q[2], q[3]));
       var eb = mesh(new THREE.SphereGeometry(q[3], 20, 12), bagMatE, q[0], q[1] - q[3] * 0.62, q[2] + 0.03, eyeBags); eb.scale.set(0.95, 0.42, 0.75); eb.castShadow = false;
     });
+    eyes = pelEyes;
   }
   /* Les accessoires de la boutique : chapeau, lunettes, tour de cou */
   var acc = new THREE.Group(); bodyG.add(acc);
@@ -1493,7 +1548,8 @@ button, input { touch-action: manipulation; }
     buildStage();
     rag.visible = badNow && !modelNow; tuft.children.forEach(function (o) { o.visible = !G.look.hat && stageNow >= 1; });
   }
-  function dress() { useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth); buildAcc(G.look); syncParts(); stageKey = ''; paint(); }
+  function liveEyes() { eyes = (modelNow && modelNow.eyes && modelNow.eyes.length) ? modelNow.eyes : pelEyes; }
+  function dress() { useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth); buildAcc(G.look); syncParts(); stageKey = ''; paint(); liveEyes(); }
   var toastT = null;
   function toast(msg) { $('toast').textContent = msg; $('toast').hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { $('toast').hidden = true; }, 3200); }
   function gauge(id, bar, txt, lv, pct) {
@@ -1627,7 +1683,7 @@ button, input { touch-action: manipulation; }
   function hitPet(ev) { var p = rel(ev); ptr.set(p.x * 2 - 1, -(p.y * 2 - 1)); ray.setFromCamera(ptr, camera); return ray.intersectObject(pet, true).length > 0; }
   stage.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, y: ev.clientY, sx: ev.clientX, sy: ev.clientY, used: false, moved: 0, acc: 0, onPet: phase === 'play' && hitPet(ev) }; });
   window.addEventListener('pointermove', function (ev) {
-    var p = rel(ev); lookX = Math.max(-0.5, Math.min(0.5, p.x - 0.5)); lookY = Math.max(-0.5, Math.min(0.5, p.y - 0.5));
+    var p = rel(ev); lookX = Math.max(-0.5, Math.min(0.5, p.x - 0.5)); lookY = Math.max(-0.5, Math.min(0.5, p.y - 0.5)); lastMove = clock.getElapsedTime();
     if (down) {
       var dx = ev.clientX - down.x, dy = ev.clientY - down.y, dist = Math.abs(dx) + Math.abs(dy); down.moved += dist; down.x = ev.clientX; down.y = ev.clientY;
       if (phase === 'run') {                  /* pendant la course : un glissement = un ordre */
@@ -1650,7 +1706,7 @@ button, input { touch-action: manipulation; }
         ray.setFromCamera(ptr, camera);
         if (ray.intersectObject(pet, true).length) {
           try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}      /* une petite vibration sous le doigt, sur les téléphones qui le permettent */
-          heart(); var pick = Math.random();
+          heart(); perk = 1; var pick = Math.random();
           start(mood === 'tete' ? 'wiggle' : mood === 'fatigue' ? (pick < 0.5 ? 'jump' : 'wiggle') : (pick < 0.4 ? 'jump' : pick < 0.7 ? 'spin' : 'wiggle'));
         }
       }
@@ -1682,6 +1738,7 @@ button, input { touch-action: manipulation; }
   resize();
 
   var stageK = STAGE[0].k, earK = STAGE[0].ear;
+  var lastMove = -10, gazeX = 0, gazeY = 0, gazeNext = 0, talkUntil = 0, perk = 0, smile = 0.7, twL0 = -9, twR0 = -9, twNextL = 2, twNextR = 4;
   var v3 = new THREE.Vector3(), petUntil = 0, nextSay = 1e9, todayDone = false, coinShown = -1, coinGoal = 0, focusCam = false;
 
   /* ---------- De la vie : cœurs, confettis, bulles de parole ---------- */
@@ -1740,6 +1797,7 @@ button, input { touch-action: manipulation; }
     if (phase !== 'play') return;
     $('bubble').hidden = true; void $('bubble').offsetWidth; $('bubble').textContent = txt; $('bubble').hidden = false;
     clearTimeout(sayT); sayT = setTimeout(function () { $('bubble').hidden = true; }, dur || 3400);
+    talkUntil = clock.getElapsedTime() + Math.min((dur || 3400) / 1000 * 0.7, 0.8 + txt.length * 0.05);      /* sa bouche bouge le temps de dire la phrase */
   }
   function chatter() {
     if (whyNow.length && Math.random() < 0.65) { say(whyNow[whyTurn++ % whyNow.length].l, 5600); return; }     /* quand ça ne va pas, il dit surtout pourquoi */
@@ -1847,6 +1905,9 @@ button, input { touch-action: manipulation; }
       aL = 0.9 + Math.sin(t * 13) * 0.7; aR = 0.9 - Math.sin(t * 13) * 0.7; breath = 0; extraSpin = 0;
     }
 
+    var talking = t < talkUntil && phase !== 'dead' && phase !== 'run', petting = playing && t < petUntil;
+    if (talking && !reduce && !(act && act.type === 'yawn')) mouthT = Math.max(mouthT, 0.18 + Math.abs(Math.sin(t * 13)) * 0.42);   /* il parle : la bouche s'ouvre et se ferme */
+
     /* 3. Lissage et ressorts : rien ne change d'un coup */
     var f = 1 - Math.pow(0.002, dt), fFast = 1 - Math.pow(0.000001, dt);
     lean += (leanT - lean) * f; droop += (droopT - droop) * f;
@@ -1875,20 +1936,35 @@ button, input { touch-action: manipulation; }
     footR.position.y = standY + 0.16 + Math.max(0, -Math.sin(t * 2.2 * sp)) * step;
 
     armL.rotation.z = -aLs; armR.rotation.z = aRs;
+    /* Le regard : il suit ton doigt ; si rien ne bouge depuis un moment, il regarde ailleurs tout seul */
+    var idle = t - lastMove > 2.5;
+    if (idle && t > gazeNext && !reduce) { gazeNext = t + 1.1 + Math.random() * 2.4; gazeX = (Math.random() - 0.5) * 0.9; gazeY = (Math.random() - 0.5) * 0.45; }
+    var gx = idle ? gazeX : lookX, gy = idle ? gazeY : lookY;
+    var wide = (act && (act.type === 'jump' || act.type === 'evolve' || act.type === 'intro') && t - act.t0 < 0.35) || perk > 0.6 ? 1.16 : 1;   /* surpris : les yeux s'écarquillent */
+    var pupilT = petting ? 1.3 : ache ? 0.72 : tired ? 0.88 : wide > 1 ? 0.8 : 1;                                                   /* content : grosses pupilles ; mal de tête : toutes petites */
     var browA = sad ? 0.45 : tired ? 0.25 : ache ? -0.4 : (act && act.type === 'jump') ? -0.15 : 0;      /* triste : sourcils tombants ; mal de tête : froncés */
     eyes.forEach(function (e) {
-      e.scale.y = open; e.userData.brow.rotation.z += (e.userData.side * browA - e.userData.brow.rotation.z) * f; e.userData.brow.position.y = e.userData.r * (1.22 + (sad || tired ? -0.1 : 0)) / Math.max(0.3, open);
+      e.scale.y = open * wide; e.scale.x = wide; e.userData.brow.rotation.z += (e.userData.side * browA - e.userData.brow.rotation.z) * f; e.userData.brow.position.y = e.userData.r * (1.22 + (sad || tired ? -0.1 : 0)) / Math.max(0.3, open);
       var r = e.userData.r, p = e.userData.pupil;
-      p.position.x += (lookX * r * 0.7 - p.position.x) * f;
-      p.position.y += (-r * 0.05 - lookY * r * 0.6 - p.position.y) * f;
+      p.position.x += (gx * r * 0.7 - p.position.x) * f * 2.2;
+      p.position.y += (-r * 0.05 - gy * r * 0.6 - p.position.y) * f * 2.2; p.scale.setScalar(p.scale.x + (pupilT - p.scale.x) * f);
     });
     mouth.scale.y = 0.3 + mouthO * 0.75; mouth.position.y = 0.98 - mouthO * 0.12; teeth.position.y = -mouthO * 0.42;
+    var smileT = phase === 'dead' ? -0.6 : petting ? 1 : (playing && hpNow <= 40) ? -0.9 : sad ? -0.9 : ache ? -0.65 : tired ? -0.3 : 0.75;
+    smile += (smileT - smile) * f; mouth.scale.x = 1.1 + smile * 0.09;
+    cornerL.position.set(-0.53 - smile * 0.03, mouth.position.y + smile * 0.11, 0.8); cornerR.position.set(0.53 + smile * 0.03, mouth.position.y + smile * 0.11, 0.8);
 
     var vy = dt > 0 ? (y - prevY) / dt : 0; prevY = y;
     earLag += (Math.max(-0.7, Math.min(0.7, -vy * 0.14)) - earLag) * 0.2;
-    var tw = t % 5.3, twitch = (!reduce && tw < 0.3) ? Math.sin(tw / 0.3 * Math.PI * 2) * 0.22 : 0;
-    earL.rotation.z = 0.35 + droop + earLag + twitch;
-    earR.rotation.z = -0.7 - droop * 0.6 - earLag;
+    /* Les oreilles : chacune frétille à son rythme, elles se dressent quand on le touche, remuent quand il parle et suivent ton doigt */
+    if (!reduce && t > twNextL) { twL0 = t; twNextL = t + 2.2 + Math.random() * 5; }
+    if (!reduce && t > twNextR) { twR0 = t; twNextR = t + 2.8 + Math.random() * 6; }
+    var twitchL = t - twL0 < 0.35 ? Math.sin((t - twL0) / 0.35 * Math.PI * 2) * 0.26 : 0, twitchR = t - twR0 < 0.35 ? Math.sin((t - twR0) / 0.35 * Math.PI * 2) * 0.26 : 0;
+    var tk = talking && !reduce ? Math.sin(t * 15) * 0.07 : 0; perk *= Math.pow(0.12, dt);
+    earL.rotation.z = 0.35 + droop + earLag + twitchL + tk - perk * 0.3 - gx * 0.18;
+    earR.rotation.z = -0.7 - droop * 0.6 - earLag + twitchR - tk + perk * 0.5 - gx * 0.18;
+    earL.rotation.x = twitchL * 0.6 - perk * 0.12; earR.rotation.x = twitchR * 0.6 - perk * 0.12;
+    if (modelNow) modelNow.earU.value += ((twitchL + twitchR) * 1.3 + earLag * 0.9 + tk * 4 + perk * 0.5 - droop * 0.5 - modelNow.earU.value) * 0.4;
 
     starK += ((ache ? 1 : 0) - starK) * f; stars.scale.setScalar(Math.max(0.001, starK));
     stars.rotation.y = t * 3; stars.position.y = 2.75 + Math.sin(t * 4) * 0.05;
@@ -1969,7 +2045,7 @@ button, input { touch-action: manipulation; }
     if (Math.abs(camera.fov - wantFov) > 0.05) { camera.fov += (wantFov - camera.fov) * cf; camera.updateProjectionMatrix(); }
     if (phase === 'run' && RUN.shake > 0 && !reduce) { camera.position.x += (Math.random() - 0.5) * RUN.shake; camera.position.y += (Math.random() - 0.5) * RUN.shake; RUN.shake -= dt; }
 
-    if (modelNow) { modelNow.play(phase === 'dead' ? 'Death' : phase === 'run' ? (RUN.state === 'over' ? 'HitRecieve' : RUN.y > 0.05 ? 'Jump' : 'Walk') : act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) modelNow.mixer.update(dt * (phase === 'run' ? 1.9 : tired ? 0.5 : 1)); }
+    if (modelNow) { modelNow.play(phase === 'dead' ? 'Death' : phase === 'run' ? (RUN.state === 'over' ? 'HitRecieve' : RUN.y > 0.05 ? 'Jump' : 'Walk') : act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) { modelNow.mixer.update(dt * (phase === 'run' ? 1.9 : tired ? 0.5 : 1)); if (talking && modelNow.headBone) { modelNow.headBone.rotation.x += Math.sin(t * 15) * 0.06; modelNow.headBone.scale.y *= 1 + Math.sin(t * 15) * 0.035; } } }
     renderer.render(scene, camera);
     if (!$('bubble').hidden) {                /* la bulle suit la tête de la créature */
       v3.set(pet.position.x, pet.position.y + (2.75 + (G.look.hat ? 0.45 : 0)) * sc * stageK, pet.position.z).project(camera);
@@ -2202,7 +2278,7 @@ button, input { touch-action: manipulation; }
       tuft.children.forEach(function (o) { o.visible = false; }); stageOwn.forEach(function (o) { o.visible = false; }); moodG.visible = false;
       var par = pet.parent, shown = pet.visible; studio.add(pet); pet.visible = true;
       pet.position.set(0, 0, 0); pet.rotation.set(0, focus === 'back' ? Math.PI * 0.8 : -0.3, 0); pet.scale.setScalar(1); bodyG.scale.set(1, 1, 1);
-      eyes.forEach(function (e) { e.scale.y = 1; });
+      liveEyes(); eyes.forEach(function (e) { e.scale.set(1, 1, 1); });
       var fc = focusOf(focus); thumbCam.position.set(0, fc[0] + 0.15, fc[1]); thumbCam.lookAt(0, fc[0], 0);
       var url = snap(studio, thumbCam);
       par.add(pet); pet.visible = shown;

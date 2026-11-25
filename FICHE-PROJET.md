@@ -137,7 +137,9 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Niveaux et expérience, avec récompenses et auras | Fait |
 | Barre de vie, et mort du monstre s'il est vraiment négligé | Fait |
 | 47 cosmétiques dans 5 catégories, avec raretés, niveaux requis et essayage | Fait |
-| Quatre mini-jeux : course, attrape-fruits, mémoire, tri des déchets | Fait |
+| Sept mini-jeux, dont trois jeux de cerveau : calcul, suite à retenir, couleurs pièges | Fait |
+| Défis du jour, étoiles, cadeau, question du jour et 18 trophées | Fait |
+| Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
 | Comptes (pseudo et mot de passe), amis, classement mondial et classement entre amis | Fait |
 | La créature parle (bulles), aime les caresses (cœurs), fête les bonnes journées (confettis) | Fait |
@@ -274,6 +276,29 @@ Cette limite est voulue : FormiLife sert à passer moins de temps sur les écran
 - Le monstre lui-même reste enregistré sur l'appareil. Le compte ne sert qu'aux amis et aux classements.
 
 Ces fonctions ont besoin du serveur : elles marchent sur la version en ligne (Railway), pas sur la page de démonstration.
+
+### Les jeux de cerveau
+
+Trois jeux de plus dans la liste des mini-jeux. Ils comptent dans les 8 parties et les 50 pièces par jour.
+
+| Jeu | Ce qu'on fait | Ce que ça entraîne |
+|---|---|---|
+| Calcul éclair | 45 secondes de calcul mental. Tous les 4 bons résultats, un nouveau type de calcul arrive | Le calcul et la rapidité |
+| La suite lumineuse | Quatre touches s'allument dans un ordre. On refait la suite, qui s'allonge à chaque tour | La mémoire à court terme |
+| Couleurs pièges | Le mot « ROUGE » est écrit en bleu : il faut appuyer sur la couleur de l'encre | L'attention |
+
+### Les défis, les étoiles et les trophées
+
+Un bouton rond en haut à droite (la cible) ouvre l'écran des défis.
+
+- **Trois défis par jour**, choisis d'après la date : un pour prendre soin de soi, un pour jouer, un pour apprendre. Chacun rapporte 10 pièces.
+- **Une étoile** et 15 pièces quand les trois défis du jour sont réussis. **À 5 étoiles, un cadeau de 100 pièces.**
+- **La question du jour** : une question sur le cerveau, le sommeil, le sport ou les écrans, avec l'explication. 5 pièces si la réponse est bonne. Il y a 20 questions.
+- **18 trophées** à collectionner (séries de jours, niveaux, records, bien-être...). Chacun rapporte 20 pièces.
+
+### La pause écran
+
+Toutes les 20 minutes passées dans l'appli, le monstre demande au joueur de regarder au loin pendant 20 secondes. Une appli qui parle du temps d'écran doit montrer l'exemple.
 
 ### L'espace bien-être
 

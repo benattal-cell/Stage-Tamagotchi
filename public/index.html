@@ -1624,7 +1624,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function dayKey(back) {
-    var d = new Date(Date.now() + (G.dayOffset - (back || 0)) * 864e5);
+    var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + G.dayOffset - (back || 0));      /* on compte en jours du calendrier : le changement d'heure ne décale rien */
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
   function hm(h) { var m = Math.round(h * 60); return Math.floor(m / 60) + ' h ' + pad(m % 60); }
@@ -3508,7 +3508,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   $('aLevel').addEventListener('click', function () { if (!needPlay()) return; var c = calc(); G.xpBonus += c.need - c.xp; saveG(); closeAdmin(); refresh(true); });
   $('aHeal').addEventListener('click', function () { if (!needPlay()) return; G.hpFrom = dayKey(0); saveG(); sfx('wave'); refresh(false); paintAdmin(); });
   $('deadNew').addEventListener('click', function () {
-    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins), best: G.best, game: G.game, rec: G.rec, well: G.well };          /* le joueur garde ses achats et ses pièces */
+    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins), best: G.best, game: G.game, rec: G.rec, well: G.well, stats: G.stats, quest: G.quest, quiz: G.quiz, trophies: G.trophies };          /* le joueur garde ses achats et ses pièces */
     G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; G.best = keep.best; G.game = keep.game; G.rec = keep.rec; G.well = keep.well; G.stats = keep.stats; G.quest = keep.quest; G.quiz = keep.quiz; G.trophies = keep.trophies; saveG();
     $('name').value = ''; act = null; $('dead').hidden = true; goTitle();
   });

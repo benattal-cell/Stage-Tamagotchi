@@ -608,6 +608,7 @@ button, input { touch-action: manipulation; }
   sun.shadow.camera.left = -7; sun.shadow.camera.right = 7;
   sun.shadow.camera.top = 8; sun.shadow.camera.bottom = -3;
   sun.shadow.radius = 4;
+  var backLight = new THREE.DirectionalLight(0x9FB8FF, 0.45); backLight.position.set(-4, 5, -6); scene.add(backLight);
   scene.add(sun);
   var lamp = new THREE.PointLight(0xF7C948, 0.7, 12);
   lamp.position.set(-3.4, 3.4, -1.4);
@@ -805,11 +806,33 @@ button, input { touch-action: manipulation; }
     { label: 'Gris souris', fur: 0x9AA0B4, dark: 0x6E7389 }
   ];
   var furMat = mat(palette[0].fur), darkMat = mat(palette[0].dark);
+  /* Deux astuces de dessin animé pour un rendu plus soigné :
+     - un liseré de lumière sur les bords du monstre, calculé dans le shader ;
+     - un contour sombre : on redessine la forme un peu plus grosse, en noir, et on n'en garde que l'envers. */
+  var RIM = '#include <emissivemap_fragment>\n\tfloat rimK = pow(1.0 - clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0), 2.6);\n\ttotalEmissiveRadiance += rimK * vec3(0.30, 0.36, 0.55);';
+  function rimOn(m) { m.onBeforeCompile = function (sh) { sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', RIM); }; return m; }
+  rimOn(furMat); rimOn(darkMat);
+  var outMat = new THREE.MeshBasicMaterial({ color: 0x1B1D2B, side: THREE.BackSide });
+  function outline(m, k) { var o2 = new THREE.Mesh(m.geometry, outMat); o2.scale.setScalar(k || 1.05); o2.raycast = function () {}; m.add(o2); return m; }
+  function smoothNormals(geo) {             /* les modèles ont des facettes : pour un contour sans trous, on calcule une direction moyenne par point */
+    var pa = geo.attributes.position, na = geo.attributes.normal, map = {}, out = new Float32Array(pa.count * 3), keys = [], n, k, a2, l;
+    for (n = 0; n < pa.count; n++) { k = Math.round(pa.getX(n) * 1e3) + '_' + Math.round(pa.getY(n) * 1e3) + '_' + Math.round(pa.getZ(n) * 1e3); keys.push(k); a2 = map[k] || (map[k] = [0, 0, 0]); a2[0] += na.getX(n); a2[1] += na.getY(n); a2[2] += na.getZ(n); }
+    for (n = 0; n < pa.count; n++) { a2 = map[keys[n]]; l = Math.sqrt(a2[0] * a2[0] + a2[1] * a2[1] + a2[2] * a2[2]) || 1; out[n * 3] = a2[0] / l; out[n * 3 + 1] = a2[1] / l; out[n * 3 + 2] = a2[2] / l; }
+    geo.setAttribute('snormal', new THREE.BufferAttribute(out, 3));
+  }
+  function hullMat(width, skinned) {
+    var m = new THREE.MeshBasicMaterial({ color: 0x1B1D2B, side: THREE.BackSide, skinning: !!skinned });
+    m.onBeforeCompile = function (sh) {
+      sh.uniforms.uOut = { value: width };
+      sh.vertexShader = sh.vertexShader.replace('void main() {', 'attribute vec3 snormal;\nuniform float uOut;\nvoid main() {').replace('#include <begin_vertex>', 'vec3 transformed = vec3( position ) + snormal * uOut;');
+    };
+    return m;
+  }
   var white = mat(0xFFF8E7, { roughness: 0.4 }), black = mat(0x1B1D2B, { roughness: 0.3 });
 
   var pet = new THREE.Group(); pet.position.set(HOME.x, 0, HOME.z); scene.add(pet);
   var bodyG = new THREE.Group(); pet.add(bodyG);
-  var body = mesh(new THREE.SphereGeometry(1, 48, 36), furMat, 0, 1.2, 0, bodyG);
+  var body = outline(mesh(new THREE.SphereGeometry(1, 48, 36), furMat, 0, 1.2, 0, bodyG), 1.035);
   body.scale.set(1, 1.12, 0.92);
   /* Les oreilles tournent autour de leur base. Leur forme se choisit dans l'atelier. */
   var earL = new THREE.Group(), earR = new THREE.Group();
@@ -824,22 +847,27 @@ button, input { touch-action: manipulation; }
       else if (kind === 'cornes') mesh(new THREE.ConeGeometry(0.15, 0.55, 14), bone, 0, 0.27, 0, e);
       else if (kind === 'antennes') { mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.8, 8), darkMat, 0, 0.4, 0, e); mesh(new THREE.SphereGeometry(0.13, 14, 10), mat(0xF7C948, { emissive: 0x6A5210 }), 0, 0.85, 0, e); }
       else mesh(new THREE.ConeGeometry(n ? 0.26 : 0.28, n ? 0.7 : 0.85, 20), furMat, 0, n ? 0.35 : 0.425, 0, e);
+      e.children.slice().forEach(function (ch) { outline(ch, 1.09); });
     });
   }
 
   function arm(side) {
     var p = new THREE.Group(); p.position.set(side * 0.84, 1.32, 0.15); bodyG.add(p);
-    mesh(new THREE.SphereGeometry(0.24, 20, 16), darkMat, 0, -0.32, 0, p).scale.set(0.8, 1.4, 0.8);
+    outline(mesh(new THREE.SphereGeometry(0.24, 20, 16), darkMat, 0, -0.32, 0, p), 1.12).scale.set(0.8, 1.4, 0.8);
     return p;
   }
   var armL = arm(-1), armR = arm(1);
-  var footL = mesh(new THREE.SphereGeometry(0.3, 20, 16), darkMat, -0.42, 0.16, 0.45, pet); footL.scale.set(1.1, 0.55, 1.4);
-  var footR = mesh(new THREE.SphereGeometry(0.3, 20, 16), darkMat, 0.42, 0.16, 0.45, pet); footR.scale.set(1.1, 0.55, 1.4);
+  var footL = outline(mesh(new THREE.SphereGeometry(0.3, 20, 16), darkMat, -0.42, 0.16, 0.45, pet), 1.1); footL.scale.set(1.1, 0.55, 1.4);
+  var footR = outline(mesh(new THREE.SphereGeometry(0.3, 20, 16), darkMat, 0.42, 0.16, 0.45, pet), 1.1); footR.scale.set(1.1, 0.55, 1.4);
+  outline(mesh(new THREE.SphereGeometry(0.2, 16, 12), darkMat, 0.1, 0.5, -0.92, bodyG), 1.1);      /* une petite queue */
 
+  var thread0 = mat(0x1B1D2B, { roughness: 0.8 });
   function eye(x, y, z, r) {
     var e = new THREE.Group(); e.position.set(x, y, z); bodyG.add(e);
     mesh(new THREE.SphereGeometry(r, 28, 20), white, 0, 0, 0, e);
     e.userData.pupil = mesh(new THREE.SphereGeometry(r * 0.4, 20, 16), black, 0, -r * 0.05, r * 0.72, e);
+    var shine = new THREE.Mesh(new THREE.SphereGeometry(r * 0.13, 10, 8), new THREE.MeshBasicMaterial({ color: 0xFFFFFF })); shine.position.set(r * 0.16, r * 0.14, r * 0.34); e.userData.pupil.add(shine);   /* le reflet qui rend l'œil vivant */
+    var brow = mesh(new THREE.BoxGeometry(r * 1.5, r * 0.2, r * 0.2), thread0, 0, r * 1.22, r * 0.5, e); brow.castShadow = false; e.userData.brow = brow; e.userData.side = x < -0.05 ? -1 : x > 0.05 ? 1 : 0;
     e.userData.r = r;
     return e;
   }
@@ -887,14 +915,14 @@ button, input { touch-action: manipulation; }
     root.traverse(function (o) {
       if (o.isBone) bones.push(o);
       if (!o.isMesh) return;
-      o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; meshes.push(o);
+      o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; meshes.push(o); smoothNormals(o.geometry);
       if (mats.indexOf(o.material) < 0) {
         o.material.roughness = 0.9; o.material.metalness = 0; mats.push(o.material);
         o.material.emissive.setHex(0xFFFFFF); o.material.emissiveMap = o.material.map; o.material.emissiveIntensity = 0.28;   /* un peu de lumière propre, pour qu'ils restent colorés la nuit */
         /* Changer la teinte : on fait tourner les couleurs de sa texture sur le cercle des couleurs (le rose devient orange, puis jaune…) */
         o.material.onBeforeCompile = function (sh) {
           sh.uniforms.uHue = hueU;
-          sh.fragmentShader = sh.fragmentShader
+          sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', RIM)
             .replace('void main() {', 'uniform float uHue;\nvec3 hueRot(vec3 c, float a) { const vec3 k = vec3(0.57735); float ca = cos(a); return c * ca + cross(k, c) * sin(a) + k * dot(k, c) * (1.0 - ca); }\nvoid main() {')
             .replace('#include <map_fragment>', '#include <map_fragment>\n\tdiffuseColor.rgb = hueRot(diffuseColor.rgb, uHue);')
             .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n\ttotalEmissiveRadiance = hueRot(totalEmissiveRadiance, uHue);');
@@ -919,6 +947,11 @@ button, input { touch-action: manipulation; }
     var sh = slice((f.hat - 0.16) * H, f.hat * H), se = slice((f.eye - 0.08) * H, (f.eye + 0.08) * H), sn = slice((f.neck - 0.06) * H, (f.neck + 0.06) * H), sb = slice(0.42 * H, 0.62 * H), sm = slice((f.eye - f.mouth - 0.05) * H, (f.eye - f.mouth + 0.05) * H);
     var mixer = new THREE.AnimationMixer(root), actions = {};
     gltf.animations.forEach(function (c) { actions[c.name] = mixer.clipAction(c); });
+    meshes.forEach(function (o) {             /* le contour : la même forme, gonflée, en noir, vue de l'intérieur */
+      var hull = o.isSkinnedMesh ? new THREE.SkinnedMesh(o.geometry, hullMat(0.032 / k, true)) : new THREE.Mesh(o.geometry, hullMat(0.032 / k, false));
+      hull.position.copy(o.position); hull.quaternion.copy(o.quaternion); hull.scale.copy(o.scale); hull.frustumCulled = false; hull.raycast = function () {};
+      o.parent.add(hull); if (o.isSkinnedMesh) hull.bind(o.skeleton, o.bindMatrix);
+    });
     MODELS[id] = {
       id: id, holder: holder, hueU: hueU, mats: mats, meshes: meshes, bones: bones, mixer: mixer, actions: actions, cur: '', curA: null, H: H,
       A: { hatX: sh.cx, hatZ: sh.cz, hatY: f.hat * H, hatR: Math.max(0.25, Math.min(0.85, Math.max(sh.w, sh.d) * 0.48 * f.hatR)),
@@ -938,7 +971,7 @@ button, input { touch-action: manipulation; }
      à l'os le plus proche : comme ça le chapeau suit la tête quand elle bouge. */
   function fitAcc(M, h, gl, nk, bk) {
     var A = M.A, k = A.hatR / 0.72, sy;
-    M.rest(); pet.updateMatrixWorld(true);
+    M.holder.scale.set(1, 1, 1); M.rest(); pet.updateMatrixWorld(true);
     h.scale.setScalar(k); h.position.set(A.hatX, A.hatY - 2.0 * k, A.hatZ);
     gl.scale.setScalar(A.eyeK); gl.position.set(A.eyeX, A.eyeY - 1.52 * A.eyeK, A.eyeZ - 0.97 * A.eyeK);
     sy = (A.neckRX + A.neckRZ) / 1.75; nk.scale.set(A.neckRX / 0.9 * 0.96, sy * 0.8, A.neckRZ / 0.83 * 0.96); nk.position.set(A.neckX, A.neckY - 0.66 * sy, A.neckZ);
@@ -952,7 +985,7 @@ button, input { touch-action: manipulation; }
     }
     if (!M.bones.length) return;
     [[h, A.hatY], [gl, A.eyeY], [nk, A.neckY], [bk, A.backY]].forEach(function (q) { boneAt(q[1]).attach(q[0]); hooked.push(q[0]); });
-    M.play('Idle');
+    shape(M); M.play('Idle');
   }
   /* ---------- Tous les autres cosmétiques : chacun est un petit assemblage de formes ---------- */
   var MET = { metalness: 0.6, roughness: 0.35 };
@@ -1008,24 +1041,150 @@ button, input { touch-action: manipulation; }
   }
 
   /* Montre la peluche ou un monstre téléchargé */
+  /* Deux espèces changent carrément de corps en devenant adultes */
+  var EVOLVE = { Mushnub: 'Mushnub_Evolved', GreenBlob: 'GreenSpikyBlob' };
+  function bodyOf(id) { return (stageNow === 2 && EVOLVE[id] && MODELS[EVOLVE[id]]) ? EVOLVE[id] : id; }
+  function shape(M) { var q = [[1.1, 0.88, 1.1], [1, 1, 1], [0.97, 1.07, 0.97]][stageNow]; M.holder.scale.set(q[0], q[1], q[2]); }   /* bébé : rond et trapu ; adulte : plus élancé */
   function useSpecies(id) {
-    var M = MODELS[id] || null;
+    var M = MODELS[bodyOf(id)] || null;
     if (M !== modelNow) { unhook(); empty(modelG); modelNow = M; if (M) { modelG.add(M.holder); M.play('Idle'); } }
   }
   /* ---------- Ce qui montre son âge ----------
-     Bébé : une tétine, des joues roses, une couche et un biberon. Ado : un skate et une mèche rebelle. Adulte : une moustache et une mallette.
-     Ça marche sur tous les monstres : l'appli se sert du repère « bouche » mesuré sur chacun. */
-  var stageOwn = [], stageKey = '', standY = 0, face = { x: 0, y: 0.98, z: 0.98, k: 1 }, headTop = 2.4;
+     Bébé : tous ont une tétine et un biberon (la peluche a aussi des joues roses et une couche).
+     Ensuite, chaque espèce a SA propre évolution : une à l'adolescence, une plus spectaculaire à l'âge adulte. */
+  var stageOwn = [], orbits = [], stageKey = '', standY = 0, face = { x: 0, y: 0.98, z: 0.98, k: 1 }, headTop = 2.4;
   function boneNear(M, y) {
     var w = new THREE.Vector3(), best = null, by = -1e9;
     M.bones.forEach(function (bn) { bn.getWorldPosition(w); bodyG.worldToLocal(w); if (w.y <= y + 0.01 && w.y > by) { by = w.y; best = bn; } });
     return best || M.bones[0];
   }
+  function lum(geo, col, x, y, z, par) { var o = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col })); o.position.set(x, y, z); o.raycast = function () {}; par.add(o); return o; }   /* un objet qui brille */
+  function gem(r, col, x, y, z, par) { return mesh(new THREE.OctahedronGeometry(r), mat(col, { emissive: col, emissiveIntensity: 0.55, roughness: 0.2 }), x, y, z, par); }
+  /* Chaque recette reçoit : l'âge (1 = ado, 2 = adulte) et des « zones » où poser ses objets.
+     h = sur la tête · t = tout en haut (caché si le monstre porte un chapeau) · b = dans le dos · c = sur le corps · g = au sol · orb() = fait tourner un objet autour de lui.
+     Les positions sont écrites pour la peluche ; l'appli les adapte à la taille de chaque monstre. */
+  var EVO = {
+    peluche: function (a, h, t, b, c, g, orb) {
+      var o = qCyl(0.15, 0.15, 0.05, 0xE8C55A, 0, 0.72, 0.9, c, MET); o.rotation.x = Math.PI / 2 - 0.3;                              /* un gros bouton doré */
+      if (a < 2) return;
+      for (var n = 0; n < 11; n++) { var an = n / 11 * Math.PI * 2; o = qCone(0.2, 0.55, 0xC0392B, Math.cos(an) * 1.08, 1.3 + Math.sin(an) * 1.16, -0.25, c); o.rotation.z = an - Math.PI / 2; o.scale.z = 0.35; }   /* une collerette de feutrine */
+      [0, 1, 2].forEach(function (n) { o = qCyl(0.13, 0.13, 0.04, [0xF7C948, 0x5CC8FF, 0xFF6B8B][n], 0, 0, 0, g); o.rotation.x = Math.PI / 2; orb(o, 1.55, 1.1, 1.3, n * 2.1); });
+    },
+    PinkBlob: function (a, h, t, b, c, g, orb) {
+      var o = qCone(0.2, 0.34, 0xE0457B, 0.3, 2.3, 0.28, t); o.rotation.z = -Math.PI / 2; o = qCone(0.2, 0.34, 0xE0457B, 0.64, 2.3, 0.28, t); o.rotation.z = Math.PI / 2; qSph(0.09, 0xB8305C, 0.47, 2.3, 0.3, t);   /* un nœud */
+      if (a < 2) return;
+      for (var n = 0; n < 5; n++) { o = mesh(new THREE.ConeGeometry(0.13, 0.5, 8), mat(0xFF9CC8, { transparent: true, opacity: 0.85, roughness: 0.15, emissive: 0x7A2048 }), Math.cos(n * 1.257) * 0.4, 2.55, Math.sin(n * 1.257) * 0.4, t); }   /* la couronne de gelée */
+      [0, 1, 2].forEach(function (n) { orb(qSph(0.17, 0xFF7FB4, 0, 0, 0, g, { roughness: 0.2 }), 1.5, 0.9, 0.5 + n * 0.5, n * 2.1); });
+    },
+    GreenBlob: function (a, h, t, b, c, g, orb) {
+      qCyl(0.03, 0.04, 0.5, 0x4F9B4A, 0, 2.5, 0, t); var o = qSph(0.2, 0x7FD06A, -0.18, 2.72, 0, t); o.scale.set(1, 0.3, 0.6); o.rotation.z = 0.5; o = qSph(0.2, 0x7FD06A, 0.18, 2.76, 0, t); o.scale.set(1, 0.3, 0.6); o.rotation.z = -0.5;   /* une pousse */
+      if (a < 2) return;
+      [0, 1, 2, 3, 4].forEach(function (n) { o = qSph(0.2, 0x8FE07A, 0, 0, 0, g, { emissive: 0x2A5A22 }); o.scale.set(1, 0.25, 0.55); orb(o, 1.6, 1.3, 0.6 + (n % 3) * 0.5, n * 1.26); });   /* un tourbillon de feuilles */
+    },
+    GreenSpikyBlob: function (a, h, t, b, c, g, orb) {
+      [[-0.45, 1.75], [0, 2.0], [0.45, 1.75]].forEach(function (q) { gem(0.2, 0x5CE1FF, q[0], q[1], -0.9, b).scale.y = 1.9; });                 /* des cristaux dans le dos */
+      if (a < 2) return;
+      [[-0.85, 1.2], [0.85, 1.2], [-0.25, 2.35], [0.25, 2.35]].forEach(function (q) { gem(0.16, 0x5CE1FF, q[0], q[1], -0.75, b).scale.y = 1.7; });
+      [0, 1].forEach(function (n) { orb(lum(new THREE.OctahedronGeometry(0.13), 0xBFF4FF, 0, 0, 0, g), 1.6, 2.4, 1.2, n * 3.14); });
+    },
+    Alien: function (a, h, t, b, c, g, orb) {
+      lum(new THREE.SphereGeometry(0.11, 10, 8), 0x5CFF9D, -0.5, 2.6, 0.1, h); lum(new THREE.SphereGeometry(0.11, 10, 8), 0x5CFF9D, 0.5, 2.6, 0.1, h);   /* des antennes qui s'allument */
+      if (a < 2) return;
+      var o = mesh(new THREE.TorusGeometry(1.4, 0.05, 8, 40), mat(0x5CE1FF, { emissive: 0x2A8FB0, transparent: true, opacity: 0.85 }), 0, 1.2, 0, c); o.rotation.x = Math.PI / 2 + 0.35;   /* un anneau comme Saturne */
+      var u = new THREE.Group(); g.add(u); o = qSph(0.26, 0x9AA0B4, 0, 0, 0, u, MET); o.scale.y = 0.35; lum(new THREE.SphereGeometry(0.13, 10, 8), 0x7FE8CF, 0, 0.08, 0, u); orb(u, 1.75, 1.2, 2.1, 0);   /* une petite soucoupe */
+    },
+    Mushnub: function (a, h, t, b, c, g, orb) {
+      var n2 = a < 2 ? 3 : 7; for (var n = 0; n < n2; n++) orb(lum(new THREE.SphereGeometry(0.07, 8, 6), 0xFFF3C0, 0, 0, 0, g), 1.25 + (n % 2) * 0.35, 0.7 + (n % 3) * 0.2, 0.7 + (n % 4) * 0.45, n * 0.9);   /* des spores */
+      if (a < 2) return;
+      [[-1.35, 0.5], [1.4, 0.2], [0.9, 1.1]].forEach(function (q, n) { qCyl(0.07, 0.09, 0.3, 0xF4E3C8, q[0], 0.15, q[1], g); qSph(0.2, n % 2 ? 0x5CC8FF : 0xFF8A3C, q[0], 0.32, q[1], g).scale.y = 0.6; });   /* des petits champignons poussent autour de lui */
+    },
+    Mushnub_Evolved: function (a, h, t, b, c, g, orb) {
+      var n2 = a < 2 ? 3 : 6; for (var n = 0; n < n2; n++) orb(lum(new THREE.SphereGeometry(0.07, 8, 6), 0xFFB45C, 0, 0, 0, g), 1.3 + (n % 2) * 0.35, 0.8, 0.7 + (n % 4) * 0.45, n * 1.05);
+      if (a < 2) return;
+      var o = mesh(new THREE.TorusGeometry(1.0, 0.045, 8, 36), new THREE.MeshBasicMaterial({ color: 0xFFB45C }), 0, 2.05, 0, h); o.rotation.x = Math.PI / 2;   /* un halo autour du chapeau */
+    },
+    Cactoro: function (a, h, t, b, c, g, orb) {
+      function flower(x, y, z, par) { for (var n = 0; n < 5; n++) qSph(0.1, 0xFF7FB4, x + Math.cos(n * 1.257) * 0.13, y + Math.sin(n * 1.257) * 0.13, z, par).scale.z = 0.5; qSph(0.08, 0xF7C948, x, y, z + 0.04, par); }
+      flower(-0.55, 2.05, 0.5, h);                                                                                                         /* une fleur */
+      if (a < 2) return;
+      flower(0.6, 1.5, 0.75, c); flower(-0.75, 0.95, 0.7, c);
+      [-1.35, 1.4].forEach(function (x) { qCyl(0.04, 0.04, 0.5, 0x8A5A3A, x, 0.25, 0.5, g); qSph(0.19, x < 0 ? 0xD62828 : 0xF7C948, x, 0.6, 0.5, g); qCyl(0.195, 0.195, 0.06, 0xFFFFFF, x, 0.6, 0.5, g); });   /* des maracas */
+      var o = lum(new THREE.CylinderGeometry(1.0, 1.0, 0.04, 36), 0xFFC24A, 0, 2.1, -1.15, b); o.rotation.x = Math.PI / 2; for (var ry = 0; ry < 10; ry++) { var rg = lum(new THREE.BoxGeometry(0.1, 0.36, 0.04), 0xFFC24A, Math.cos(ry * 0.628) * 1.3, 2.1 + Math.sin(ry * 0.628) * 1.3, -1.15, b); rg.rotation.z = ry * 0.628 - Math.PI / 2; }                 /* un soleil derrière lui */
+    },
+    Yeti: function (a, h, t, b, c, g, orb) {
+      var big = a >= 2;
+      [-1, 1].forEach(function (s2) { var o = mesh(new THREE.ConeGeometry(big ? 0.17 : 0.12, big ? 0.85 : 0.45, 8), mat(0x9FE8FF, { emissive: 0x3A8FB0, roughness: 0.15 }), s2 * 0.62, big ? 2.4 : 2.25, 0.05, h); o.rotation.z = -s2 * (big ? 0.75 : 0.5); });   /* des cornes de glace */
+      if (!big) return;
+      [-1, 1].forEach(function (s2) { gem(0.24, 0x9FE8FF, s2 * 1.08, 1.75, 0, c).scale.y = 1.5; gem(0.15, 0xCFF4FF, s2 * 1.25, 1.5, 0.15, c); });   /* de la glace sur les épaules */
+      [0, 1, 2].forEach(function (n) { orb(lum(new THREE.OctahedronGeometry(0.09), 0xFFFFFF, 0, 0, 0, g), 1.6, 0.8, 0.8 + n * 0.6, n * 2.1); });
+    },
+    Birb: function (a, h, t, b, c, g, orb) {
+      var n, o, cols = [0xFF8A3C, 0xFFD25A, 0xFF5A3C];
+      for (n = 0; n < (a < 2 ? 3 : 5); n++) { o = qCone(0.09, 0.45, cols[n % 3], (n - (a < 2 ? 1 : 2)) * 0.14, 2.5, -0.05, t); o.rotation.z = -(n - (a < 2 ? 1 : 2)) * 0.25; }   /* une crête de flammes */
+      if (a < 2) return;
+      for (n = 0; n < 5; n++) { o = qCone(0.13, 1.1, cols[n % 3], (n - 2) * 0.28, 1.5 + (2 - Math.abs(n - 2)) * 0.18, -1.15, b); o.rotation.x = -0.9; o.rotation.z = -(n - 2) * 0.3; o.scale.z = 0.4; }   /* une queue de phénix */
+      [0, 1].forEach(function (n3) { orb(lum(new THREE.SphereGeometry(0.08, 8, 6), 0xFFB45C, 0, 0, 0, g), 1.5, 1.6, 1.4, n3 * 3.14); });
+    },
+    Pigeon: function (a, h, t, b, c, g, orb) {
+      [-0.25, 0.25].forEach(function (x) { var o = mesh(new THREE.TorusGeometry(0.19, 0.045, 8, 20), mat(0x8A5A3A), x, 2.12, 0.6, t); o.rotation.x = -0.5; var gl2 = qCyl(0.17, 0.17, 0.03, 0x9FD8F0, x, 2.12, 0.6, t, { roughness: 0.1, metalness: 0.4 }); gl2.rotation.x = Math.PI / 2 - 0.5; });   /* des lunettes d'aviateur */
+      if (a < 2) return;
+      [-1, 1].forEach(function (s2) { var o = qSph(0.3, 0xE8C55A, s2 * 1.05, 1.5, 0.2, c, MET); o.scale.set(0.9, 0.5, 0.2); o.rotation.z = s2 * 0.5; });     /* des ailes dorées */
+      bx2(0.8, 0.55, 0.3, 0x8A5A3A, 1.35, 0.3, 0.45, g); bx2(0.82, 0.2, 0.32, 0x5A3A22, 1.35, 0.5, 0.45, g);                                   /* la sacoche du facteur */
+      var e2 = new THREE.Group(); g.add(e2); bx2(0.36, 0.24, 0.03, 0xFFFFFF, 0, 0, 0, e2); qSph(0.05, 0xD62828, 0, 0, 0.03, e2); orb(e2, 1.6, 1.0, 1.9, 0);   /* une lettre qui vole */
+    },
+    Chicken: function (a, h, t, b, c, g, orb) {
+      var n, o; for (n = 0; n < (a < 2 ? 3 : 5); n++) qSph(0.15, 0xD62828, 0, 2.42 + Math.sin((n + 0.5) / (a < 2 ? 3 : 5) * Math.PI) * 0.16, 0.4 - n * 0.2, t);   /* une grande crête */
+      if (a < 2) return;
+      for (n = 0; n < 7; n++) { o = qCone(0.12, 1.0, n % 2 ? 0xFFFFFF : 0xD62828, (n - 3) * 0.24, 1.45 + (3 - Math.abs(n - 3)) * 0.14, -1.1, b); o.rotation.x = -0.8; o.rotation.z = -(n - 3) * 0.24; o.scale.z = 0.35; }   /* une queue en éventail */
+      qSph(0.26, 0xE8C55A, 1.3, 0.3, 0.5, g, MET).scale.y = 1.25;                                                                           /* un œuf d'or */
+    },
+    Cat: function (a, h, t, b, c, g, orb) {
+      var o = mesh(new THREE.TorusGeometry(0.92, 0.06, 8, 30), mat(0xD62828), 0, 0.8, 0, c); o.rotation.x = Math.PI / 2; qSph(0.13, 0xE8C55A, 0, 0.66, 0.9, c, MET);   /* un collier à grelot */
+      if (a < 2) return;
+      [-1, 0, 1].forEach(function (n) { var tl = new THREE.Group(); tl.position.set(n * 0.35, 0.7, -0.85); tl.rotation.set(-0.55, 0, -n * 0.45); b.add(tl); qCone(0.14, 1.0, 0xE8963C, 0, 0.5, 0, tl); qSph(0.15, 0x5A3A22, 0, 1.02, 0, tl); });   /* trois queues */
+      qSph(0.28, 0xFF6B8B, 1.3, 0.28, 0.5, g); o = mesh(new THREE.TorusGeometry(0.28, 0.02, 6, 20), mat(0xD9486E), 1.3, 0.28, 0.5, g); o.rotation.y = 0.8;   /* une pelote */
+    },
+    Dog: function (a, h, t, b, c, g, orb) {
+      function boneAt2(x, z, k) { var bg = new THREE.Group(); bg.position.set(x, 0.14 * k, z); bg.scale.setScalar(k); bg.rotation.y = 0.5; g.add(bg); var st = qCyl(0.07, 0.07, 0.6, 0xF6F1E7, 0, 0, 0, bg); st.rotation.z = Math.PI / 2; [[-0.32, 0.07], [-0.32, -0.07], [0.32, 0.07], [0.32, -0.07]].forEach(function (q) { qSph(0.1, 0xF6F1E7, q[0], 0, q[1], bg); }); }
+      boneAt2(1.25, 0.6, a < 2 ? 1 : 1.5);                                                                                                  /* un os */
+      if (a < 2) return;
+      var o = mesh(new THREE.TorusGeometry(0.93, 0.08, 8, 30), mat(0x2A2A38), 0, 0.82, 0, c); o.rotation.x = Math.PI / 2;                   /* un collier à pointes */
+      for (var n = 0; n < 9; n++) { var an = n / 9 * Math.PI * 2; o = qCone(0.06, 0.2, 0xE8C55A, Math.cos(an) * 1.0, 0.82, Math.sin(an) * 1.0, c, MET); o.rotation.z = -Math.PI / 2; o.rotation.y = -an; }
+      gem(0.13, 0xF7C948, 0, 0.62, 0.92, c);
+      orb(qSph(0.16, 0xC6E84A, 0, 0, 0, g), 1.6, 1.5, 0.5, 0);                                                                              /* une balle */
+    },
+    Fish: function (a, h, t, b, c, g, orb) {
+      var n2 = a < 2 ? 3 : 6; for (var n = 0; n < n2; n++) orb(mesh(new THREE.SphereGeometry(0.1 + (n % 3) * 0.03, 10, 8), mat(0xBFE8FF, { transparent: true, opacity: 0.55, roughness: 0.1 }), 0, 0, 0, g), 1.2 + (n % 2) * 0.35, 0.6 + (n % 3) * 0.2, 0.6 + (n % 4) * 0.5, n * 1.05);   /* des bulles */
+      if (a < 2) return;
+      var o = qCone(0.3, 0.8, 0x4A6A8A, 0, 2.45, -0.15, t); o.scale.z = 0.25; o.rotation.x = -0.35;                                         /* un aileron de requin */
+      qCyl(0.035, 0.035, 2.0, 0xE8C55A, 1.35, 1.0, 0.4, g, MET); [-0.16, 0, 0.16].forEach(function (x) { qCone(0.05, 0.3, 0xE8C55A, 1.35 + x, 2.1, 0.4, g, MET); }); bx2(0.4, 0.05, 0.05, 0xE8C55A, 1.35, 1.95, 0.4, g, MET);   /* un trident */
+    },
+    Orc: function (a, h, t, b, c, g, orb) {
+      var o = qCyl(0.16, 0.07, 1.2, 0x8A5A3A, 1.35, 0.6, 0.45, g); o.rotation.z = -0.3; [[1.5, 1.0], [1.58, 1.15], [1.42, 1.12]].forEach(function (q) { qCone(0.05, 0.16, 0xC9CDE6, q[0], q[1], 0.45, g, MET).rotation.z = -1.2; });   /* une massue */
+      if (a < 2) return;
+      dome(0.76, 0x8A90A8, 1.97, t, 0.6); [-1, 1].forEach(function (s2) { o = qCone(0.13, 0.6, 0xF3E9D2, s2 * 0.72, 2.3, 0, t); o.rotation.z = -s2 * 0.85; });    /* un casque à cornes */
+      [-1, 1].forEach(function (s2) { qSph(0.3, 0x8A90A8, s2 * 1.05, 1.72, 0, c, MET).scale.y = 0.7; o = qCone(0.08, 0.3, 0xC9CDE6, s2 * 1.22, 1.95, 0, c, MET); o.rotation.z = -s2 * 0.6; });   /* des épaulières */
+    },
+    Ninja: function (a, h, t, b, c, g, orb) {
+      var o = mesh(new THREE.TorusGeometry(0.78, 0.07, 8, 30), mat(0xD62828), 0, 1.58, 0, h); o.rotation.x = Math.PI / 2;                    /* un bandeau */
+      [-0.12, 0.12].forEach(function (x, n) { o = bx2(0.12, 0.6, 0.03, 0xD62828, x, 1.32, -0.86, h); o.rotation.x = 0.35; o.rotation.z = (n ? -1 : 1) * 0.2; });
+      if (a < 2) return;
+      [-1, 1].forEach(function (s2) { var k2 = new THREE.Group(); k2.position.set(0, 1.4, -0.95); k2.rotation.z = s2 * 0.6; b.add(k2); bx2(0.07, 1.5, 0.03, 0xC9CDE6, 0, 0.2, 0, k2, MET); bx2(0.26, 0.05, 0.08, 0xE8C55A, 0, -0.55, 0, k2, MET); bx2(0.08, 0.36, 0.06, 0x2A2A38, 0, -0.75, 0, k2); });   /* deux sabres croisés */
+      [0, 1, 2].forEach(function (n) { var sh2 = new THREE.Group(); g.add(sh2); bx2(0.36, 0.03, 0.09, 0x2A2A38, 0, 0, 0, sh2, MET); bx2(0.09, 0.03, 0.36, 0x2A2A38, 0, 0, 0, sh2, MET); orb(sh2, 1.6, 2.2, 1.0 + n * 0.35, n * 2.1); });   /* des étoiles de ninja */
+    },
+    Wizard: function (a, h, t, b, c, g, orb) {
+      var o = qCyl(0.04, 0.05, 1.3, 0x5A3A22, 1.35, 0.65, 0.45, g); o.rotation.z = -0.2; gem(0.16, 0xFFE680, 1.49, 1.4, 0.45, g);              /* une baguette */
+      if (a < 2) return;
+      var bk2 = new THREE.Group(); g.add(bk2); bx2(0.5, 0.08, 0.38, 0x4A2F7A, 0, 0, 0, bk2); bx2(0.46, 0.09, 0.34, 0xF6F1E7, 0, 0.005, 0, bk2); gem(0.06, 0xFFE680, 0, 0.06, 0, bk2); orb(bk2, 1.6, 0.8, 1.9, 0);   /* un grimoire qui flotte */
+      [0xFF4FD8, 0x5CE1FF, 0x5CFF9D].forEach(function (col, n) { orb(lum(new THREE.SphereGeometry(0.11, 10, 8), col, 0, 0, 0, g), 1.35, 1.7, 0.7 + n * 0.5, 1 + n * 2.1); });   /* des orbes magiques */
+    }
+  };
   function buildStage() {
-    var M = modelNow, st = stageNow, key = (M ? M.id : 'p') + '|' + st + '|' + (G.look.hat || '') + '|' + (G.look.neck || ''); if (key === stageKey) return;
-    stageKey = key; stageOwn.forEach(function (o) { if (o.parent) o.parent.remove(o); }); stageOwn = [];
+    if (G.species !== 'peluche' && MODELS[bodyOf(G.species)] && modelNow !== MODELS[bodyOf(G.species)]) { dress(); return; }   /* le corps change avec l'âge : on rhabille tout */
+    var M = modelNow, st = stageNow, key = (M ? M.id : 'p') + '|' + G.species + '|' + st + '|' + (G.look.hat || '') + '|' + (G.look.back || ''); if (key === stageKey) return;
+    stageKey = key; stageOwn.forEach(function (o) { if (o.parent) o.parent.remove(o); }); stageOwn = []; orbits = [];
     if (M) { face = { x: M.A.mouthX, y: M.A.mouthY, z: M.A.mouthZ, k: Math.max(0.55, M.A.eyeK) }; headTop = M.H + 0.05; } else { face = { x: 0, y: 0.98, z: 0.98, k: 1 }; headTop = 2.4; }
-    var fg = new THREE.Group(), gr = new THREE.Group(), o, n; fg.position.set(face.x, face.y, face.z); fg.scale.setScalar(face.k * 1.3); bodyG.add(fg); pet.add(gr); stageOwn.push(fg, gr);
+    var fg = new THREE.Group(), gr = new THREE.Group(), o; fg.position.set(face.x, face.y, face.z); fg.scale.setScalar(face.k * 1.3); bodyG.add(fg); pet.add(gr); stageOwn.push(fg, gr);
     standY = 0;
     if (st === 0) {
       o = qSph(0.24, 0x5CC8FF, 0, 0, 0.06, fg, { roughness: 0.4 }); o.scale.set(1.15, 0.85, 0.3);                      /* la tétine */
@@ -1037,23 +1196,26 @@ button, input { touch-action: manipulation; }
       }
       qCyl(0.16, 0.16, 0.42, 0xFFFFFF, 1.25, 0.21, 0.45, gr, { roughness: 0.3 }); qCyl(0.17, 0.17, 0.08, 0x5CC8FF, 1.25, 0.46, 0.45, gr); qCone(0.08, 0.16, 0xF4C7A0, 1.25, 0.58, 0.45, gr);   /* le biberon */
       qCyl(0.14, 0.14, 0.2, 0xFFE9A8, 1.25, 0.14, 0.45, gr);
-    } else if (st === 1) {
-      standY = 0.16;                           /* le skate : le monstre est posé dessus */
-      o = bx2(2.1, 0.09, 0.78, 0xE2725B, 0, 0.13, 0.2, gr); bx2(2.12, 0.02, 0.62, 0x1B1D2B, 0, 0.18, 0.2, gr); bx2(0.3, 0.021, 0.8, 0xFFE680, 0.6, 0.18, 0.2, gr);
-      [[-0.72, -0.1], [-0.72, 0.5], [0.72, -0.1], [0.72, 0.5]].forEach(function (q) { var wh = qCyl(0.09, 0.09, 0.12, 0xFFE680, q[0], 0.08, q[1], gr); wh.rotation.x = Math.PI / 2; });
-      if (M && !G.look.hat) { var tg = new THREE.Group(); tg.position.set(M.A.hatX, M.A.hatY + 0.05, M.A.hatZ); tg.scale.setScalar(Math.max(0.6, M.A.hatR / 0.72)); bodyG.add(tg); stageOwn.push(tg);   /* la mèche rebelle */
-        [[0, 0.2, 0.2, 0], [-0.16, 0.14, 0.2, 0.5], [0.16, 0.14, 0.2, -0.5]].forEach(function (q) { o = qCone(0.09, 0.42, 0x2A2A38, q[0], q[1], q[2], tg); o.rotation.z = q[3]; o.rotation.x = 0.35; }); }
-    } else {
-      [-1, 1].forEach(function (s2) { o = qCone(0.1, 0.5, 0x2A2A38, s2 * 0.24, 0.2, 0.06, fg); o.rotation.z = s2 * 1.75; o.scale.z = 0.5; });   /* la moustache */
-      qSph(0.09, 0x2A2A38, 0, 0.22, 0.07, fg).scale.z = 0.5;
-      bx2(0.85, 0.58, 0.22, 0x8A5A3A, 1.3, 0.31, 0.4, gr); bx2(0.87, 0.07, 0.24, 0x5A3A22, 1.3, 0.5, 0.4, gr); bx2(0.12, 0.1, 0.24, 0xE8C55A, 1.3, 0.42, 0.42, gr, MET);   /* la mallette */
-      o = mesh(new THREE.TorusGeometry(0.14, 0.03, 8, 16, Math.PI), mat(0x5A3A22), 1.3, 0.6, 0.4, gr);
+    } else if (EVO[G.species]) {
+      /* les zones, mises à la taille du monstre */
+      var h = new THREE.Group(), t2 = new THREE.Group(), b = new THREE.Group(), c = new THREE.Group(), gs = 1;
+      h.add(t2); t2.visible = !G.look.hat; b.visible = !G.look.back;
+      if (M) {
+        var A = M.A, kh = A.hatR / 0.72, kc = Math.max(0.5, Math.min(1.15, A.backK));
+        h.scale.setScalar(kh); h.position.set(A.hatX, A.hatY - 2.0 * kh, A.hatZ);
+        b.scale.setScalar(A.backK); b.position.set(A.backX, A.backY - 1.25 * A.backK, A.backZ + 0.85 * A.backK);
+        c.scale.setScalar(kc); c.position.set(A.backX, M.H * 0.5 - 1.2 * kc, (A.backZ + A.eyeZ) / 2);
+        gs = Math.max(0.75, Math.min(1.15, kc)); h.userData.y = A.hatY; b.userData.y = A.backY; c.userData.y = M.H * 0.45;
+      }
+      gr.scale.setScalar(gs); bodyG.add(h); bodyG.add(b); bodyG.add(c); stageOwn.push(h, b, c);
+      EVO[G.species](st, h, t2, b, c, gr, function (obj, r, sp, y, ph) { obj.userData = { r: r, sp: sp, y: y, ph: ph || 0 }; orbits.push(obj); return obj; });
+      [h, b, c, gr].forEach(function (grp) { grp.traverse(function (x) { x.raycast = function () {}; }); });
     }
     bodyG.position.y = standY;
     if (M && M.bones.length) {                 /* sur un monstre téléchargé, on accroche tout au squelette pour suivre ses mouvements */
-      M.rest(); pet.updateMatrixWorld(true);
-      stageOwn.forEach(function (g2) { if (g2.parent === bodyG) boneNear(M, g2.position.y).attach(g2); });
-      M.play('Idle');
+      M.holder.scale.set(1, 1, 1); M.rest(); pet.updateMatrixWorld(true);
+      stageOwn.forEach(function (g2) { if (g2.parent === bodyG) boneNear(M, g2.userData.y != null ? g2.userData.y : g2.position.y).attach(g2); });
+      shape(M); M.play('Idle');
     }
   }
   function bx2(w, hh, d, col, x, y, z, par, opt) { return mesh(new THREE.BoxGeometry(w, hh, d), mat(col, opt), x, y, z, par); }
@@ -1213,6 +1375,10 @@ button, input { touch-action: manipulation; }
     var spr = noRay(new THREE.Sprite(new THREE.SpriteMaterial({ map: zTex, transparent: true, opacity: 0, depthWrite: false })));
     pet.add(spr); zs.push(spr);
   }
+  var shc = document.createElement('canvas'); shc.width = shc.height = 128;
+  var shg = shc.getContext('2d'), grd = shg.createRadialGradient(64, 64, 4, 64, 64, 62); grd.addColorStop(0, 'rgba(10,10,20,.62)'); grd.addColorStop(0.6, 'rgba(10,10,20,.28)'); grd.addColorStop(1, 'rgba(10,10,20,0)'); shg.fillStyle = grd; shg.fillRect(0, 0, 128, 128);
+  var blob = noRay(new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shc), transparent: true, depthWrite: false })));   /* une ombre douce sous le monstre : elle le « pose » au sol */
+  blob.rotation.x = -Math.PI / 2; blob.visible = false; scene.add(blob);
   var dust = [];
   for (var d8 = 0; d8 < 10; d8++) {
     var dm = noRay(new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ color: 0xC9CDE6, transparent: true, opacity: 0, depthWrite: false })));
@@ -1709,8 +1875,9 @@ button, input { touch-action: manipulation; }
     footR.position.y = standY + 0.16 + Math.max(0, -Math.sin(t * 2.2 * sp)) * step;
 
     armL.rotation.z = -aLs; armR.rotation.z = aRs;
+    var browA = sad ? 0.45 : tired ? 0.25 : ache ? -0.4 : (act && act.type === 'jump') ? -0.15 : 0;      /* triste : sourcils tombants ; mal de tête : froncés */
     eyes.forEach(function (e) {
-      e.scale.y = open;
+      e.scale.y = open; e.userData.brow.rotation.z += (e.userData.side * browA - e.userData.brow.rotation.z) * f; e.userData.brow.position.y = e.userData.r * (1.22 + (sad || tired ? -0.1 : 0)) / Math.max(0.3, open);
       var r = e.userData.r, p = e.userData.pupil;
       p.position.x += (lookX * r * 0.7 - p.position.x) * f;
       p.position.y += (-r * 0.05 - lookY * r * 0.6 - p.position.y) * f;
@@ -1743,6 +1910,8 @@ button, input { touch-action: manipulation; }
       o.scale.setScalar(0.25 + ph * 0.4);
       o.material.opacity = Math.sin(Math.PI * ph) * zK;
     });
+    blob.visible = pet.visible; blob.position.set(pet.position.x, 0.03, pet.position.z + 0.1); blob.scale.setScalar(stageK * Math.max(0.45, 1 - pet.position.y * 0.3)); blob.material.opacity = Math.max(0.25, 1 - pet.position.y * 0.35);
+    orbits.forEach(function (o) { var q = o.userData, a3 = t * q.sp + q.ph; o.position.set(Math.cos(a3) * q.r, q.y + Math.sin(t * 2 + q.ph) * 0.08, Math.sin(a3) * q.r); o.rotation.y = t * 1.6 + q.ph; });
     dust.forEach(function (d) {
       var o = d.userData; if (o.life >= 1) { d.visible = false; return; }
       o.life += dt / 0.6;

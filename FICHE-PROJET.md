@@ -163,13 +163,32 @@ Cette règle remplace « il grandit tous les 3 jours ».
 
 ### Ce qu'on voit sur le monstre
 
-**Son âge**, sur les 18 monstres :
+**Son âge.** Bébé, tous les monstres ont une grosse tétine et un biberon à côté d'eux, et un corps plus rond. Ensuite, **chaque espèce a sa propre évolution** : une à l'adolescence (niveau 5), une plus spectaculaire à l'âge adulte (niveau 12).
 
-| Âge | Ce qu'il porte |
-|---|---|
-| Bébé (niveaux 1 à 4) | Une grosse tétine et un biberon à côté de lui. La peluche a aussi des joues roses et une couche |
-| Ado (niveaux 5 à 11) | Il est debout sur un skate, avec une mèche rebelle |
-| Adulte (niveau 12 et plus) | Une moustache, et une mallette posée à côté |
+| Espèce | Ado | Adulte |
+|---|---|---|
+| Peluche | Un gros bouton doré | Une collerette de feutrine, des boutons qui tournent autour d'elle |
+| Blob rose | Un nœud | Une couronne de gelée, des mini-blobs qui tournent |
+| Blob vert | Une pousse sur la tête | Il change de corps et devient piquant, dans un tourbillon de feuilles |
+| Blob piquant | Des cristaux dans le dos | Encore plus de cristaux, des éclats lumineux |
+| Alien | Des antennes qui s'allument | Un anneau comme Saturne, une petite soucoupe en orbite |
+| Champi | Des spores | Il change de corps, des petits champignons poussent autour de lui |
+| Grand champi | Des spores orange | Un halo autour du chapeau |
+| Cactus | Une fleur | Trois fleurs, des maracas, un soleil derrière lui |
+| Yéti | Des petites cornes de glace | De grandes cornes, de la glace sur les épaules, des flocons |
+| Piaf | Une crête de flammes | Une queue de phénix, des braises |
+| Pigeon | Des lunettes d'aviateur | Des ailes dorées, une sacoche de facteur, une lettre qui vole |
+| Poulet | Une grande crête | Une queue en éventail, un œuf d'or |
+| Chat | Un collier à grelot | Trois queues, une pelote |
+| Chien | Un os | Un collier à pointes, un gros os, une balle |
+| Poisson | Des bulles | Un aileron de requin, un trident |
+| Orc | Une massue | Un casque à cornes, des épaulières |
+| Ninja | Un bandeau | Deux sabres dans le dos, des étoiles de ninja |
+| Sorcier | Une baguette | Un grimoire qui flotte, des orbes magiques |
+
+Ce qui se pose tout en haut de la tête est caché quand le monstre porte un chapeau, et ce qui est dans le dos quand il porte un objet dans le dos.
+
+**Le rendu.** Tous les monstres ont un contour sombre, un liseré de lumière sur les bords et une ombre douce au sol, comme dans un dessin animé. La peluche a en plus des sourcils qui bougent selon son humeur, un reflet dans les yeux et une petite queue.
 
 **Son état**, pour qu'on le remarque tout de suite :
 

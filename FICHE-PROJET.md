@@ -137,7 +137,8 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Niveaux et expérience, avec récompenses et auras | Fait |
 | Barre de vie, et mort du monstre s'il est vraiment négligé | Fait |
 | 47 cosmétiques dans 5 catégories, avec raretés, niveaux requis et essayage | Fait |
-| Cinq mini-jeux : course, attrape-fruits, mémoire, tri des déchets, respiration | Fait |
+| Quatre mini-jeux : course, attrape-fruits, mémoire, tri des déchets | Fait |
+| Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
 | Comptes (pseudo et mot de passe), amis, classement mondial et classement entre amis | Fait |
 | La créature parle (bulles), aime les caresses (cœurs), fête les bonnes journées (confettis) | Fait |
 | Quêtes bonus et cadeaux hebdomadaires | À faire |
@@ -250,16 +251,15 @@ Le premier mini-jeu est **« La course des poubelles »** : le monstre court tou
 - **La difficulté monte par paliers** (150 m, 400 m, 800 m) : les rangées se rapprochent, se remplissent, et la vitesse passe de 9 à 34.
 - **Cinq zones** de 320 m chacune changent les couleurs : la ruelle, le quartier néon, l'aube, la zone toxique, minuit rouge.
 - **Commandes** : glisser à gauche ou à droite pour changer de voie, vers le haut pour sauter, vers le bas pour glisser. Un simple toucher marche aussi, ainsi que les flèches du clavier.
-**Les quatre autres jeux**
+**Les trois autres jeux**
 
 | Jeu | Le principe | Ce qu'il rapporte |
 |---|---|---|
 | Attrape-fruits | Des choses tombent du ciel, le monstre suit le doigt. Il faut attraper les fruits et l'eau, éviter les bonbons, le soda et les écrans. Trois vies, et ça accélère | 1 pièce pour 2 aliments attrapés |
 | Mémoire | Seize cartes, huit paires de cosmétiques portés par son propre monstre | De 3 à 14 pièces : moins on retourne de cartes, plus on gagne |
 | Tri des déchets | 45 secondes pour ranger chaque déchet dans la bonne poubelle (jaune, verre, compost, ordures). Une erreur coûte 3 secondes et le jeu donne la bonne réponse | 1 pièce pour 2 déchets bien triés |
-| Respiration | Une minute à respirer avec un rond qui gonfle (4 secondes) et dégonfle (6 secondes) | 10 pièces, une seule fois par jour |
 
-**La limite par jour** : 8 parties et 50 pièces au maximum, tous jeux confondus. La respiration ne compte pas dans les parties.
+**La limite par jour** : 8 parties et 50 pièces au maximum, tous jeux confondus.
 
 Cette limite est voulue : FormiLife sert à passer moins de temps sur les écrans. Des mini-jeux sans limite pousseraient à faire l'inverse, et rapporteraient plus que de bien dormir. Les jeux restent donc un bonus, et les vraies récompenses viennent du sommeil, des pas et du temps d'écran.
 
@@ -274,6 +274,27 @@ Cette limite est voulue : FormiLife sert à passer moins de temps sur les écran
 - Le monstre lui-même reste enregistré sur l'appareil. Le compte ne sert qu'aux amis et aux classements.
 
 Ces fonctions ont besoin du serveur : elles marchent sur la version en ligne (Railway), pas sur la page de démonstration.
+
+### L'espace bien-être
+
+Un bouton du menu ouvre dix activités pour s'occuper de soi. Elles ne comptent pas dans les parties de jeu. **La première fois de la journée, chacune rapporte 5 pièces**, soit 50 pièces au plus.
+
+| Activité | Ce qu'on fait |
+|---|---|
+| Respiration calme | Inspirer 4 secondes, souffler 6, pendant une minute |
+| Respiration carrée | Inspirer, retenir, souffler, retenir : 4 secondes chacun |
+| Cohérence cardiaque | Inspirer 5 secondes, souffler 5, pendant trois minutes |
+| Méditation : le tour du corps | Deux minutes de phrases guidées pour relâcher le corps des pieds à la tête |
+| Méditation : les nuages | Deux minutes pour regarder passer ses pensées |
+| Étirements | Cinq mouvements doux de 20 secondes |
+| Sons apaisants | La pluie, les vagues ou le vent, pendant trois minutes |
+| Trois bonnes choses | Écrire ce qui a fait du bien dans la journée |
+| Comment tu te sens ? | Noter son humeur parmi cinq, et revoir ses sept derniers jours |
+| Verres d'eau | Un compteur : six verres dans la journée |
+
+**Vie privée** : les notes et l'humeur restent sur l'appareil. Elles ne sont jamais envoyées au serveur, et on n'en garde que quatorze jours.
+
+**Un jeu ne remplace pas une personne.** Quand le joueur note qu'il va mal, l'appli lui rappelle qu'en parler à quelqu'un de confiance aide. Si c'est le cas trois jours de suite, elle lui conseille clairement d'en parler à un adulte : un parent, un professeur, l'infirmière du collège.
 
 ### Les monstres
 

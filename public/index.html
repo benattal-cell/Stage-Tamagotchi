@@ -212,7 +212,7 @@ button, input { touch-action: manipulation; }
 
 /* ---------- Le menu du bas, l'atelier et la boutique ---------- */
 .bottombar { flex-direction: column; align-items: stretch; flex-wrap: nowrap; }
-.nav { display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr; gap: 6px; }
+.nav { display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr 1fr; gap: 5px; }
 .navb {
   position: relative; min-height: 60px; border: 0; border-radius: 18px; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   background: var(--panel); color: var(--ink); font-family: var(--display); font-weight: 800; font-size: .84rem; line-height: 1.1;
@@ -347,6 +347,19 @@ button, input { touch-action: manipulation; }
 #entry .day { background: var(--night); border: 0; }
 .why:not([hidden]) { align-self: flex-start; max-width: calc(100% - 64px); min-height: 34px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 8px; border-radius: 999px; border: 2px solid var(--warn); background: var(--panel); color: var(--warn); font-family: var(--body); font-weight: 800; font-size: .82rem; text-align: left; line-height: 1.15; animation: pop .35s ease-out; }
 .why svg { flex: none; }
+.navb { font-size: .74rem; padding: 6px 2px; }
+.navb svg { width: 22px; height: 22px; }
+.navb:nth-child(5) svg { animation-delay: 1.6s; }
+.gcard.ok { border: 2px solid #3FA890; }
+.gcard .tick { color: var(--mint); }
+.moods { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.moodb { min-height: 64px; border-radius: 14px; border: 3px solid transparent; background: var(--night); color: var(--ink); font-weight: 800; font-size: .74rem; padding: 6px 2px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.moodb[aria-pressed="true"] { border-color: var(--coin); }
+.moodb i { width: 26px; height: 26px; border-radius: 50%; display: block; }
+.days { display: flex; gap: 6px; align-items: flex-end; }
+.days span { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .68rem; font-weight: 800; color: var(--muted); }
+.days i { width: 18px; height: 18px; border-radius: 50%; background: var(--line); display: block; }
+textarea.inp { min-height: 56px; resize: vertical; font-size: 1rem; line-height: 1.3; padding: 10px 14px; }
 </style>
 </head>
 <body>
@@ -369,6 +382,7 @@ button, input { touch-action: manipulation; }
     <div class="bottombar">
       <nav class="nav" aria-label="Menu">
         <button type="button" class="navb main" id="enter"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M8 13l3 3 5-6"/></svg><span id="enterLab">Ma journée</span><span class="navsub" id="enterSub"></span><span class="dots" aria-hidden="true"><i id="d0"></i><i id="d1"></i><i id="d2"></i></span></button>
+        <button type="button" class="navb" id="navWell"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20c-5-3-8-6.5-8-10a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 3.500-3 7-8 10z"/></svg><span>Bien-être</span></button>
         <button type="button" class="navb" id="navGames"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="5"/><path d="M8 10.5v4M6 12.5h4M15.5 11.5h.01M18 13.5h.01"/></svg><span>Jeux</span></button>
         <button type="button" class="navb" id="navLook"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l4 3 4-3 5 4-3 3-2-1v10H8V10l-2 1-3-3z"/></svg><span>Atelier</span></button>
         <button type="button" class="navb" id="navShop"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Boutique</span><i id="shopDot" hidden></i></button>
@@ -587,8 +601,46 @@ button, input { touch-action: manipulation; }
       <div class="sheethead"><h2 id="zenTitle">Respiration</h2><span class="pill" id="zenLeft"></span></div>
       <div class="zenwrap"><div class="zen" id="zenBall"></div></div>
       <div class="zentxt" id="zenTxt" aria-live="polite"></div>
-      <p class="small" id="zenNote">Pose ton téléphone, respire avec le rond pendant une minute. Tu peux fermer les yeux et te laisser guider par le son.</p>
+      <p class="small" id="zenNote"></p>
       <button type="button" class="ghost" id="zenClose">Arrêter</button>
+    </div>
+  </div>
+  <div class="veil" id="amb" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="ambTitle">
+      <div class="sheethead"><h2 id="ambTitle">Sons apaisants</h2><span class="pill" id="ambLeft"></span></div>
+      <p class="small">Choisis un son, pose ton téléphone et écoute. Il s'arrête tout seul au bout de 3 minutes.</p>
+      <div class="row" id="ambList"></div>
+      <p class="small" id="ambNote" role="status"></p>
+      <button type="button" class="ghost" id="ambClose">Arrêter</button>
+    </div>
+  </div>
+  <div class="veil" id="grat" hidden>
+    <form class="card" id="gratForm" role="dialog" aria-modal="true" aria-labelledby="gratTitle" novalidate>
+      <h2 id="gratTitle">Trois bonnes choses</h2>
+      <p class="small">Écris trois choses qui t'ont fait du bien aujourd'hui, même toutes petites. Ça reste sur ton téléphone : personne d'autre ne peut les lire.</p>
+      <textarea class="inp" id="grat0" maxlength="120" aria-label="Première bonne chose" placeholder="1."></textarea>
+      <textarea class="inp" id="grat1" maxlength="120" aria-label="Deuxième bonne chose" placeholder="2."></textarea>
+      <textarea class="inp" id="grat2" maxlength="120" aria-label="Troisième bonne chose" placeholder="3."></textarea>
+      <span class="err" id="gratErr" role="alert" hidden>Écris-en au moins une pour enregistrer.</span>
+      <button type="submit" class="big">Enregistrer</button>
+      <button type="button" class="ghost" id="gratClose">Fermer</button>
+    </form>
+  </div>
+  <div class="veil" id="feel" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="feelTitle">
+      <h2 id="feelTitle">Comment tu te sens ?</h2>
+      <p class="small">Il n'y a pas de bonne ou de mauvaise réponse. Ça reste sur ton téléphone.</p>
+      <div class="moods" id="feelList"></div>
+      <p class="small" id="feelNote" role="status"></p>
+      <div class="days" id="feelDays" aria-label="Tes sept derniers jours"></div>
+      <button type="button" class="ghost" id="feelClose">Fermer</button>
+    </div>
+  </div>
+  <div class="sheetwrap" id="well" hidden>
+    <div class="sheet" role="dialog" aria-labelledby="wellTitle" style="max-height: 78%">
+      <div class="sheethead"><h2 id="wellTitle">Bien-être</h2><span class="pill" id="wellCount"></span><button type="button" class="ghost" id="wellClose">Terminé</button></div>
+      <p class="small">Des pauses pour toi. La première fois de la journée, chacune rapporte 5 pièces.</p>
+      <div class="opts" id="wellList"></div>
     </div>
   </div>
   <div class="sheetwrap" id="look" hidden>
@@ -1492,7 +1544,7 @@ button, input { touch-action: manipulation; }
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
   var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null, back: null, fx: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0 } }; }
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0 }, well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
   var G = freshG();
   function load() {
     try {
@@ -1508,6 +1560,7 @@ button, input { touch-action: manipulation; }
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
       var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0) };
+      var w0 = (o.well && typeof o.well === 'object') ? o.well : {}; G.well = { day: typeof w0.day === 'string' ? w0.day : '', done: (w0.done && typeof w0.done === 'object') ? w0.done : {}, water: Math.max(0, Math.min(12, w0.water | 0)), notes: (w0.notes && typeof w0.notes === 'object') ? w0.notes : {}, feel: (w0.feel && typeof w0.feel === 'object') ? w0.feel : {} };
       G.xpBonus = Math.max(0, Number(o.xpBonus) || 0); G.hpFrom = typeof o.hpFrom === 'string' ? o.hpFrom : ''; G.lvlSeen = Math.max(1, o.lvlSeen | 0); G.dead = o.dead === true; G.born = typeof o.born === 'string' ? o.born : '';
       return !!G.name;
     } catch (e) { return false; }
@@ -1693,7 +1746,7 @@ button, input { touch-action: manipulation; }
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
+    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.well = old.well; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
@@ -2172,7 +2225,7 @@ button, input { touch-action: manipulation; }
   /* ---------- Les bruitages : eux aussi fabriqués par du code ----------
      Quatre briques : un bip dont la hauteur glisse, un souffle (du bruit filtré),
      un ressort (un bip qui tremble) et une petite voix (un son riche passé dans deux filtres, comme une bouche). */
-  var PV = 1;                                  /* à chaque son, la hauteur change un tout petit peu : ça évite l'effet robot */
+  var PV = 1, breathS = 4;                                  /* à chaque son, la hauteur change un tout petit peu : ça évite l'effet robot */
   function env(gn, at, attack, dur, peak) {
     gn.gain.setValueAtTime(0.0001, at); gn.gain.linearRampToValueAtTime(peak, at + attack); gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
   }
@@ -2230,8 +2283,9 @@ button, input { touch-action: manipulation; }
     evolve:  function (k, at) { hiss(500, 6000, 0.9, 0.5 * k, at, 3); [523, 659, 784, 1047, 1319].forEach(function (fq, n) { blip(fq, fq, 0.18, 'triangle', 0.24 * k, at + 0.2 + n * 0.12); }); },
     purr:    function (k, at) { voice(300, 350, 0.22, 0.3 * k, at, U, O); voice(350, 310, 0.22, 0.3 * k, at + 0.2, O, U); },
     honk:    function (k, at) { blip(233, 233, 0.22, 'sawtooth', 0.22 * k, at); blip(185, 185, 0.22, 'sawtooth', 0.22 * k, at); blip(233, 233, 0.3, 'sawtooth', 0.22 * k, at + 0.3); blip(185, 185, 0.3, 'sawtooth', 0.22 * k, at + 0.3); },
-    breathIn:  function (k, at) { hiss(300, 900, 3.6, 0.1 * k, at, 1.2); blip(196, 294, 3.6, 'sine', 0.08 * k, at); },
-    breathOut: function (k, at) { hiss(900, 250, 5.4, 0.1 * k, at, 1.2); blip(294, 196, 5.4, 'sine', 0.08 * k, at); },
+    breathIn:  function (k, at) { hiss(300, 900, breathS * 0.9, 0.1 * k, at, 1.2); blip(196, 294, breathS * 0.9, 'sine', 0.08 * k, at); },
+    breathOut: function (k, at) { hiss(900, 250, breathS * 0.9, 0.1 * k, at, 1.2); blip(294, 196, breathS * 0.9, 'sine', 0.08 * k, at); },
+    bell:    function (k, at) { blip(784, 780, 1.6, 'sine', 0.2 * k, at); blip(1568, 1560, 0.9, 'sine', 0.06 * k, at); },
     coin:    function (k, at) { blip(1568, 2093, 0.08, 'triangle', 0.22 * k, at); },
     cash:    function (k, at) { blip(1319, 1319, 0.09, 'triangle', 0.25 * k, at); blip(1760, 1760, 0.25, 'triangle', 0.25 * k, at + 0.08); hiss(5000, 9000, 0.12, 0.12 * k, at, 3); },
     death:   function (k, at) { [392, 311, 262, 196].forEach(function (fq, n) { blip(fq, fq * 0.97, n === 3 ? 1.2 : 0.5, 'sine', 0.3 * k, at + n * 0.45); }); },
@@ -2246,7 +2300,7 @@ button, input { touch-action: manipulation; }
   function sfx(name, loud, delay) {
     if (!actx || !prefs.sfx || document.hidden || phase === 'loading' || !SFX[name]) return;
     if (actx.state === 'suspended') actx.resume();
-    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash' || name === 'death' || name === 'honk' || name === 'breathIn' || name === 'breathOut') ? 1 : 0.94 + Math.random() * 0.12;
+    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash' || name === 'death' || name === 'honk' || name === 'breathIn' || name === 'breathOut' || name === 'bell') ? 1 : 0.94 + Math.random() * 0.12;
     SFX[name](loud == null ? 1 : loud, actx.currentTime + 0.01 + (delay || 0));
   }
   /* Un navigateur refuse de jouer du son avant que le joueur ait touché la page : on attend son premier geste */
@@ -2821,36 +2875,138 @@ button, input { touch-action: manipulation; }
   $('triAgain').addEventListener('click', triStart);
   $('triClose').addEventListener('click', function () { sfx('tick'); TRI.on = false; clearInterval(TRI.timer); $('tri').hidden = true; });
 
-  /* ---------- Une minute de respiration : le seul « jeu » qui fait vraiment du bien ----------
-     Il ne compte pas dans les parties du jour, et rapporte 10 pièces une fois par jour. */
-  var ZEN = { timer: null, t: 0, on: false, phase: '' };
-  function zenStart() {
-    if (phase !== 'play') return; closeSheets(); ZEN.t = 0; ZEN.on = true; ZEN.phase = '';
-    $('zenNote').textContent = 'Pose ton téléphone, respire avec le rond pendant une minute. Tu peux fermer les yeux et te laisser guider par le son.'; $('zenClose').textContent = 'Arrêter';
-    $('zen').hidden = false; $('zenClose').focus(); clearInterval(ZEN.timer); zenTick(); ZEN.timer = setInterval(zenTick, 250);
+  ['mem', 'tri'].forEach(function (id) { $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Escape') $(id + 'Close').click(); }); });
+
+  /* ---------- L'espace bien-être ----------
+     Des pauses pour s'occuper de soi : respirer, se détendre, s'étirer, écouter, écrire.
+     Rien de tout ça n'est envoyé au serveur : les notes et l'humeur restent sur l'appareil. */
+  function wellDay() {
+    var w = G.well; if (w.day !== dayKey(0)) { w.day = dayKey(0); w.done = {}; w.water = 0; }
+    ['notes', 'feel'].forEach(function (k) { var ks = Object.keys(w[k]).sort(); while (ks.length > 14) delete w[k][ks.shift()]; });   /* on ne garde que deux semaines */
+    return w;
   }
-  function zenTick() {
-    if (!ZEN.on) return;
-    var cyc = ZEN.t % 10, ph = cyc < 4 ? 'in' : 'out';                 /* 4 secondes pour inspirer, 6 pour souffler */
-    if (ph !== ZEN.phase) { ZEN.phase = ph; $('zenBall').style.transitionDuration = (ph === 'in' ? 4 : 6) + 's'; $('zenBall').style.transform = ph === 'in' ? 'scale(1.9)' : 'scale(1)'; $('zenTxt').textContent = ph === 'in' ? 'Inspire…' : 'Souffle…'; sfx(ph === 'in' ? 'breathIn' : 'breathOut'); }
-    $('zenLeft').textContent = Math.max(0, Math.ceil(60 - ZEN.t)) + ' s'; ZEN.t += 0.25;
-    if (ZEN.t >= 60) {
-      ZEN.on = false; clearInterval(ZEN.timer); var gm = gameDay(), first = !gm.zen, e = 0; if (first) { gm.zen = true; e = earn(10); }
-      $('zenTxt').textContent = 'Bravo'; $('zenBall').style.transform = 'scale(1.3)'; $('zenClose').textContent = 'Fermer';
-      $('zenNote').textContent = first ? 'Une minute de calme. +' + e + ' pièces, une fois par jour.' : 'Une minute de calme. Tu as déjà eu ta récompense aujourd\'hui, mais ça fait toujours du bien.';
+  function wellDone(key) {                    /* la première fois de la journée : 5 pièces */
+    var w = wellDay(); if (w.done[key]) { saveG(); return false; }
+    w.done[key] = true; G.bonus += 5; saveG(); sfx('cash'); refresh(false); toast('+5 pièces'); heart(); return true;
+  }
+  /* Les séances guidées. Une respiration est une boucle de temps (inspirer, retenir, souffler) ; les autres sont une suite d'étapes. */
+  var IN = 'Inspire…', OUT = 'Souffle…', HOLD = 'Retiens…';
+  var SESS = {
+    calme: { name: 'Respiration calme', sub: 'Inspire 4 secondes, souffle 6. Une minute.', total: 60, loop: [[IN, 4, 1.9], [OUT, 6, 1]], end: 'Une minute de calme.' },
+    carree: { name: 'Respiration carrée', sub: 'Inspire, retiens, souffle, retiens : 4 secondes chacun.', total: 64, loop: [[IN, 4, 1.9], [HOLD, 4, 1.9], [OUT, 4, 1], [HOLD, 4, 1]], end: 'Quatre tours de carré.' },
+    coeur: { name: 'Cohérence cardiaque', sub: 'Inspire 5 secondes, souffle 5 secondes. Trois minutes.', total: 180, loop: [[IN, 5, 1.9], [OUT, 5, 1]], end: 'Trois minutes à ton rythme.' },
+    scan: { name: 'Méditation : le tour du corps', sub: 'Deux minutes pour relâcher tout le corps, des pieds à la tête.', steps: [
+      ['Installe-toi bien. Ferme les yeux si tu veux.', 15], ['Sens tes pieds posés sur le sol.', 15], ['Détends tes jambes, elles deviennent lourdes.', 15], ['Relâche ton ventre, laisse-le bouger avec ta respiration.', 15],
+      ['Laisse tomber tes épaules, loin des oreilles.', 15], ['Desserre ta mâchoire, détends ton front.', 15], ['Écoute les bruits autour de toi, sans rien faire.', 15], ['Respire encore une fois profondément. Tu peux rouvrir les yeux.', 15]], end: 'Tout ton corps est détendu.' },
+    nuage: { name: 'Méditation : les nuages', sub: 'Deux minutes pour laisser passer les pensées.', steps: [
+      ['Assieds-toi tranquillement et respire normalement.', 15], ['Imagine un grand ciel bleu au-dessus de toi.', 15], ['Chaque pensée qui arrive est un nuage.', 15], ['Tu n\'as pas besoin de le suivre. Regarde-le passer.', 20],
+      ['Si un nuage est gros ou gris, il passe aussi.', 20], ['Reviens à ta respiration, doucement.', 15], ['Le ciel est toujours là, derrière les nuages.', 20]], end: 'Le ciel est dégagé.' },
+    etire: { name: 'Étirements', sub: 'Cinq mouvements doux, 20 secondes chacun. Sans forcer.', steps: [
+      ['Lève les bras très haut et grandis-toi.', 20], ['Penche doucement la tête à droite, puis à gauche.', 20], ['Roule tes épaules vers l\'arrière, lentement.', 20], ['Penche-toi en avant et laisse pendre tes bras.', 20], ['Secoue tes mains et tes jambes.', 20]], end: 'Ton corps est réveillé.' }
+  };
+  var WS = { timer: null, t: 0, on: false, key: '', idx: -1, at: 0 };
+  function sessStart(key) {
+    if (phase !== 'play') return; closeSheets(); var S = SESS[key]; WS.key = key; WS.t = 0; WS.on = true; WS.idx = -1; WS.at = 0;
+    WS.total = S.total || S.steps.reduce(function (a, q) { return a + q[1]; }, 0);
+    $('zenTitle').textContent = S.name; $('zenNote').textContent = S.loop ? 'Pose ton téléphone et respire avec le rond. Tu peux fermer les yeux et te laisser guider par le son.' : 'Lis chaque phrase, puis fais ce qu\'elle dit. Un petit son annonce la suivante.';
+    $('zenClose').textContent = 'Arrêter'; $('zenTxt').textContent = ''; $('zenBall').style.transitionDuration = '0s'; $('zenBall').style.transform = 'scale(1)';
+    $('zen').hidden = false; $('zenClose').focus(); clearInterval(WS.timer); WS.timer = setInterval(sessTick, 250); sessTick();
+  }
+  function sessTick() {
+    if (!WS.on) return; var S = SESS[WS.key], list = S.loop || S.steps;
+    if (WS.idx < 0 || WS.t >= WS.at) {         /* on passe au temps suivant */
+      WS.idx = WS.idx + 1; if (S.loop) WS.idx = WS.idx % list.length;
+      if (WS.idx < list.length && WS.t < WS.total - 0.01) {
+        var q = list[WS.idx]; WS.at = WS.t + q[1]; $('zenTxt').textContent = q[0];
+        if (S.loop) { $('zenBall').style.transitionDuration = q[1] + 's'; $('zenBall').style.transform = 'scale(' + q[2] + ')'; breathS = q[1]; if (q[0] === IN) sfx('breathIn'); else if (q[0] === OUT) sfx('breathOut'); }
+        else { $('zenBall').style.transitionDuration = '3s'; $('zenBall').style.transform = 'scale(' + (WS.idx % 2 ? 1.25 : 1.6) + ')'; sfx('bell'); }
+      }
+    }
+    $('zenLeft').textContent = Math.max(0, Math.ceil(WS.total - WS.t)) + ' s'; WS.t += 0.25;
+    if (WS.t >= WS.total) {
+      WS.on = false; clearInterval(WS.timer); var first = wellDone(WS.key);
+      $('zenTxt').textContent = 'Bravo'; $('zenBall').style.transitionDuration = '2s'; $('zenBall').style.transform = 'scale(1.3)'; $('zenClose').textContent = 'Fermer'; sfx('bell');
+      $('zenNote').textContent = S.end + (first ? ' +5 pièces.' : ' Tu avais déjà eu ta récompense aujourd\'hui, mais ça fait toujours du bien.');
       say('Ça fait du bien…', 4000); start('yawn');
     }
   }
-  $('zenClose').addEventListener('click', function () { sfx('tick'); ZEN.on = false; clearInterval(ZEN.timer); $('zen').hidden = true; });
-  ['mem', 'tri', 'zen'].forEach(function (id) { $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Escape') $(id + 'Close').click(); }); });
+  function backToWell() { if (phase !== 'play') return; paintWell(); $('well').hidden = false; focusCam = true; }      /* après une activité, on revient à la liste */
+  $('zenClose').addEventListener('click', function () { sfx('tick'); WS.on = false; clearInterval(WS.timer); $('zen').hidden = true; backToWell(); });
+  /* Les sons apaisants : du bruit filtré, comme pour les bruitages, mais qui dure */
+  var AMB = { node: null, key: '', timer: null, t: 0 };
+  var AMBS = [['pluie', 'La pluie'], ['vagues', 'Les vagues'], ['vent', 'Le vent dans les arbres']];
+  function ambStop() { if (AMB.node) { try { AMB.node.g.gain.setTargetAtTime(0, actx.currentTime, 0.4); var nd = AMB.node; setTimeout(function () { try { nd.src.stop(); nd.lfo.stop(); } catch (e) {} }, 1500); } catch (e) {} } AMB.node = null; AMB.key = ''; clearInterval(AMB.timer); musicSync(); ambPaint(); }
+  function ambPlay(key) {
+    unlock(); if (!actx) { $('ambNote').textContent = 'Le son n\'est pas disponible sur cet appareil.'; return; }
+    ambStop(); if (actx.state === 'suspended') actx.resume();
+    var src = actx.createBufferSource(), fl = actx.createBiquadFilter(), g2 = actx.createGain(), lfo = actx.createOscillator(), lg = actx.createGain(), vol = Math.max(0.25, prefs.sfxVolume / 100) * 0.5;
+    src.buffer = noiseBuf; src.loop = true;
+    if (key === 'pluie') { fl.type = 'highpass'; fl.frequency.value = 1400; lfo.frequency.value = 0.35; lg.gain.value = vol * 0.12; }
+    else if (key === 'vagues') { fl.type = 'lowpass'; fl.frequency.value = 520; lfo.frequency.value = 0.11; lg.gain.value = vol * 0.7; }
+    else { fl.type = 'bandpass'; fl.frequency.value = 420; fl.Q.value = 0.6; lfo.frequency.value = 0.19; lg.gain.value = vol * 0.45; }
+    g2.gain.value = 0; g2.gain.setTargetAtTime(vol, actx.currentTime, 0.8); lfo.connect(lg); lg.connect(g2.gain);     /* le volume monte et descend lentement, comme des vagues */
+    src.connect(fl); fl.connect(g2); g2.connect(actx.destination); src.start(); lfo.start();
+    AMB.node = { src: src, g: g2, lfo: lfo }; AMB.key = key; AMB.t = 0; master.gain.setTargetAtTime(0, actx.currentTime, 0.3);   /* la musique du jeu se tait */
+    clearInterval(AMB.timer); AMB.timer = setInterval(function () { AMB.t++; $('ambLeft').textContent = Math.max(0, 180 - AMB.t) + ' s'; if (AMB.t === 60 && wellDone('sons')) $('ambNote').textContent = 'Une minute d\'écoute : +5 pièces.'; if (AMB.t >= 180) { ambStop(); $('ambNote').textContent = 'C\'est fini. Tu peux relancer un son.'; } }, 1000);
+    $('ambLeft').textContent = '180 s'; $('ambNote').textContent = ''; ambPaint();
+  }
+  function ambPaint() { Array.prototype.forEach.call($('ambList').children, function (b) { b.setAttribute('aria-pressed', b._k === AMB.key ? 'true' : 'false'); }); if (!AMB.key) $('ambLeft').textContent = ''; }
+  AMBS.forEach(function (q) { var b = btn('chip', q[1], function () { if (AMB.key === q[0]) ambStop(); else ambPlay(q[0]); }); b._k = q[0]; $('ambList').appendChild(b); });
+  $('ambClose').addEventListener('click', function () { ambStop(); $('amb').hidden = true; backToWell(); });
+  /* Trois bonnes choses */
+  $('gratForm').addEventListener('submit', function (ev) {
+    ev.preventDefault(); var list = [0, 1, 2].map(function (n) { return $('grat' + n).value.trim().slice(0, 120); });
+    if (!list.some(function (x) { return x; })) { $('gratErr').hidden = false; return; }
+    wellDay().notes[dayKey(0)] = list; wellDone('merci'); saveG(); $('grat').hidden = true; say('J\'adore quand tu me racontes !', 4000); start('wave'); backToWell();
+  });
+  [0, 1, 2].forEach(function (n) { $('grat' + n).addEventListener('input', function () { $('gratErr').hidden = true; }); });
+  $('gratClose').addEventListener('click', function () { sfx('tick'); $('grat').hidden = true; backToWell(); });
+  /* Comment tu te sens */
+  var FEEL = [['Super', '#7FE8CF'], ['Bien', '#9BD67A'], ['Bof', '#F7C948'], ['Pas top', '#F0A050'], ['Mal', '#FF8E7A']];
+  function feelPaint() {
+    var w = wellDay(), cur = w.feel[dayKey(0)], box = $('feelList'), dy = $('feelDays'), n; empty2(box); empty2(dy);
+    FEEL.forEach(function (q, n2) { var b = el('button', 'moodb'); b.type = 'button'; b.setAttribute('aria-pressed', cur === n2 ? 'true' : 'false'); var dot = el('i'); dot.style.background = q[1]; b.appendChild(dot); b.appendChild(el('span', '', q[0])); b.addEventListener('click', function () { feelPick(n2); }); box.appendChild(b); });
+    for (n = 6; n >= 0; n--) { var k = dayKey(n), v = w.feel[k], sp3 = el('span'), d2 = el('i'); if (v != null) d2.style.background = FEEL[v][1]; sp3.appendChild(d2); sp3.appendChild(document.createTextNode(n === 0 ? 'auj.' : k.slice(8) + '/' + k.slice(5, 7))); dy.appendChild(sp3); }
+  }
+  function feelPick(n) {
+    var w = wellDay(); w.feel[dayKey(0)] = n; saveG(); wellDone('humeur'); sfx('tick');
+    var low = 0, d; for (d = 0; d < 3; d++) if (w.feel[dayKey(d)] >= 3) low++;
+    /* Un jeu ne remplace pas une vraie personne : si ça ne va pas plusieurs jours de suite, on le dit simplement */
+    $('feelNote').textContent = n <= 1 ? 'Tant mieux ! Garde ce qui t\'a fait du bien aujourd\'hui.' : n === 2 ? 'Des jours comme ça, ça arrive. Une petite respiration peut aider.' : low >= 3 ? 'Ça fait plusieurs jours que ce n\'est pas facile. Parles-en à un adulte en qui tu as confiance : un parent, un prof, l\'infirmière du collège. Tu n\'as pas à garder ça pour toi.' : 'Merci de le dire. Quand ça ne va pas, en parler à quelqu\'un de confiance fait souvent du bien.';
+    feelPaint(); say(n <= 1 ? 'Trop bien !' : 'Je suis là avec toi.', 3600);
+  }
+  $('feelClose').addEventListener('click', function () { sfx('tick'); $('feel').hidden = true; backToWell(); });
+  ['zen', 'amb', 'grat', 'feel'].forEach(function (id) { $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Escape') $(id + 'Close').click(); }); });
+  /* La liste des activités */
+  var WELL = [
+    { key: 'calme', go: function () { sessStart('calme'); } }, { key: 'carree', go: function () { sessStart('carree'); } }, { key: 'coeur', go: function () { sessStart('coeur'); } },
+    { key: 'scan', go: function () { sessStart('scan'); } }, { key: 'nuage', go: function () { sessStart('nuage'); } }, { key: 'etire', go: function () { sessStart('etire'); } },
+    { key: 'sons', name: 'Sons apaisants', sub: 'La pluie, les vagues ou le vent, pendant 3 minutes.', go: function () { closeSheets(); $('ambNote').textContent = ''; ambPaint(); $('amb').hidden = false; $('ambClose').focus(); } },
+    { key: 'merci', name: 'Trois bonnes choses', sub: 'Écris ce qui t\'a fait du bien aujourd\'hui.', go: function () { closeSheets(); var nt = wellDay().notes[dayKey(0)] || ['', '', '']; [0, 1, 2].forEach(function (n) { $('grat' + n).value = nt[n] || ''; }); $('gratErr').hidden = true; $('grat').hidden = false; $('grat0').focus(); } },
+    { key: 'humeur', name: 'Comment tu te sens ?', sub: 'Note ton humeur du jour et revois ta semaine.', go: function () { closeSheets(); $('feelNote').textContent = ''; feelPaint(); $('feel').hidden = false; $('feelClose').focus(); } }
+  ];
+  function paintWell() {
+    var w = wellDay(), box = $('wellList'), nb = 0; empty2(box);
+    WELL.forEach(function (a) {
+      var S = SESS[a.key] || a, done = !!w.done[a.key]; if (done) nb++;
+      var row = el('div', 'gcard' + (done ? ' ok' : '')), nm = el('span', 'nm', S.name); nm.appendChild(el('span', 'sub', S.sub)); if (done) nm.appendChild(el('span', 'sub tick', 'Fait aujourd\'hui'));
+      row.appendChild(nm); row.appendChild(btn('buy' + (done ? ' on' : ''), done ? 'Refaire' : 'Commencer', a.go)); box.appendChild(row);
+    });
+    /* les verres d'eau : un simple compteur */
+    var wd = !!w.done.eau, row2 = el('div', 'gcard' + (wd ? ' ok' : '')), nm2 = el('span', 'nm', 'Verres d\'eau : ' + w.water + ' sur 6'); nm2.appendChild(el('span', 'sub', 'Appuie à chaque verre bu. À 6, c\'est gagné.')); if (wd) { nb++; nm2.appendChild(el('span', 'sub tick', 'Fait aujourd\'hui')); }
+    row2.appendChild(nm2); var wb = btn('buy' + (wd ? ' on' : ''), '+ 1 verre', function () { var w2 = wellDay(); w2.water = Math.min(12, w2.water + 1); saveG(); sfx('pop'); if (w2.water >= 6) wellDone('eau'); paintWell(); }); wb.id = 'waterPlus'; row2.appendChild(wb); box.appendChild(row2);
+    $('wellCount').textContent = nb + ' / ' + (WELL.length + 1);
+  }
+  $('navWell').addEventListener('click', function () { sfx('tick'); closeSheets(); paintWell(); $('well').hidden = false; focusCam = true; $('wellClose').focus(); });
+  $('wellClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navWell').focus(); });
+  $('well').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSheets(); });
 
   /* ---------- La liste des jeux ---------- */
   var GAMES = [
     { name: 'La course des poubelles', sub: 'Esquive, saute et glisse à travers cinq zones.', rec: function () { return G.best ? 'Record : ' + G.best + ' m' : ''; }, go: runStart },
     { name: 'Attrape-fruits', sub: 'Attrape ce qui est bon, évite les bonbons et les écrans.', rec: function () { return G.rec.catch ? 'Record : ' + G.rec.catch : ''; }, go: catchStart },
     { name: 'Mémoire', sub: 'Retrouve les paires de cosmétiques.', rec: function () { return G.rec.mem ? 'Record : ' + G.rec.mem + ' coups' : ''; }, go: memStart },
-    { name: 'Tri des déchets', sub: '45 secondes pour mettre chaque déchet dans la bonne poubelle.', rec: function () { return G.rec.tri ? 'Record : ' + G.rec.tri : ''; }, go: triStart },
-    { name: 'Respiration', sub: 'Une minute de calme. Ne compte pas dans tes parties.', rec: function () { return gameDay().zen ? 'Fait aujourd\'hui' : '+10 pièces, une fois par jour'; }, go: zenStart, free: true }
+    { name: 'Tri des déchets', sub: '45 secondes pour mettre chaque déchet dans la bonne poubelle.', rec: function () { return G.rec.tri ? 'Record : ' + G.rec.tri : ''; }, go: triStart }
   ];
   function paintGames() {
     var gm = gameDay(), left = playsLeft(), box = $('gmList'); empty2(box);
@@ -2859,7 +3015,7 @@ button, input { touch-action: manipulation; }
       var row = el('div', 'gcard'), nm = el('span', 'nm', gq.name); nm.appendChild(el('span', 'sub', gq.sub)); var rc = gq.rec(); if (rc) nm.appendChild(el('span', 'sub rar3', rc));
       var b = btn('buy', 'Jouer', gq.go); b.disabled = !gq.free && left <= 0; row.appendChild(nm); row.appendChild(b); box.appendChild(row);
     });
-    $('gmNote').textContent = left > 0 ? 'Les jeux rapportent un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.' : 'Plus de partie pour aujourd\'hui. La respiration reste ouverte. Reviens demain !';
+    $('gmNote').textContent = left > 0 ? 'Les jeux rapportent un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.' : 'Plus de partie pour aujourd\'hui. L\'espace bien-être reste ouvert. Reviens demain !';
   }
   $('navGames').addEventListener('click', function () { sfx('tick'); closeSheets(); paintGames(); $('games').hidden = false; focusCam = true; $('gamesClose').focus(); });
   $('gamesClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navGames').focus(); });
@@ -3007,7 +3163,7 @@ button, input { touch-action: manipulation; }
     useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth);
     var tryOn = JSON.parse(JSON.stringify(G.look)); if (sel) tryOn[slot] = sel.id; buildAcc(tryOn); syncParts(); paint();
   }
-  function closeSheets() { var was = !$('shop').hidden; $('games').hidden = true; $('look').hidden = true; $('shop').hidden = true; focusCam = false; shopSel = null; if (was && phase === 'play') dress(); }
+  function closeSheets() { var was = !$('shop').hidden; $('well').hidden = true; $('games').hidden = true; $('look').hidden = true; $('shop').hidden = true; focusCam = false; shopSel = null; if (was && phase === 'play') dress(); }
   $('navLook').addEventListener('click', function () { sfx('tick'); closeSheets(); paintLook(); $('look').hidden = false; focusCam = true; $('lookClose').focus(); });
   $('navShop').addEventListener('click', function () { sfx('tick'); closeSheets(); paintShop(); $('shop').hidden = false; focusCam = true; $('shopClose').focus(); });
   $('lookClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navLook').focus(); });
@@ -3108,8 +3264,8 @@ button, input { touch-action: manipulation; }
   $('aLevel').addEventListener('click', function () { if (!needPlay()) return; var c = calc(); G.xpBonus += c.need - c.xp; saveG(); closeAdmin(); refresh(true); });
   $('aHeal').addEventListener('click', function () { if (!needPlay()) return; G.hpFrom = dayKey(0); saveG(); sfx('wave'); refresh(false); paintAdmin(); });
   $('deadNew').addEventListener('click', function () {
-    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins), best: G.best, game: G.game, rec: G.rec };          /* le joueur garde ses achats et ses pièces */
-    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; G.best = keep.best; G.game = keep.game; G.rec = keep.rec; saveG();
+    var keep = { owned: G.owned, decors: G.decors, bonus: Math.max(0, calc().coins), best: G.best, game: G.game, rec: G.rec, well: G.well };          /* le joueur garde ses achats et ses pièces */
+    G = freshG(); G.owned = keep.owned; G.decors = keep.decors; G.bonus = keep.bonus; G.best = keep.best; G.game = keep.game; G.rec = keep.rec; G.well = keep.well; saveG();
     $('name').value = ''; act = null; $('dead').hidden = true; goTitle();
   });
   $('aNext').addEventListener('click', function () { if (!needPlay()) return; sfx('tick'); nextDay(); });
@@ -3131,7 +3287,7 @@ button, input { touch-action: manipulation; }
       loader.load('models/' + sp.id + MODEL_EXT, function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
     });
   });
-  if (location.hash === '#reglage') window.__fl = { CT: CT, foods: foods, MEM: MEM, TRI: TRI, ZEN: ZEN, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
+  if (location.hash === '#reglage') window.__fl = { CT: CT, foods: foods, MEM: MEM, TRI: TRI, WS: WS, AMB: AMB, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
   function loadStep() {

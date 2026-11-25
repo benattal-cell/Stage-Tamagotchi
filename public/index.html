@@ -264,6 +264,21 @@ button, input { touch-action: manipulation; }
 .buy:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--coin-deep); }
 .buy:disabled { background: var(--line); color: var(--muted); box-shadow: none; }
 .buy.on { background: var(--mint); box-shadow: 0 4px 0 #3FA890; }
+/* Comptes, amis et classements */
+#rankBtn:not([hidden]) { top: 72px; }
+.inp { min-height: 50px; border-radius: 14px; border: 2px solid var(--line); background: var(--night); color: var(--ink); font-family: var(--body); font-weight: 800; font-size: 1.1rem; padding: 6px 14px; width: 100%; box-sizing: border-box; }
+.lb { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.lbrow { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: center; gap: 8px; background: var(--night); border: 2px solid transparent; border-radius: 14px; padding: 8px 12px; }
+.lbrow.me { border-color: var(--coin); }
+.lbrow .rk { font-family: var(--display); font-weight: 800; font-size: 1.2rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lbrow.top .rk { color: var(--coin); }
+.lbrow .who { min-width: 0; font-weight: 800; overflow-wrap: anywhere; } .lbrow .who small { display: block; font-size: .8rem; font-weight: 700; color: var(--muted); }
+.lbrow .sc { font-family: var(--display); font-weight: 800; font-size: 1.1rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.frow { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--night); border-radius: 14px; padding: 8px 12px; box-sizing: border-box; font-weight: 800; }
+.frow span { min-width: 0; overflow-wrap: anywhere; } .frow .row { flex: none; }
+#socBody { min-height: 0; flex-direction: column; flex-wrap: nowrap; align-items: stretch; }
+#socBody h3 { margin: 6px 0 0; font-family: var(--display); font-size: 1.1rem; }
+
 /* Le mini-jeu de course */
 #runHud { justify-content: space-between; }
 #games .sheet { max-height: 78%; }
@@ -362,6 +377,27 @@ button, input { touch-action: manipulation; }
   <button type="button" class="gear" id="gear" aria-label="Paramètres" hidden>
     <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.6"/><circle cx="8" cy="17" r="2.6"/></svg>
   </button>
+  <button type="button" class="gear" id="rankBtn" aria-label="Classement et amis" hidden>
+    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg>
+  </button>
+  <div class="veil" id="social" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="socTitle">
+      <div class="sheethead"><h2 id="socTitle">Classement</h2><button type="button" class="ghost" id="socClose">Fermer</button></div>
+      <p class="small" id="socOff" hidden>Les comptes, les amis et les classements fonctionnent sur la version en ligne du jeu, celle qui tourne sur le serveur. Cette page-ci est une démonstration sans serveur.</p>
+      <form id="socAuth" class="field" hidden novalidate>
+        <div class="tabs" id="authTabs" role="tablist"></div>
+        <div class="field"><label for="aPseudo">Ton pseudo</label><input class="inp" id="aPseudo" type="text" autocomplete="username" maxlength="16" autocapitalize="none" spellcheck="false"></div>
+        <div class="field"><label for="aPass">Ton mot de passe</label><input class="inp" id="aPass" type="password" autocomplete="current-password" maxlength="72"></div>
+        <span class="err" id="authErr" role="alert" hidden></span>
+        <p class="small">Choisis un pseudo qui n'est pas ton vrai nom. Pas besoin d'adresse e-mail. Les autres joueurs voient ton pseudo, ton monstre et tes scores, jamais ton sommeil ni ton temps d'écran.</p>
+        <button type="submit" class="big" id="authGo">Se connecter</button>
+      </form>
+      <div id="socMain" hidden>
+        <div class="tabs" id="socTabs" role="tablist"></div>
+        <div class="opts" id="socBody"></div>
+      </div>
+    </div>
+  </div>
   <div class="veil" id="settings" hidden>
     <div class="card" role="dialog" aria-modal="true" aria-labelledby="setTitle">
       <h2 id="setTitle">Paramètres</h2>
@@ -472,7 +508,7 @@ button, input { touch-action: manipulation; }
   <div class="sheetwrap" id="games" hidden>
     <div class="sheet" role="dialog" aria-labelledby="gamesTitle">
       <div class="sheethead"><h2 id="gamesTitle">Mini-jeux</h2><button type="button" class="ghost" id="gamesClose">Terminé</button></div>
-      <div class="item"><span class="nm">La course des poubelles<span class="sub">Esquive, saute et glisse à travers cinq zones. Ça va de plus en plus vite, et ça devient vraiment dur.</span></span></div>
+      <div class="item"><span class="nm">La course des poubelles<span class="sub">Esquive, saute et glisse à travers cinq zones, entre les chariots qui zigzaguent et les camions qui foncent. Ça va de plus en plus vite, et ça devient vraiment dur.</span></span></div>
       <div class="stats">
         <div class="stat"><strong id="gmRuns"></strong><span>courses restantes</span></div>
         <div class="stat"><strong id="gmCoins"></strong><span>pièces aujourd'hui</span></div>
@@ -1165,7 +1201,7 @@ button, input { touch-action: manipulation; }
     coins += G.bonus - G.spent;                                       /* ce qu'on a gagné, moins ce qu'on a dépensé à la boutique */
     return { n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv, lvl: lvl, xp: rem, need: xpNeed(lvl), hp: hp, age: span + 1 };
   }
-  function show(id) { ['loading', 'title', 'custom', 'hud', 'runHud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; }
+  function show(id) { ['loading', 'title', 'custom', 'hud', 'runHud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; $('rankBtn').hidden = id !== 'hud'; }
   function setColor(i) {
     colorIndex = i; paint();
     Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
@@ -1240,7 +1276,7 @@ button, input { touch-action: manipulation; }
   /* ---------- La mort du monstre : quand sa vie tombe à zéro ---------- */
   function die(c) {
     G.dead = true; G.deadLvl = c.lvl; G.deadAge = c.age; saveG();
-    phase = 'dead'; closeSheets(); ['settings', 'entry', 'admin'].forEach(function (id) { $(id).hidden = true; });
+    phase = 'dead'; closeSheets(); ['settings', 'entry', 'admin', 'social'].forEach(function (id) { $(id).hidden = true; });
     $('bubble').hidden = true; show(null); $('gear').hidden = true; fallK = 0;
     act = { type: 'death', t0: clock.getElapsedTime(), dur: 2.6 }; sfx('death');
     setTimeout(showDead, reduce ? 300 : 3000);
@@ -1770,6 +1806,7 @@ button, input { touch-action: manipulation; }
     sigh:    function (k, at) { voice(430, 270, 0.7, 0.4 * k, at + 0.15, O, U); hiss(900, 400, 0.7, 0.08 * k, at + 0.2); },
     evolve:  function (k, at) { hiss(500, 6000, 0.9, 0.5 * k, at, 3); [523, 659, 784, 1047, 1319].forEach(function (fq, n) { blip(fq, fq, 0.18, 'triangle', 0.24 * k, at + 0.2 + n * 0.12); }); },
     purr:    function (k, at) { voice(300, 350, 0.22, 0.3 * k, at, U, O); voice(350, 310, 0.22, 0.3 * k, at + 0.2, O, U); },
+    honk:    function (k, at) { blip(233, 233, 0.22, 'sawtooth', 0.22 * k, at); blip(185, 185, 0.22, 'sawtooth', 0.22 * k, at); blip(233, 233, 0.3, 'sawtooth', 0.22 * k, at + 0.3); blip(185, 185, 0.3, 'sawtooth', 0.22 * k, at + 0.3); },
     coin:    function (k, at) { blip(1568, 2093, 0.08, 'triangle', 0.22 * k, at); },
     cash:    function (k, at) { blip(1319, 1319, 0.09, 'triangle', 0.25 * k, at); blip(1760, 1760, 0.25, 'triangle', 0.25 * k, at + 0.08); hiss(5000, 9000, 0.12, 0.12 * k, at, 3); },
     death:   function (k, at) { [392, 311, 262, 196].forEach(function (fq, n) { blip(fq, fq * 0.97, n === 3 ? 1.2 : 0.5, 'sine', 0.3 * k, at + n * 0.45); }); },
@@ -1784,7 +1821,7 @@ button, input { touch-action: manipulation; }
   function sfx(name, loud, delay) {
     if (!actx || !prefs.sfx || document.hidden || phase === 'loading' || !SFX[name]) return;
     if (actx.state === 'suspended') actx.resume();
-    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash' || name === 'death') ? 1 : 0.94 + Math.random() * 0.12;
+    PV = (name === 'fanfare' || name === 'tick' || name === 'evolve' || name === 'cash' || name === 'death' || name === 'honk') ? 1 : 0.94 + Math.random() * 0.12;
     SFX[name](loud == null ? 1 : loud, actx.currentTime + 0.01 + (delay || 0));
   }
   /* Un navigateur refuse de jouer du son avant que le joueur ait touché la page : on attend son premier geste */
@@ -1901,6 +1938,116 @@ button, input { touch-action: manipulation; }
   function withShape(key, id) { var l = { ears: G.look.ears, eyes: G.look.eyes, teeth: G.look.teeth, hat: null, glasses: null, neck: null, back: null, fx: null }; l[key] = id; return l; }
   function picture(url, cls) { var im = document.createElement('img'); im.className = cls || 'th'; im.alt = ''; im.width = 64; im.height = 64; if (url) im.src = url; return im; }
 
+  /* ---------- Comptes, amis et classements ----------
+     Tout ça passe par le serveur : le jeu lui envoie des demandes (« crée ce compte », « donne-moi le classement »)
+     et le serveur répond. On n'envoie que le pseudo, l'apparence du monstre et les scores : jamais le sommeil ni l'écran. */
+  var ME = null, online = null, socTab = 0, lbScope = 'world', lbKind = 'week', authMode = 'login';
+  function apiCall(method, route, body) {
+    return fetch('api/' + route, { method: method, credentials: 'same-origin', headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d || {} }; }); })
+      .catch(function () { return { ok: false, status: 0, d: { error: 'Le serveur ne répond pas.' } }; });
+  }
+  function isoWeek(date) {
+    var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())), day = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - day);
+    var y0 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return d.getUTCFullYear() + '-W' + String(Math.ceil(((d - y0) / 864e5 + 1) / 7)).padStart(2, '0');
+  }
+  function weekPoints() {                     /* le total des points des journées de cette semaine, du lundi au dimanche */
+    var wk = isoWeek(new Date()), sum = 0;
+    Object.keys(G.entries).forEach(function (k) { if (isoWeek(new Date(k + 'T12:00:00')) === wk) sum += score(G.entries[k]).pts; });
+    return sum;
+  }
+  function pushScore() {
+    if (!ME || !G.name) return Promise.resolve();
+    return apiCall('POST', 'score', { week: isoWeek(new Date()), weekPts: weekPoints(), best: G.best, monster: { name: G.name, species: G.species, color: G.color, hue: G.hue || 0, level: levelNow } });
+  }
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }   /* textContent : un pseudo ne peut jamais devenir du code */
+  function btn(cls, txt, fn) { var b = el('button', cls, txt); b.type = 'button'; b.addEventListener('click', fn); return b; }
+  function speciesName(id) { var f = SPECIES.filter(function (q) { return q.id === id; })[0]; return f ? f.name : 'Peluche'; }
+  function paintAuth() {
+    tabs('authTabs', ['Connexion', 'Créer un compte'], authMode === 'login' ? 0 : 1, function (n) { authMode = n ? 'signup' : 'login'; $('authErr').hidden = true; paintAuth(); });
+    $('authGo').textContent = authMode === 'login' ? 'Se connecter' : 'Créer mon compte';
+    $('aPass').setAttribute('autocomplete', authMode === 'login' ? 'current-password' : 'new-password');
+  }
+  function paintSocial() {
+    $('socOff').hidden = online !== false; $('socAuth').hidden = online === false || !!ME; $('socMain').hidden = !ME;
+    $('socTitle').textContent = ME ? ME.pseudo : 'Classement';
+    if (online === false) return;
+    if (!ME) { paintAuth(); return; }
+    tabs('socTabs', ['Classement', 'Amis' + (ME.incoming.length ? ' (' + ME.incoming.length + ')' : ''), 'Compte'], socTab, function (n) { socTab = n; paintSocial(); });
+    var box = $('socBody'); empty2(box);
+    if (socTab === 0) {
+      var r1 = el('div', 'row'), r2 = el('div', 'row');
+      [['world', 'Monde'], ['friends', 'Amis']].forEach(function (q) { var b = btn('chip', q[1], function () { sfx('tick'); lbScope = q[0]; paintSocial(); }); b.setAttribute('aria-pressed', lbScope === q[0] ? 'true' : 'false'); r1.appendChild(b); });
+      [['week', 'Points de la semaine'], ['run', 'Record de course']].forEach(function (q) { var b = btn('chip', q[1], function () { sfx('tick'); lbKind = q[0]; paintSocial(); }); b.setAttribute('aria-pressed', lbKind === q[0] ? 'true' : 'false'); r2.appendChild(b); });
+      var list = el('div', 'lb'); list.appendChild(el('p', 'small', 'Chargement…'));
+      box.appendChild(r1); box.appendChild(r2); box.appendChild(list);
+      var want = lbScope + lbKind;
+      pushScore().then(function () { return apiCall('GET', 'leaderboard?kind=' + lbKind + '&scope=' + lbScope); }).then(function (r) {
+        if (want !== lbScope + lbKind || socTab !== 0 || !list.parentNode) return;       /* le joueur a changé d'onglet entre-temps */
+        empty2(list);
+        if (!r.ok) { list.appendChild(el('p', 'err', r.d.error || 'Classement indisponible.')); return; }
+        if (!r.d.rows.length || (r.d.rows.length === 1 && !r.d.rows[0].score)) list.appendChild(el('p', 'small', lbScope === 'friends' ? 'Ajoute des amis pour te mesurer à eux.' : 'Personne n\'a encore de score. À toi de jouer !'));
+        r.d.rows.forEach(function (q) {
+          var row = el('div', 'lbrow' + (q.me ? ' me' : '') + (q.rank <= 3 ? ' top' : ''));
+          row.appendChild(el('span', 'rk', q.rank + '.'));
+          var who = el('span', 'who', q.pseudo + (q.me ? ' (toi)' : '')); who.appendChild(el('small', '', (q.monster.name || '?') + ' · ' + speciesName(q.monster.species) + ' · niveau ' + q.monster.level)); row.appendChild(who);
+          row.appendChild(el('span', 'sc', lbKind === 'run' ? q.score + ' m' : q.score.toLocaleString('fr-FR') + ' pts'));
+          list.appendChild(row);
+        });
+        if (lbKind === 'week') list.appendChild(el('p', 'small', 'Ce classement repart à zéro chaque lundi.'));
+      });
+    } else if (socTab === 1) {
+      var form = el('form', 'pair'); form.noValidate = true;
+      var inp = el('input', 'inp'); inp.type = 'text'; inp.id = 'fPseudo'; inp.maxLength = 16; inp.placeholder = 'Pseudo d\'un ami'; inp.setAttribute('aria-label', 'Pseudo d\'un ami'); inp.setAttribute('autocapitalize', 'none');
+      var add = el('button', 'buy', 'Ajouter'); add.type = 'submit'; form.appendChild(inp); form.appendChild(add);
+      var msg = el('p', 'small', ''); msg.id = 'fMsg'; msg.setAttribute('role', 'status');
+      form.addEventListener('submit', function (ev) {
+        ev.preventDefault(); var v = inp.value.trim(); if (!v) return;
+        apiCall('POST', 'friends/add', { pseudo: v }).then(function (r) { if (r.ok) { ME = r.d.me; paintSocial(); $('fMsg').textContent = r.d.info || ''; } else { msg.textContent = r.d.error || 'Impossible.'; msg.className = 'err'; } });
+      });
+      box.appendChild(form); box.appendChild(msg);
+      function friendAct(route, pseudo) { return function () { sfx('tick'); apiCall('POST', 'friends/' + route, { pseudo: pseudo }).then(function (r) { if (r.ok) { ME = r.d.me; paintSocial(); } }); }; }
+      if (ME.incoming.length) { box.appendChild(el('h3', '', 'Ils veulent être tes amis'));
+        ME.incoming.forEach(function (ps) { var fr = el('div', 'frow'); fr.appendChild(el('span', '', ps)); var rw = el('div', 'row'); rw.appendChild(btn('buy', 'Accepter', friendAct('accept', ps))); rw.appendChild(btn('ghost', 'Refuser', friendAct('remove', ps))); fr.appendChild(rw); box.appendChild(fr); }); }
+      box.appendChild(el('h3', '', 'Tes amis'));
+      if (!ME.friends.length) box.appendChild(el('p', 'small', 'Tu n\'as pas encore d\'ami. Demande son pseudo à quelqu\'un qui joue.'));
+      ME.friends.forEach(function (f) { var fr = el('div', 'frow'), sp2 = el('span', '', f.pseudo); sp2.appendChild(el('small', 'sub', (f.monster.name || '?') + ' · niveau ' + f.monster.level)); fr.appendChild(sp2); fr.appendChild(btn('ghost', 'Retirer', friendAct('remove', f.pseudo))); box.appendChild(fr); });
+      if (ME.outgoing.length) { box.appendChild(el('h3', '', 'En attente de réponse'));
+        ME.outgoing.forEach(function (ps) { var fr = el('div', 'frow'); fr.appendChild(el('span', '', ps)); fr.appendChild(btn('ghost', 'Annuler', friendAct('remove', ps))); box.appendChild(fr); }); }
+    } else {
+      box.appendChild(el('p', 'small', 'Connecté en tant que ' + ME.pseudo + '. Ton monstre reste enregistré sur cet appareil ; le compte sert aux amis et aux classements.'));
+      box.appendChild(btn('big', 'Se déconnecter', function () { apiCall('POST', 'logout').then(function () { ME = null; paintSocial(); }); }));
+      box.appendChild(el('h3', '', 'Supprimer mon compte'));
+      box.appendChild(el('p', 'small', 'Ton pseudo, tes scores et ta liste d\'amis seront effacés du serveur. C\'est définitif.'));
+      var pw = el('input', 'inp'); pw.type = 'password'; pw.id = 'delPass'; pw.placeholder = 'Ton mot de passe'; pw.setAttribute('aria-label', 'Ton mot de passe pour confirmer'); pw.setAttribute('autocomplete', 'current-password');
+      var derr = el('p', 'err', ''); derr.setAttribute('role', 'alert');
+      box.appendChild(pw); box.appendChild(derr);
+      box.appendChild(btn('ghost danger', 'Supprimer définitivement', function () { apiCall('POST', 'account/delete', { password: pw.value }).then(function (r) { if (r.ok) { ME = null; socTab = 0; paintSocial(); } else derr.textContent = r.d.error || 'Impossible.'; }); }));
+    }
+  }
+  function closeSocial() { $('social').hidden = true; if (!$('rankBtn').hidden) $('rankBtn').focus(); }
+  $('rankBtn').addEventListener('click', function () {
+    sfx('tick'); closeSheets(); paintSocial(); $('social').hidden = false; $('socClose').focus();
+    if (online !== false) apiCall('GET', 'me').then(function (r) { online = r.status !== 0; ME = r.ok ? r.d.me : null; paintSocial(); });   /* on revérifie, par exemple si une demande d'ami est arrivée */
+  });
+  $('socClose').addEventListener('click', function () { sfx('tick'); closeSocial(); });
+  $('social').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSocial(); });
+  $('socAuth').addEventListener('submit', function (ev) {
+    ev.preventDefault(); $('authErr').hidden = true;
+    var ps = $('aPseudo').value.trim(), pw = $('aPass').value;
+    if (!/^[A-Za-z0-9_-]{3,16}$/.test(ps)) { $('authErr').textContent = 'Le pseudo doit faire 3 à 16 caractères : lettres sans accent, chiffres, tiret ou tiret bas.'; $('authErr').hidden = false; return; }
+    if (pw.length < 6) { $('authErr').textContent = 'Le mot de passe doit faire au moins 6 caractères.'; $('authErr').hidden = false; return; }
+    $('authGo').disabled = true;
+    apiCall('POST', authMode, { pseudo: ps, password: pw, monster: { name: G.name, species: G.species, color: G.color, hue: G.hue || 0, level: levelNow } }).then(function (r) {
+      $('authGo').disabled = false;
+      if (!r.ok) { $('authErr').textContent = r.d.error || 'Impossible.'; $('authErr').hidden = false; return; }
+      ME = r.d.me; $('aPass').value = ''; socTab = 0; sfx('fanfare'); pushScore().then(paintSocial);
+    });
+  });
+  apiCall('GET', 'me').then(function (r) { online = r.status !== 0; ME = r.ok ? r.d.me : null; });
+
   /* ---------- Mini-jeu : la course des poubelles ----------
      Le monstre court tout droit sur 3 voies. Le décor avance vers lui : c'est lui qui a l'air de courir.
      Pour que le jeu ne pousse pas à rester sur l'écran, il y a un nombre de courses et de pièces par jour. */
@@ -1942,11 +2089,13 @@ button, input { touch-action: manipulation; }
   }
   for (rn = 0; rn < 14; rn++) { var sk = plain(new THREE.BoxGeometry(0.03, 0.03, 3.2), new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0 }), (Math.random() - 0.5) * 6.4, 0.4 + Math.random() * 3.6, -Math.random() * 60); streaks.push(sk); }
   /* Les obstacles : chaque objet contient toutes les formes, on n'en montre qu'une */
+  var truckM = mat(0x2F8F5B), truckM2 = mat(0x1F6B43), glassM = mat(0x9FD8F0, { roughness: 0.15, metalness: 0.4 }), cartM = mat(0xB8C0D0, { roughness: 0.3, metalness: 0.7 });
+  var lightM = new THREE.MeshBasicMaterial({ color: 0xFFF3B0 }), flashM = new THREE.MeshBasicMaterial({ color: 0xFF8A3C });
   var redM = mat(0xD62828), whiteM = mat(0xF6F1E7), rollM = mat(0xF08A4B), tireM = mat(0x18181F, { roughness: 0.7 });
   function stripes(w, y, par) { var n = Math.round(w / 0.42), k; for (k = 0; k < n; k++) mesh(new THREE.BoxGeometry(w / n, 0.28, 0.18), k % 2 ? whiteM : redM, -w / 2 + (k + 0.5) * w / n, y, 0, par); }
   for (rn = 0; rn < 22; rn++) {
     var ob = new THREE.Group(), P = {}, key; ob.visible = false; runG.add(ob);
-    ['bin', 'crt', 'bar', 'bar3', 'roll', 'tire'].forEach(function (nm) { P[nm] = new THREE.Group(); ob.add(P[nm]); });
+    ['bin', 'crt', 'bar', 'bar3', 'roll', 'tire', 'truck', 'cart'].forEach(function (nm) { P[nm] = new THREE.Group(); ob.add(P[nm]); });
     mesh(new THREE.CylinderGeometry(0.52, 0.44, 1.5, 18), binMat, 0, 0.75, 0, P.bin); mesh(new THREE.CylinderGeometry(0.58, 0.58, 0.12, 18), lidMat, 0, 1.56, 0, P.bin);
     mesh(new THREE.BoxGeometry(1.1, 0.6, 0.8), card, 0, 0.3, 0, P.crt); mesh(new THREE.BoxGeometry(0.16, 0.6, 0.82), mat(0xD8B98A), 0, 0.3, 0, P.crt);
     stripes(1.26, 1.34, P.bar); mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8), tireM, -0.6, 0.75, 0, P.bar); mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8), tireM, 0.6, 0.75, 0, P.bar);
@@ -1954,8 +2103,18 @@ button, input { touch-action: manipulation; }
     var ro = mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.05, 18), rollM, 0, 0.45, 0, P.roll); ro.rotation.z = Math.PI / 2;
     [-0.3, 0.3].forEach(function (x) { var rr = mesh(new THREE.TorusGeometry(0.455, 0.03, 6, 20), whiteM, x, 0.45, 0, P.roll); rr.rotation.y = Math.PI / 2; });
     var ti = mesh(new THREE.TorusGeometry(0.42, 0.17, 10, 22), tireM, 0, 0.59, 0, P.tire); ti.rotation.y = Math.PI / 2;
-    ob.userData = { on: false, P: P, type: 'bin', lane: 0, ph: 0 }; obst.push(ob);
+    /* le camion-poubelle : son avant est en z = 0, il s'étend sur 5,6 m derrière */
+    mesh(new THREE.BoxGeometry(1.16, 1.5, 1.3), truckM, 0, 1.05, -0.65, P.truck); mesh(new THREE.BoxGeometry(1.0, 0.55, 0.06), glassM, 0, 1.35, 0.01, P.truck);
+    mesh(new THREE.BoxGeometry(1.22, 2.0, 4.2), truckM2, 0, 1.3, -3.5, P.truck); mesh(new THREE.BoxGeometry(1.24, 0.22, 4.22), whiteM, 0, 1.2, -3.5, P.truck); mesh(new THREE.BoxGeometry(1.2, 0.2, 0.2), tireM, 0, 0.32, 0.04, P.truck);
+    [[-0.5, -0.6], [0.5, -0.6], [-0.5, -4.6], [0.5, -4.6], [-0.5, -3.3], [0.5, -3.3]].forEach(function (q) { var wh = mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.24, 14), tireM, q[0], 0.34, q[1], P.truck); wh.rotation.z = Math.PI / 2; });
+    plain(new THREE.SphereGeometry(0.13, 10, 8), lightM, -0.38, 0.62, 0.05, P.truck); plain(new THREE.SphereGeometry(0.13, 10, 8), lightM, 0.38, 0.62, 0.05, P.truck);
+    plain(new THREE.BoxGeometry(0.5, 0.12, 0.12), flashM, 0, 1.9, -0.5, P.truck);
+    /* le chariot de supermarché */
+    mesh(new THREE.BoxGeometry(0.85, 0.6, 1.0), cartM, 0, 0.75, 0, P.cart); mesh(new THREE.BoxGeometry(0.75, 0.5, 0.9), tireM, 0, 0.82, 0, P.cart); mesh(new THREE.BoxGeometry(0.9, 0.06, 0.06), redM, 0, 1.18, 0.55, P.cart);
+    [[-0.36, 0.42], [0.36, 0.42], [-0.36, -0.42], [0.36, -0.42]].forEach(function (q) { mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 6), cartM, q[0], 0.25, q[1], P.cart); mesh(new THREE.SphereGeometry(0.09, 8, 6), tireM, q[0], 0.09, q[1], P.cart); });
+    ob.userData = { on: false, P: P, type: 'bin', lane: 0, ph: 0, c: 0 }; obst.push(ob);
   }
+  var warns = [-1, 0, 1].map(function (l) { var wm = plain(new THREE.PlaneGeometry(1.15, 16), new THREE.MeshBasicMaterial({ color: 0xFF3B3B, transparent: true, opacity: 0, depthWrite: false }), l * LANE, 0.02, -9); wm.rotation.x = -Math.PI / 2; return wm; });
   var coinMat = mat(0xF7C948, { metalness: 0.7, roughness: 0.25, emissive: 0x6A5210 });
   for (rn = 0; rn < 36; rn++) { var rc = mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.07, 18), coinMat, 0, 0, 0, runG); rc.rotation.x = Math.PI / 2; rc.visible = false; rc.castShadow = false; rc.userData = { on: false }; rcoins.push(rc); }
   function gameDay() { if (G.game.day !== dayKey(0)) G.game = { day: dayKey(0), runs: 0, coins: 0 }; return G.game; }
@@ -1965,6 +2124,7 @@ button, input { touch-action: manipulation; }
     o.userData.on = true; o.userData.type = type; o.userData.lane = lane; o.userData.ph = Math.random() * 6;
     for (k in o.userData.P) o.userData.P[k].visible = k === type;
     o.position.set(type === 'bar3' ? 0 : lane * LANE, 0, z); o.rotation.y = (type === 'bin' || type === 'crt') ? Math.random() * 0.5 - 0.25 : 0; o.visible = true;
+    return o;
   }
   function coin(lane, y, z) { var c2 = freeOf(rcoins); if (c2) { c2.userData.on = true; c2.position.set(lane * LANE, y, z); c2.visible = true; } }
   function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
@@ -1989,11 +2149,16 @@ button, input { touch-action: manipulation; }
     if (tier >= 2 && r < [0, 0, 0.38, 0.46][tier]) {                            /* un pneu qui traverse la route : il faut sauter au bon moment */
       put('tire', 0, z0); RUN.next = air; return;
     }
-    var kinds = [['bin', 'bin', 'crt'], ['bin', 'bin', 'crt', 'bar'], ['bin', 'crt', 'bar', 'roll'], ['bin', 'bin', 'bar', 'roll', 'roll']][tier];
+    if (tier >= 1 && RUN.safe !== 0 && r > 0.5 && r < [0, 0.64, 0.68, 0.72][tier]) {   /* un chariot qui va et vient entre les deux autres voies : il ne reste que la voie sûre */
+      var ca = put('cart', 0, z0); if (ca) ca.userData.c = -RUN.safe * LANE / 2;
+      for (k = 0; k < 3; k++) coin(RUN.safe, 0.7, z0 - 1.5 + k * 1.5); RUN.next = gap; return;
+    }
+    var kinds = [['bin', 'bin', 'crt'], ['bin', 'crt', 'bar', 'truck'], ['bin', 'crt', 'bar', 'roll', 'truck'], ['bin', 'bar', 'roll', 'roll', 'truck', 'truck']][tier];
     [-1, 0, 1].forEach(function (l) {
       if (l === RUN.safe || Math.random() > [0.55, 0.72, 0.85, 0.94][tier]) return;
-      var ty = pick(kinds); if (ty === 'roll' && RUN.hist.indexOf(l) >= 0) ty = 'bin';   /* un tonneau va plus vite que le reste : jamais dans une voie qui vient d'être sûre */
-      put(ty, l, z0);
+      var ty = pick(kinds); if ((ty === 'roll' || ty === 'truck') && RUN.hist.indexOf(l) >= 0) ty = 'bin';   /* tonneaux et camions vont plus vite que le reste : jamais dans une voie qui vient d'être sûre */
+      if (ty === 'truck' && obst.some(function (o) { return o.userData.on && o.userData.type === 'truck' && o.userData.lane !== l; })) ty = 'bin';   /* jamais deux camions de front */
+      put(ty, l, ty === 'truck' ? z0 - 14 : z0); if (ty === 'truck') sfx('honk', 0.8);
     });
     if (tier >= 2 && Math.random() < [0, 0, 0.22, 0.34][tier]) {                /* même la voie sûre demande un geste */
       var act2 = pick(['crt', 'bar']); put(act2, RUN.safe, z0); if (act2 === 'crt') coin(RUN.safe, 1.5, z0); RUN.next = air; return;
@@ -2013,7 +2178,7 @@ button, input { touch-action: manipulation; }
     gm.runs++; saveG(); closeSheets(); $('bubble').hidden = true; $('runEnd').hidden = true;
     applyDecor(0); D.forEach(function (gr) { gr.visible = false; }); wall.visible = ledge.visible = false; box.visible = false; floor.visible = false; flies.visible = false; runG.visible = true;
     scene.fog.near = 26; scene.fog.far = 66;
-    obst.concat(rcoins).forEach(function (o) { o.userData.on = false; o.visible = false; });
+    obst.concat(rcoins).forEach(function (o) { o.userData.on = false; o.visible = false; }); warns.forEach(function (wm) { wm.material.opacity = 0; });
     RUN.state = 'ready'; RUN.lane = 0; RUN.x = 0; RUN.y = 0; RUN.vy = 0; RUN.slide = 0; RUN.v = 9; RUN.dist = 0; RUN.coins = 0; RUN.next = 2; RUN.safe = 0; RUN.hist = [0, 0, 0]; RUN.zone = 0; RUN.shake = 0; RUN.t0 = clock.getElapsedTime();
     paintZone(); act = null; spin = 0; phase = 'run'; show('runHud'); $('gear').hidden = true; $('runCount').hidden = false; $('runTip').hidden = false;
     $('runDist').textContent = '0 m'; $('runCoins').textContent = '0';
@@ -2022,7 +2187,7 @@ button, input { touch-action: manipulation; }
     if (RUN.state !== 'go' && RUN.state !== 'ready') return;
     RUN.state = 'over'; RUN.t0 = clock.getElapsedTime(); if (crash) { RUN.shake = 0.45; sfx('thud'); try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {} }
     var gm = gameDay(), got = RUN.coins, earned = Math.max(0, Math.min(got, COINS_PER_DAY - gm.coins)), dist = Math.floor(RUN.dist), record = dist > G.best;
-    gm.coins += earned; G.bonus += earned; if (record) G.best = dist; saveG();
+    gm.coins += earned; G.bonus += earned; if (record) G.best = dist; saveG(); pushScore();
     setTimeout(function () {
       if (phase !== 'run') return;
       $('runEndTitle').textContent = record && dist > 0 ? 'Nouveau record !' : crash ? 'Aïe !' : 'Course terminée';
@@ -2055,7 +2220,8 @@ button, input { touch-action: manipulation; }
       RUN.next -= dz; if (RUN.next <= 0) spawnRow();
       RUN.vy -= 24 * dt; RUN.y += RUN.vy * dt; if (RUN.y <= 0) { RUN.y = 0; RUN.vy = 0; }
       if (RUN.slide > 0) RUN.slide -= dt;
-      var low = RUN.slide > 0 && RUN.y < 0.05;
+      var low = RUN.slide > 0 && RUN.y < 0.05, warnOn = [false, false, false];
+      function hitTruck(o) { if (o.position.z > -0.6 && o.position.z < 6.2 && Math.abs(o.position.x - RUN.x) < 0.85) runOver(true); }
       dashes.forEach(function (o) { o.position.z += dz; if (o.position.z > 8) o.position.z -= 102; });
       arches.forEach(function (o) { o.position.z += dz; if (o.position.z > 10) o.position.z -= 168; });
       towers.forEach(function (o) { o.position.z += dz * 0.7; if (o.position.z > 14) o.position.z -= 180; });
@@ -2065,7 +2231,9 @@ button, input { touch-action: manipulation; }
       brick2.offset.x -= dz / 5;
       obst.forEach(function (o) {
         var u = o.userData; if (!u.on) return;
-        o.position.z += dz + (u.type === 'roll' ? 5 * dt : 0);
+        o.position.z += dz + (u.type === 'roll' ? 5 * dt : u.type === 'truck' ? 12 * dt : 0);
+        if (u.type === 'cart') o.position.x = u.c + Math.sin(t * 2.6 + u.ph) * LANE / 2;
+        if (u.type === 'truck') { if (o.position.z < -8) warnOn[u.lane + 1] = true; if (o.position.z > 15) { u.on = false; o.visible = false; } return hitTruck(o); }
         if (u.type === 'roll') u.P.roll.children[0].rotation.x -= dt * 9;
         if (u.type === 'tire') { o.position.x = Math.sin(t * 2.3 + u.ph) * LANE * 1.25; u.P.tire.children[0].rotation.x += dt * 8; }
         if (o.position.z > 8) { u.on = false; o.visible = false; return; }
@@ -2076,6 +2244,7 @@ button, input { touch-action: manipulation; }
         else if (u.type === 'tire') hit = az < 0.5 && ax < 0.68 && RUN.y < 0.62;
         else if (u.type === 'bar') hit = az < 0.42 && ax < 0.8 && !low;
         else if (u.type === 'bar3') hit = az < 0.42 && !low;
+        else if (u.type === 'cart') hit = az < 0.6 && ax < 0.8 && RUN.y < 1.15;
         if (hit) runOver(true);
       });
       rcoins.forEach(function (o) {
@@ -2083,6 +2252,8 @@ button, input { touch-action: manipulation; }
         if (o.position.z > 8) { o.userData.on = false; o.visible = false; return; }
         if (Math.abs(o.position.z) < 0.8 && Math.abs(o.position.x - RUN.x) < 0.75 && Math.abs(o.position.y - 0.7 - RUN.y) < 1.1) { o.userData.on = false; o.visible = false; RUN.coins++; sfx('coin', 0.6); $('runCoins').textContent = RUN.coins; }
       });
+      warns.forEach(function (wm, n) { wm.material.opacity = warnOn[n] ? 0.22 + Math.abs(Math.sin(t * 11)) * 0.3 : 0; });
+      flashM.color.setHex(Math.sin(t * 14) > 0 ? 0xFF8A3C : 0x5A2A10);
       paintZone();
       $('runDist').textContent = Math.floor(RUN.dist) + ' m';
     }
@@ -2288,7 +2459,7 @@ button, input { touch-action: manipulation; }
   $('entry').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeEntry(); });
   function logDay(e) {
     G.entries[dayKey(0)] = e; saveG();
-    var sc = score(e), grew = refresh(true);
+    var sc = score(e), grew = refresh(true); pushScore();
     if (phase === 'dead') return;
     if (!grew) {
       toast('+' + sc.pts + ' points · +' + Math.floor(sc.pts / 10) + ' pièces');

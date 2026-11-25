@@ -138,10 +138,10 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Barre de vie, et mort du monstre s'il est vraiment négligé | Fait |
 | 47 cosmétiques dans 5 catégories, avec raretés, niveaux requis et essayage | Fait |
 | Mini-jeu « La course des poubelles » | Fait |
+| Comptes (pseudo et mot de passe), amis, classement mondial et classement entre amis | Fait |
 | La créature parle (bulles), aime les caresses (cœurs), fête les bonnes journées (confettis) | Fait |
 | Quêtes bonus et cadeaux hebdomadaires | À faire |
 | Export de l'appli Santé | À faire |
-| Comptes, créatures des copains, classement | À faire |
 
 ### Comment l'appli applique les règles
 
@@ -189,6 +189,8 @@ Le premier mini-jeu est **« La course des poubelles »** : le monstre court tou
 | Barrière sur toute la largeur | Glisser dessous | 150 m |
 | Tonneau qui roule, plus rapide que le reste | Changer de voie ou sauter | 400 m |
 | Pneu qui traverse la route | Sauter au bon moment | 400 m |
+| Chariot qui va et vient entre deux voies | Prendre la troisième voie | 150 m |
+| Camion-poubelle qui fonce vers soi, annoncé par un klaxon et une bande rouge au sol | Quitter sa voie | 150 m |
 
 - **Le parcours n'est jamais régulier** : l'écart entre deux rangées change tout le temps, avec parfois une pause et parfois deux rangées collées.
 - **Il existe toujours un chemin.** Le programme garde une « voie sûre » qui ne se déplace que d'une voie à la fois ; c'est ce qui rend le jeu dur mais jamais injuste.
@@ -198,6 +200,18 @@ Le premier mini-jeu est **« La course des poubelles »** : le monstre court tou
 - **5 courses par jour** et **50 pièces par jour au maximum** avec les jeux.
 
 Cette limite est voulue : FormiLife sert à passer moins de temps sur les écrans. Un mini-jeu sans limite pousserait à faire l'inverse, et rapporterait plus que de bien dormir. Les jeux restent donc un bonus, et les vraies récompenses viennent du sommeil, des pas et du temps d'écran.
+
+### Les comptes, les amis et les classements
+
+- **Un compte = un pseudo et un mot de passe.** Pas d'adresse e-mail.
+- **Ajouter un ami** : on tape son pseudo, il reçoit une demande et l'accepte. Si deux joueurs se demandent en même temps, ils deviennent amis tout de suite.
+- **Deux classements**, chacun en version Monde et en version Amis :
+  - les **points de la semaine** (le total des journées, il repart à zéro chaque lundi) ;
+  - le **record de course** du mini-jeu.
+- **Règle de vie privée** : le serveur ne reçoit que le pseudo, l'apparence du monstre et les scores. Le sommeil, les pas et le temps d'écran ne quittent jamais l'appareil.
+- Le monstre lui-même reste enregistré sur l'appareil. Le compte ne sert qu'aux amis et aux classements.
+
+Ces fonctions ont besoin du serveur : elles marchent sur la version en ligne (Railway), pas sur la page de démonstration.
 
 ### Les monstres
 

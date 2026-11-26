@@ -879,5 +879,16 @@
 "Un pack ne donne ni pièces ni vie : seulement des choses à porter et à regarder.": "A pack gives no coins and no health: only things to wear and look at.",
 "Les achats ne sont pas encore ouverts. Ils arriveront quand FormiLife sera sur le Play Store, et il faudra l'accord d'un parent.": "Purchases aren't open yet. They will arrive when FormiLife is on the Play Store, and a parent will have to agree.",
 "Débloquer les packs (test)": "Unlock the packs (test)",
-"Packs débloqués pour le test.": "Packs unlocked for testing."
+"Packs débloqués pour le test.": "Packs unlocked for testing.",
+"Pack Trésor": "Treasure Pack",
+"10 000 pièces et 3 jokers de série.": "10,000 coins and 3 streak jokers.",
+"Ta série": "Your streak",
+"jokers": "jokers",
+"Un joker répare un jour raté : ta série continue comme si de rien n'était.": "A joker fixes a missed day: your streak carries on as if nothing happened.",
+"Utiliser un joker": "Use a joker",
+"Voir les packs": "See the packs",
+"Aucun jour à réparer pour l'instant.": "No day to fix right now.",
+"Un joker peut sauver ta série de ": "A joker can save your streak of ",
+"Tu n'as pas de joker. On en trouve dans les packs.": "You don't have a joker. You can find some in the packs.",
+"Joker utilisé : ta série repart !": "Joker used: your streak is back!"
 }

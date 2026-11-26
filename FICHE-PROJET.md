@@ -399,17 +399,20 @@ Elles gardent les yeux, la bouche, les bras et les pieds de la peluche, donc tou
 
 ### Les packs payants
 
-La boutique a un rayon « Packs ». Un pack s'achète avec du vrai argent et débloque tout de suite des choses qu'on peut aussi gagner en jouant.
+Un bouton « Packs » est posé à gauche de l'écran principal. Un pack s'achète avec du vrai argent.
 
 | Pack | Contenu | Prix affiché |
 |---|---|---|
+| Pack Trésor | 10 000 pièces et 3 jokers de série. Il peut se racheter | 4,99 € |
 | Pack Créatures | Les cinq créatures spéciales | 2,99 € |
 | Pack Décors | Tous les décors | 2,99 € |
 | Pack Complet | Les créatures et tous les décors | 4,99 € |
 
-**Règle : un pack ne vend que de l'apparence.** Jamais de pièces, de vie ou de niveaux. Sinon, bien dormir et marcher ne serviraient plus à rien.
+**Les jokers de série.** Une série, ce sont des jours d'affilée où les trois mesures sont au moins « correct ». Quand un jour raté casse la série, un joker le répare et la série repart. On touche la flamme (en haut à droite) pour voir sa série et ses jokers. Un joker ne répare qu'un jour récent (trois jours au plus) et seulement s'il y avait une série juste avant. On ne trouve des jokers que dans le Pack Trésor.
 
-**Le paiement n'est pas branché.** Pour l'instant, le bouton du prix ouvre une fenêtre qui décrit le pack et dit que les achats arriveront avec le Play Store, avec l'accord d'un parent. Un vrai paiement passe par le magasin d'applis (Google Play), pas par une page web : c'est lui qui encaisse, qui vérifie l'accord parental et qui garde sa part. L'administrateur a un bouton « Débloquer les packs (test) » pour voir le résultat.
+**Décision du chef de projet : le Pack Trésor vend des pièces.** La MOA avait conseillé de ne vendre que de l'apparence. Le chef de projet a choisi de vendre aussi des pièces et des jokers. Conséquence à connaître : avec 10 000 pièces on achète presque toute la boutique, donc les pièces gagnées en dormant bien et en marchant comptent moins pour un joueur qui paie.
+
+**Le paiement n'est pas branché.** Le bouton du prix ouvre une fenêtre qui décrit le pack et dit que les achats arriveront avec le Play Store, avec l'accord d'un parent. Un vrai paiement passe par le magasin d'applis (Google Play) : c'est lui qui encaisse, vérifie l'accord parental et garde sa part. L'administrateur a un bouton « Débloquer les packs (test) ».
 
 **Avant de vendre pour de vrai**, il faudra : un adulte titulaire du compte développeur, un statut pour déclarer l'argent, une page de confidentialité, et choisir les prix définitifs (ceux-ci sont des exemples).
 

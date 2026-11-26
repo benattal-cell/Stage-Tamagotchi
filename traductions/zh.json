@@ -879,5 +879,16 @@
 "Un pack ne donne ni pièces ni vie : seulement des choses à porter et à regarder.": "礼包不会给金币或生命，只有外观和装饰。",
 "Les achats ne sont pas encore ouverts. Ils arriveront quand FormiLife sera sur le Play Store, et il faudra l'accord d'un parent.": "现在还不能购买。等 FormiLife 上架 Play 商店后才会开放，并且需要家长同意。",
 "Débloquer les packs (test)": "解锁礼包（测试）",
-"Packs débloqués pour le test.": "已为测试解锁礼包。"
+"Packs débloqués pour le test.": "已为测试解锁礼包。",
+"Pack Trésor": "宝藏礼包",
+"10 000 pièces et 3 jokers de série.": "10 000 金币和 3 张连续天数补签卡。",
+"Ta série": "你的连续天数",
+"jokers": "补签卡",
+"Un joker répare un jour raté : ta série continue comme si de rien n'était.": "补签卡可以补上错过的一天，连续天数照常继续。",
+"Utiliser un joker": "使用补签卡",
+"Voir les packs": "查看礼包",
+"Aucun jour à réparer pour l'instant.": "现在没有需要补的日子。",
+"Un joker peut sauver ta série de ": "补签卡可以保住你的连续天数： ",
+"Tu n'as pas de joker. On en trouve dans les packs.": "你没有补签卡。可以在礼包里获得。",
+"Joker utilisé : ta série repart !": "已使用补签卡：连续天数回来了！"
 }

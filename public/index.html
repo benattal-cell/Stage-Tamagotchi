@@ -2215,7 +2215,12 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     if (Math.abs(camera.fov - wantFov) > 0.05) { camera.fov += (wantFov - camera.fov) * cf; camera.updateProjectionMatrix(); }
     if (phase === 'run' && RUN.shake > 0 && !reduce) { camera.position.x += (Math.random() - 0.5) * RUN.shake; camera.position.y += (Math.random() - 0.5) * RUN.shake; RUN.shake -= dt; }
 
-    if (modelNow) { modelNow.play(phase === 'dead' ? 'Death' : phase === 'run' ? (RUN.state === 'over' ? 'HitRecieve' : RUN.y > 0.05 ? 'Jump' : 'Walk') : act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) { modelNow.mixer.update(dt * (phase === 'run' ? 1.9 : tired ? 0.5 : 1)); if (talking && modelNow.headBone) { modelNow.headBone.rotation.x += Math.sin(t * 15) * 0.06; modelNow.headBone.scale.y *= 1 + Math.sin(t * 15) * 0.035; } } }
+    if (modelNow) { modelNow.play(phase === 'dead' ? 'Death' : phase === 'run' ? (RUN.state === 'over' ? 'HitRecieve' : RUN.y > 0.05 ? 'Jump' : 'Walk') : act ? (CLIP[act.type] || 'Idle') : 'Idle'); if (!reduce) {
+      /* Le hochement de tête quand il parle : on retire d'abord celui de l'image d'avant, sinon les petits écarts s'additionnent et la tête s'écrase peu à peu */
+      var hb = modelNow.headBone; if (hb && hb.userData.talk) { hb.rotation.x -= hb.userData.talk[0]; hb.scale.y /= hb.userData.talk[1]; hb.userData.talk = null; }
+      modelNow.mixer.update(dt * (phase === 'run' ? 1.9 : tired ? 0.5 : 1));
+      if (talking && hb) { var tr = Math.sin(t * 15) * 0.06, ts = 1 + Math.sin(t * 15) * 0.035; hb.rotation.x += tr; hb.scale.y *= ts; hb.userData.talk = [tr, ts]; }
+    } }
     renderer.render(scene, camera);
     if (!$('bubble').hidden) {                /* la bulle suit la tête de la créature */
       v3.set(pet.position.x, pet.position.y + (2.75 + (G.look.hat ? 0.45 : 0)) * sc * stageK, pet.position.z).project(camera);
@@ -3656,7 +3661,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       loader.load('models/' + sp.id + MODEL_EXT, function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
     });
   });
-  if (location.hash === '#reglage') window.__fl = { night: function (v) { forceNight = v; nightSync(); }, MOTS: MOTS, BR: BR, breakCheck: breakCheck, state: function () { return G; }, CT: CT, foods: foods, MEM: MEM, TRI: TRI, WS: WS, AMB: AMB, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
+  if (location.hash === '#reglage') window.__fl = { head: function () { return modelNow && modelNow.headBone ? [modelNow.headBone.scale.y, modelNow.headBone.rotation.x] : null; }, talk: function (sec) { say('Bla bla bla bla bla bla', sec * 1000); talkUntil = clock.getElapsedTime() + sec; }, night: function (v) { forceNight = v; nightSync(); }, MOTS: MOTS, BR: BR, breakCheck: breakCheck, state: function () { return G; }, CT: CT, foods: foods, MEM: MEM, TRI: TRI, WS: WS, AMB: AMB, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
   function loadStep() {

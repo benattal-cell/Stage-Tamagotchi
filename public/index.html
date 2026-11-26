@@ -479,9 +479,15 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 #tabbar[data-tab="shop"] #navShop svg, #tabbar[data-tab="look"] #navLook svg, #tabbar[data-tab="home"] #navHome svg, #tabbar[data-tab="games"] #navGames svg, #tabbar[data-tab="well"] #navWell svg { transform: scale(1.3); }
 .tabb #shopDot:not([hidden]) { top: 4px; right: 14px; }
 .sheetwrap.page:not([hidden]) { inset: 0 0 var(--tabh) 0; }
-#well .sheet, #games .sheet { height: 100% !important; max-height: 100% !important; border-radius: 0; border-top: 0; padding-top: max(16px, env(safe-area-inset-top, 0px)); }
+#well .sheet, #games .sheet, #look .sheet, #shop .sheet { height: 100% !important; max-height: 100% !important; border-radius: 0; border-top: 0; padding-top: max(16px, env(safe-area-inset-top, 0px)); }
 .page .sheet { padding-bottom: 26px; }
-#look .sheet, #shop .sheet { max-height: 50%; }
+.prev { width: 150px; height: 150px; align-self: center; border-radius: 24px; background: radial-gradient(circle at 50% 40%, #3A4170, #1E2233); box-shadow: inset 0 0 0 2px rgba(255,255,255,.1); object-fit: contain; }
+/* Les pages glissent de côté : elles arrivent du côté de leur onglet et repartent par là */
+.page .sheet.inR { animation: pgInR .26s cubic-bezier(.2,.8,.3,1) both; } .page .sheet.inL { animation: pgInL .26s cubic-bezier(.2,.8,.3,1) both; }
+.page .sheet.outR { animation: pgOutR .22s ease-in both; } .page .sheet.outL { animation: pgOutL .22s ease-in both; }
+@keyframes pgInR { from { transform: translateX(100%); } } @keyframes pgInL { from { transform: translateX(-100%); } }
+@keyframes pgOutR { to { transform: translateX(100%); } } @keyframes pgOutL { to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { .page .sheet.inR, .page .sheet.inL, .page .sheet.outR, .page .sheet.outL { animation: none; } }
 #wellClose, #gamesClose, #lookClose, #shopClose { display: none; }
 .daybtn { flex-direction: row; gap: 10px; min-height: 54px; width: 100%; font-size: .95rem; padding: 6px 14px; }
 .daybtn .navsub { margin-left: auto; } .daybtn svg { animation: none !important; }
@@ -867,6 +873,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   <div class="sheetwrap page" id="look" hidden>
     <div class="sheet" role="dialog" aria-labelledby="lookTitle">
       <div class="sheethead"><h2 id="lookTitle">Atelier</h2><button type="button" class="ghost" id="lookClose">Terminé</button></div>
+      <img class="prev" id="lookPrev" alt="">
       <div class="tabs" id="lookTabs" role="tablist" aria-label="Ce que tu veux changer"></div>
       <div class="opts" id="lookOpts"></div>
     </div>
@@ -874,6 +881,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   <div class="sheetwrap page" id="shop" hidden>
     <div class="sheet" role="dialog" aria-labelledby="shopTitle">
       <div class="sheethead"><h2 id="shopTitle">Boutique</h2><span class="pill" id="shopCoins"></span><button type="button" class="ghost" id="shopClose">Terminé</button></div>
+      <img class="prev" id="shopPrev" alt="">
       <div class="tabs" id="shopTabs" role="tablist" aria-label="Rayons de la boutique"></div>
       <div class="opts" id="shopList"></div>
     </div>
@@ -3559,7 +3567,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     row2.appendChild(nm2); var wb = btn('buy' + (wd ? ' on' : ''), _T('+ 1 verre'), function () { var w2 = wellDay(); w2.water = Math.min(12, w2.water + 1); saveG(); sfx('pop'); if (w2.water >= 6) wellDone('eau'); else refresh(false); paintWell(); }); wb.id = 'waterPlus'; row2.appendChild(wb); box.appendChild(row2);
     $('wellCount').textContent = nb + ' / ' + (WELL.length + 1);
   }
-  $('navWell').addEventListener('click', function () { sfx('tick'); if (!$('well').hidden) { closeSheets(); return; } closeSheets(); paintWell(); $('well').hidden = false; focusCam = true; syncTab(); });
+  $('navWell').addEventListener('click', function () { sfx('tick'); tabOpen('well'); });
   $('wellClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navWell').focus(); });
   $('well').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSheets(); });
 
@@ -3955,7 +3963,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     });
     $('gmNote').textContent = isNight() ? _T('Ton monstre dort : les jeux sont fermés de 22 h à 6 h. Le bien-être reste ouvert. Bonne nuit !') : left > 0 ? _T('Les jeux rapportent un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.') : _T('Plus de partie pour aujourd\'hui. L\'espace bien-être reste ouvert. Reviens demain !');
   }
-  $('navGames').addEventListener('click', function () { sfx('tick'); if (!$('games').hidden) { closeSheets(); return; } closeSheets(); paintGames(); $('games').hidden = false; focusCam = true; syncTab(); });
+  $('navGames').addEventListener('click', function () { sfx('tick'); tabOpen('games'); });
   $('gamesClose').addEventListener('click', function () { sfx('tick'); closeSheets(); $('navGames').focus(); });
   $('games').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeSheets(); });
   $('runQuit').addEventListener('click', function () { if (curGame === 'catch') catchOver(); else runOver(false); });
@@ -4026,6 +4034,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     dress();
   }
   function paintLook() {
+    $('lookPrev').src = thumbLook(G.look, 'all');
     var list = LOOKS.filter(function (l) { return (!l.native || G.species === 'peluche') && !(l.key === 'color' && BRAIN[G.species]); });   /* oreilles, yeux et dents ne se changent que sur la peluche */
     if (lookTab >= list.length) lookTab = 0;
     tabs('lookTabs', list.map(function (l) { return l.name; }), lookTab, function (n) { lookTab = n; paintLook(); });
@@ -4072,6 +4081,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
      On touche un article pour l'essayer sur son monstre, puis on décide de l'acheter ou non. */
   var shopSel = null;
   function paintShop() {
+    $('shopPrev').src = thumbLook(G.look, 'all');
     tabs('shopTabs', [_T('Décors')].concat(SLOTS.map(function (q) { return q[1]; })).concat([_T('Monstres')]), shopTab, function (n) { shopTab = n; shopSel = null; paintShop(); });
     var box = $('shopList'), c = calc(), coins = c.coins; empty2(box);
     if (shopTab === 0) {
@@ -4116,17 +4126,31 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     });
     /* L'essayage : le monstre porte l'article choisi tant que la boutique est ouverte, même s'il n'est pas acheté */
     useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth);
-    var tryOn = JSON.parse(JSON.stringify(G.look)); if (sel) tryOn[slot] = sel.id; buildAcc(tryOn); syncParts(); paint();
+    var tryOn = JSON.parse(JSON.stringify(G.look)); if (sel) tryOn[slot] = sel.id; $('shopPrev').src = thumbLook(tryOn, 'all'); buildAcc(tryOn); syncParts(); paint();      /* la photo montre l'article essayé */
   }
   function closeSheets() { setTimeout(syncTab, 0); var was = !$('shop').hidden; $('well').hidden = true; $('quests').hidden = true; $('games').hidden = true; $('look').hidden = true; $('shop').hidden = true; focusCam = false; shopSel = null; if (was && phase === 'play') dress(); }
-  $('navLook').addEventListener('click', function () { sfx('tick'); if (!$('look').hidden) { closeSheets(); return; } closeSheets(); paintLook(); $('look').hidden = false; focusCam = true; syncTab(); });
-  $('navShop').addEventListener('click', function () { sfx('tick'); if (!$('shop').hidden) { closeSheets(); return; } closeSheets(); paintShop(); $('shop').hidden = false; focusCam = true; syncTab(); });
+  $('navLook').addEventListener('click', function () { sfx('tick'); tabOpen('look'); });
+  $('navShop').addEventListener('click', function () { sfx('tick'); tabOpen('shop'); });
   /* ---------- La barre d'onglets ----------
      L'onglet de la page ouverte est mis en avant ; « Accueil » referme tout. Sur une page, glisser le doigt de côté passe à l'onglet voisin. */
   var TABORDER = ['shop', 'look', 'home', 'games', 'well'], TABBTN = { shop: 'navShop', look: 'navLook', games: 'navGames', well: 'navWell' }, swipe0 = null;
   function syncTab() { var cur = 'home'; ['shop', 'look', 'games', 'well'].forEach(function (k) { if (!$(k).hidden) cur = k; }); $('tabbar').setAttribute('data-tab', cur); TABORDER.forEach(function (k) { $(k === 'home' ? 'navHome' : TABBTN[k]).setAttribute('aria-current', k === cur ? 'page' : 'false'); }); }
-  function tabStep(d) { var n = TABORDER.indexOf($('tabbar').getAttribute('data-tab') || 'home') + d; if (n < 0 || n >= TABORDER.length) return; if (TABORDER[n] === 'home') { sfx('tick'); closeSheets(); } else $(TABBTN[TABORDER[n]]).click(); }
-  $('navHome').addEventListener('click', function () { sfx('tick'); closeSheets(); });
+  var tabTok = 0;
+  function tabNow() { var cur = 'home'; ['shop', 'look', 'games', 'well'].forEach(function (k) { if (!$(k).hidden) cur = k; }); return cur; }
+  function tabOpen(k) {                       /* la page arrive du côté où se trouve son onglet */
+    var cur = tabNow(); if (cur === k) { tabHome(); return; }
+    var from = TABORDER.indexOf(cur), to = TABORDER.indexOf(k), sh = $(k).querySelector('.sheet'); tabTok++;
+    closeSheets(); ({ shop: paintShop, look: paintLook, games: paintGames, well: paintWell })[k]();
+    sh.classList.remove('inR', 'inL', 'outR', 'outL'); void sh.offsetWidth; sh.classList.add(to > from ? 'inR' : 'inL');
+    $(k).hidden = false; focusCam = true; sh.scrollTop = 0; syncTab();
+  }
+  function tabHome() {                        /* la page repart du côté de son onglet, puis on retrouve le monstre */
+    var cur = tabNow(); if (cur === 'home') { closeSheets(); return; }
+    var sh = $(cur).querySelector('.sheet'), tok = ++tabTok; sh.classList.remove('inR', 'inL'); sh.classList.add(TABORDER.indexOf(cur) > 2 ? 'outR' : 'outL'); $('tabbar').setAttribute('data-tab', 'home');
+    setTimeout(function () { sh.classList.remove('outR', 'outL'); if (tok === tabTok && !$(cur).hidden) closeSheets(); }, reduce ? 0 : 220);
+  }
+  function tabStep(d) { var n = TABORDER.indexOf(tabNow()) + d; if (n < 0 || n >= TABORDER.length) return; sfx('tick'); if (TABORDER[n] === 'home') tabHome(); else tabOpen(TABORDER[n]); }
+  $('navHome').addEventListener('click', function () { sfx('tick'); tabHome(); });
   ['shop', 'look', 'games', 'well'].forEach(function (k) {
     var sh = $(k).querySelector('.sheet');
     sh.addEventListener('touchstart', function (ev) { var tc = ev.touches[0]; swipe0 = (ev.target.closest && ev.target.closest('.tabs, .strip, input, textarea')) ? null : { x: tc.clientX, y: tc.clientY }; }, { passive: true });

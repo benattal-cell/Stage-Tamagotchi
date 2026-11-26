@@ -414,17 +414,21 @@ Une série, ce sont des jours d'affilée où les trois mesures sont au moins « 
 
 ### La barre d'onglets
 
-En bas de l'écran, une barre de cinq onglets reste toujours visible, comme dans beaucoup de jeux sur téléphone. Chaque catégorie a sa page.
+En bas de l'écran, une barre de cinq onglets reste toujours visible, comme dans beaucoup de jeux sur téléphone. Chaque catégorie a sa page, qui couvre tout l'écran au-dessus de la barre.
 
 | Onglet | Ce qu'il ouvre |
 |---|---|
-| Boutique | Les décors, les accessoires et les créatures. Le monstre reste visible en haut pour essayer |
-| Atelier | L'apparence du monstre, lui aussi visible en haut |
+| Boutique | Les décors, les accessoires et les créatures, avec une photo du monstre en haut de la page pour voir l'article essayé |
+| Atelier | L'apparence du monstre, avec sa photo en haut de la page |
 | **Accueil** (au milieu) | Le monstre dans son décor, avec le bouton « Ma journée » |
-| Jeux | La liste des mini-jeux, en pleine page |
-| Bien-être | Les dix activités, en pleine page |
+| Jeux | La liste des mini-jeux |
+| Bien-être | Les dix activités |
 
-L'onglet de la page ouverte est doré et surélevé. Toucher « Accueil » ou retoucher l'onglet ouvert ramène au monstre. Sur une page, glisser le doigt vers la gauche ou la droite passe à l'onglet voisin. Les boutons « Terminé » de ces pages ont disparu : c'est la barre qui sert à naviguer. Les défis (la cible) et le carnet (la plaque du nom) s'ouvrent toujours depuis l'accueil.
+- **Les pages glissent de côté.** Une page arrive du côté où se trouve son onglet (la Boutique vient de la gauche, les Jeux de la droite) et repart par le même côté.
+- L'onglet de la page ouverte est doré et surélevé.
+- Toucher « Accueil » ou retoucher l'onglet ouvert ramène au monstre.
+- Sur une page, glisser le doigt vers la gauche ou la droite passe à l'onglet voisin.
+- Les défis (la cible) et le carnet (la plaque du nom) s'ouvrent toujours depuis l'accueil.
 
 ### Le carnet du monstre
 

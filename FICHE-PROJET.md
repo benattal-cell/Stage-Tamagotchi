@@ -415,6 +415,8 @@ Deux offres sont affichées directement à gauche de l'écran principal, sans ri
 
 **À régler avant de vendre « Sans pub » : il n'y a aucune publicité dans FormiLife.** Vendre « plus de pub » dans un jeu qui n'en a pas, c'est vendre du vide : la fenêtre de l'offre le dit honnêtement au joueur. Il faudra soit ajouter de la publicité (la MOA le déconseille : joueurs mineurs, données de santé, et un jeu qui demande de moins regarder son écran), soit retirer cette offre.
 
+**Les réductions doivent être vraies.** Le Pack Complet affiche « −17 % » avec « 5,98 € » barré : c'est le vrai prix des deux packs qu'il contient, achetés séparément. Le chef de projet avait demandé de faire « comme s'il y avait des réductions » ; la MOA a refusé, car un faux prix barré est une pratique trompeuse, interdite en France et en Europe, et plus grave encore quand les joueurs sont mineurs. Pour une vraie promotion, il faut un vrai prix de départ, pratiqué pendant un temps, puis baissé.
+
 **Le paiement n'est pas branché.** Le bouton du prix ouvre une fenêtre qui décrit le pack et dit que les achats arriveront avec le Play Store, avec l'accord d'un parent. Un vrai paiement passe par le magasin d'applis (Google Play) : c'est lui qui encaisse, vérifie l'accord parental et garde sa part. L'administrateur a un bouton « Débloquer les packs (test) ».
 
 **Avant de vendre pour de vrai**, il faudra : un adulte titulaire du compte développeur, un statut pour déclarer l'argent, une page de confidentialité, et choisir les prix définitifs (ceux-ci sont des exemples).

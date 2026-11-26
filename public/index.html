@@ -1123,14 +1123,14 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
   var sun = new THREE.DirectionalLight(0xFFF1CF, 0.7);
   sun.position.set(4, 7, 5);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.02;
   sun.shadow.camera.left = -7; sun.shadow.camera.right = 7;
   sun.shadow.camera.top = 8; sun.shadow.camera.bottom = -3;
   sun.shadow.radius = 4;
   var backLight = new THREE.DirectionalLight(0x9FB8FF, 0.45); backLight.position.set(-4, 5, -6); scene.add(backLight);
   scene.add(sun);
   var lamp = new THREE.PointLight(0xF7C948, 0.7, 12);
-  lamp.position.set(-3.4, 3.4, -1.4);
+  lamp.position.set(-1.95, 3.3, -1.9);      /* là où se trouve l'ampoule du lampadaire */
   scene.add(lamp);
 
   function mat(color, extra) {
@@ -1146,26 +1146,58 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
     return m;
   }
   function noRay(o) { o.raycast = function () {}; return o; }
+  /* Une boîte dont les arêtes sont arrondies : dans la vraie vie, rien n'a d'arête parfaitement vive, et la lumière accroche ces petits arrondis.
+     On part d'une boîte découpée en 6 × 6 × 6, on resserre les points près des bords, puis on les repousse sur un arrondi de rayon r. */
+  function softBox(w, h, d, r) {
+    var geo = new THREE.BoxGeometry(w, h, d, 6, 6, 6), pos = geo.attributes.position, nor = geo.attributes.normal, half = [w / 2, h / 2, d / 2], n, a;
+    r = Math.min(r == null ? 0.045 : r, half[0] * 0.9, half[1] * 0.9, half[2] * 0.9);
+    var p = [0, 0, 0], q = [0, 0, 0];
+    for (n = 0; n < pos.count; n++) {
+      p[0] = pos.getX(n); p[1] = pos.getY(n); p[2] = pos.getZ(n);
+      for (a = 0; a < 3; a++) {
+        var hf = half[a], k = Math.round((p[a] + hf) / (2 * hf) * 6), sg = k < 3 ? -1 : 1, kk = k < 3 ? k : 6 - k;      /* 0 = sur le bord, 1 et 2 = dans l'arrondi, 3 = au milieu */
+        p[a] = kk === 3 ? 0 : sg * (hf - (kk === 0 ? 0 : kk === 1 ? r * 0.35 : r));
+        q[a] = Math.max(-(hf - r), Math.min(hf - r, p[a]));
+      }
+      var dx = p[0] - q[0], dy = p[1] - q[1], dz = p[2] - q[2], l = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
+      pos.setXYZ(n, q[0] + dx / l * r, q[1] + dy / l * r, q[2] + dz / l * r); nor.setXYZ(n, dx / l, dy / l, dz / l);
+    }
+    pos.needsUpdate = true; nor.needsUpdate = true; return geo;
+  }
 
   /* Décor : sol, mur de briques, poubelles, sacs, lune */
   var floor = mesh(new THREE.PlaneGeometry(80, 40), mat(0x3F3A5C), 0, 0, 0);
   floor.rotation.x = -Math.PI / 2; floor.castShadow = false;
+  function groundTex(tiles) {                 /* une image de sol : du grain partout, et des dalles avec leurs joints si on le demande */
+    var cv = document.createElement('canvas'); cv.width = cv.height = 512; var x2 = cv.getContext('2d'), i2;
+    x2.fillStyle = '#E6E6E6'; x2.fillRect(0, 0, 512, 512);
+    for (i2 = 0; i2 < 2600; i2++) { var v2 = Math.random(); x2.fillStyle = 'rgba(' + (v2 < 0.5 ? '0,0,0' : '255,255,255') + ',' + (0.03 + Math.random() * 0.05) + ')'; var sz = 2 + Math.random() * 7; x2.fillRect(Math.random() * 512, Math.random() * 512, sz, sz); }
+    for (i2 = 0; i2 < 14; i2++) { var gr2 = x2.createRadialGradient(0, 0, 0, 0, 0, 40 + Math.random() * 60); gr2.addColorStop(0, 'rgba(0,0,0,0.10)'); gr2.addColorStop(1, 'rgba(0,0,0,0)'); x2.save(); x2.translate(Math.random() * 512, Math.random() * 512); x2.fillStyle = gr2; x2.fillRect(-100, -100, 200, 200); x2.restore(); }
+    if (tiles) { x2.strokeStyle = 'rgba(0,0,0,0.28)'; x2.lineWidth = 5; for (i2 = 0; i2 <= 2; i2++) { x2.beginPath(); x2.moveTo(0, i2 * 256); x2.lineTo(512, i2 * 256); x2.stroke(); x2.beginPath(); x2.moveTo(i2 * 256 + (0), 0); x2.lineTo(i2 * 256, 256); x2.stroke(); x2.beginPath(); x2.moveTo(i2 * 256 + 128, 256); x2.lineTo(i2 * 256 + 128, 512); x2.stroke(); } }
+    var tx = new THREE.CanvasTexture(cv); tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.repeat.set(tiles ? 22 : 16, tiles ? 11 : 8); tx.encoding = THREE.sRGBEncoding; tx.anisotropy = 4; return tx;
+  }
+  var groundPave = groundTex(true), groundSoft = groundTex(false);
+  floor.material.map = groundPave; floor.material.bumpMap = groundPave; floor.material.bumpScale = 0.02;
 
-  var c = document.createElement('canvas'); c.width = 512; c.height = 256;
-  var g = c.getContext('2d');
-  g.fillStyle = '#3A3558'; g.fillRect(0, 0, 512, 256);
-  g.strokeStyle = '#2F2B49'; g.lineWidth = 4;
-  for (var r = 0; r < 4; r++) {
-    g.beginPath(); g.moveTo(0, r * 64); g.lineTo(512, r * 64); g.stroke();
-    for (var b = 0; b < 5; b++) {
-      var bx = b * 128 + (r % 2 ? 64 : 0);
-      g.beginPath(); g.moveTo(bx, r * 64); g.lineTo(bx, r * 64 + 64); g.stroke();
+  /* Le mur : on peint brique par brique sur une image. Chaque brique a une teinte un peu différente, quelques-unes sont plus sombres,
+     et une deuxième image en gris dit à la lumière où sont les creux (les joints). */
+  var c = document.createElement('canvas'); c.width = 1024; c.height = 512;
+  var g = c.getContext('2d'), cb = document.createElement('canvas'); cb.width = 1024; cb.height = 512; var gb = cb.getContext('2d');
+  g.fillStyle = '#27233F'; g.fillRect(0, 0, 1024, 512); gb.fillStyle = '#202020'; gb.fillRect(0, 0, 1024, 512);
+  for (var r = 0; r < 8; r++) {
+    for (var b = -1; b < 5; b++) {
+      var bx = b * 256 + (r % 2 ? 128 : 0), by = r * 64, bt = (0.86 + Math.random() * 0.28) * (Math.random() < 0.1 ? 0.78 : 1);
+      g.fillStyle = 'rgb(' + Math.round(62 * bt) + ',' + Math.round(56 * bt) + ',' + Math.round(94 * bt) + ')';
+      g.fillRect(bx + 4, by + 4, 248, 56);
+      g.fillStyle = 'rgba(255,255,255,0.07)'; g.fillRect(bx + 4, by + 4, 248, 5); g.fillStyle = 'rgba(0,0,0,0.16)'; g.fillRect(bx + 4, by + 53, 248, 7);      /* un reflet en haut, une ombre en bas */
+      gb.fillStyle = '#' + ['B8', 'C4', 'D0', 'DC'][Math.floor(Math.random() * 4)].repeat(3); gb.fillRect(bx + 5, by + 5, 246, 54);
+      for (var bsp = 0; bsp < 5; bsp++) { g.fillStyle = 'rgba(' + (Math.random() < 0.5 ? '0,0,0' : '255,255,255') + ',0.05)'; g.fillRect(bx + 8 + Math.random() * 230, by + 8 + Math.random() * 44, 6 + Math.random() * 22, 3 + Math.random() * 6); }
     }
   }
-  var brick = new THREE.CanvasTexture(c);
-  brick.wrapS = brick.wrapT = THREE.RepeatWrapping; brick.repeat.set(13, 2);
+  var brick = new THREE.CanvasTexture(c), brickBump = new THREE.CanvasTexture(cb);
+  brick.wrapS = brick.wrapT = brickBump.wrapS = brickBump.wrapT = THREE.RepeatWrapping; brick.repeat.set(13, 2); brickBump.repeat.set(13, 2); brick.anisotropy = brickBump.anisotropy = 4;
   brick.encoding = THREE.sRGBEncoding;
-  var wallMat = mat(0xffffff, { map: brick });
+  var wallMat = mat(0xffffff, { map: brick, bumpMap: brickBump, bumpScale: 0.06, roughness: 0.9 });
   var wall = mesh(new THREE.BoxGeometry(80, 4.6, 0.4), wallMat, 0, 2.3, -3.2);
   var ledge = mesh(new THREE.BoxGeometry(80, 0.2, 0.6), mat(0x4A4470), 0, 4.7, -3.2);
 
@@ -1186,12 +1218,37 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
   mesh(new THREE.SphereGeometry(0.5, 20, 16), bagMat, -0.55, 0.36, -2.2).scale.set(1.2, 0.75, 1);
   mesh(new THREE.CylinderGeometry(0.58, 0.5, 1.4, 24), binMat, -3.3, 0.7, -2.2);
   mesh(new THREE.CylinderGeometry(0.64, 0.64, 0.12, 24), lidMat, -3.3, 1.46, -2.2);
+  (function () {
+    var o, i, steel = mat(0x565C78, { roughness: 0.45, metalness: 0.6 });
+    /* les poubelles : un rebord, des nervures, une poignée sur le couvercle */
+    [[1.95, 1.5, -2.0, 0.63], [3.0, 1.36, -1.75, 0.59], [-3.3, 1.4, -2.2, 0.59]].forEach(function (q) {
+      o = mesh(new THREE.TorusGeometry(q[3], 0.04, 8, 28), lidMat, q[0], q[1], q[2]); o.rotation.x = Math.PI / 2;
+      for (i = 0; i < 3; i++) { o = mesh(new THREE.TorusGeometry(q[3] - 0.045 - i * 0.022, 0.018, 6, 28), binMat, q[0], q[1] - 0.35 - i * 0.33, q[2]); o.rotation.x = Math.PI / 2; }
+    });
+    o = mesh(new THREE.TorusGeometry(0.13, 0.03, 8, 14, Math.PI), steel, 1.95, 1.62, -2.0);
+    /* les sacs : un petit nœud */
+    [[2.55, 0.83, -0.75], [-0.55, 0.74, -2.2]].forEach(function (q) { o = mesh(new THREE.ConeGeometry(0.12, 0.22, 10), bagMat, q[0], q[1], q[2]); o.rotation.z = 0.25; });
+    /* le lampadaire */
+    mesh(new THREE.CylinderGeometry(0.06, 0.09, 3.7, 12), steel, -1.95, 1.85, -2.85);
+    mesh(new THREE.CylinderGeometry(0.13, 0.16, 0.25, 12), steel, -1.95, 0.12, -2.85);
+    o = mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.8, 10), steel, -1.95, 3.66, -2.5); o.rotation.x = Math.PI / 2;
+    mesh(new THREE.ConeGeometry(0.3, 0.26, 16, 1, true), mat(0x3B4160, { roughness: 0.5, metalness: 0.5, side: THREE.DoubleSide }), -1.95, 3.6, -2.15);
+    var bulb = noRay(new THREE.Mesh(new THREE.SphereGeometry(0.13, 14, 10), new THREE.MeshBasicMaterial({ color: 0xFFF1C4 }))); bulb.position.set(-1.95, 3.5, -2.15); scene.add(bulb);
+    /* une flaque qui brille, des affiches, un tuyau, de l'herbe au pied du mur */
+    o = mesh(new THREE.CircleGeometry(0.62, 28), mat(0x56648C, { roughness: 0.12, metalness: 0.55, transparent: true, opacity: 0.75 }), 1.55, 0.012, 1.15); o.rotation.x = -Math.PI / 2; o.scale.set(1.5, 0.8, 1); o.castShadow = false;
+    o = mesh(new THREE.CircleGeometry(0.3, 20), mat(0x56648C, { roughness: 0.12, metalness: 0.55, transparent: true, opacity: 0.75 }), 2.3, 0.012, 0.75); o.rotation.x = -Math.PI / 2; o.castShadow = false;
+    [[0.75, 2.6, 0xD98A5C, 0.1], [-1.25, 2.9, 0x6FA8C9, -0.08]].forEach(function (q) { o = mesh(new THREE.BoxGeometry(0.72, 0.95, 0.02), mat(0xE9E1CC, { roughness: 0.9 }), q[0], q[1], -2.985); o.rotation.z = q[3]; var in2 = mesh(new THREE.BoxGeometry(0.58, 0.5, 0.02), mat(q[2], { roughness: 0.9 }), 0, 0.14, 0.006, o); in2.castShadow = false; mesh(new THREE.BoxGeometry(0.5, 0.06, 0.02), mat(0x55506B), 0, -0.24, 0.006, o).castShadow = false; mesh(new THREE.BoxGeometry(0.34, 0.06, 0.02), mat(0x55506B), -0.08, -0.34, 0.006, o).castShadow = false; });
+    mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.6, 12), steel, 3.95, 2.3, -2.92);
+    [1.1, 3.4].forEach(function (y2) { mesh(new THREE.BoxGeometry(0.26, 0.07, 0.1), steel, 3.95, y2, -2.94); });
+    var grass = mat(0x4E9A57, { roughness: 0.95 });
+    [-2.0, -1.2, 0.2, 1.1, 3.6, -3.9].forEach(function (x2, k) { for (i = 0; i < 4; i++) { o = mesh(new THREE.ConeGeometry(0.035, 0.2 + (i % 2) * 0.12, 5), grass, x2 + (i - 1.5) * 0.07, 0.1 + (i % 2) * 0.05, -2.93 + (k % 2) * 0.03); o.rotation.z = (i - 1.5) * 0.22; o.castShadow = false; } });
+  })();
 
   /* ---------- Les 7 décors de la boutique ----------
      Chaque décor est un groupe d'objets qu'on montre ou qu'on cache, plus des couleurs de ciel, de sol et de lumière. */
   var D = [0, 1, 2, 3, 4, 5, 6].map(function () { var gr = new THREE.Group(); gr.visible = false; scene.add(gr); return gr; });
   scene.children.slice(_k0).forEach(function (o) { if (D.indexOf(o) < 0) D[0].add(o); });
-  function B(w, h, d, col, x, y, z, par, opt) { return mesh(new THREE.BoxGeometry(w, h, d), mat(col, opt), x, y, z, par); }
+  function B(w, h, d, col, x, y, z, par, opt) { return mesh(softBox(w, h, d), mat(col, opt), x, y, z, par); }
   function C(rt, rb, h, col, x, y, z, par, opt) { return mesh(new THREE.CylinderGeometry(rt, rb, h, 20), mat(col, opt), x, y, z, par); }
   function S(r, col, x, y, z, par, opt) { return mesh(new THREE.SphereGeometry(r, 20, 14), mat(col, opt), x, y, z, par); }
   function glow(r, col, x, y, z, par) { var m = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), new THREE.MeshBasicMaterial({ color: col })); m.position.set(x, y, z); par.add(m); return m; }
@@ -1285,10 +1342,11 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
     var d = DECORS[n]; decorNow = n;
     D.forEach(function (gr, k) { gr.visible = d.groups.indexOf(k) >= 0; });
     scene.background.setHex(d.sky); scene.fog.color.setHex(d.sky); floor.material.color.setHex(d.floor);
+    var gtx = n < 2 ? groundPave : groundSoft; if (floor.material.map !== gtx) { floor.material.map = gtx; floor.material.bumpMap = gtx; floor.material.needsUpdate = true; }      /* des dalles dans la ruelle, un simple grain ailleurs */
     wall.visible = ledge.visible = d.wall != null;
-    if (d.wall != null) { wallMat.color.setHex(d.wall); var tex = d.brick ? brick : null; if (wallMat.map !== tex) { wallMat.map = tex; wallMat.needsUpdate = true; } ledge.material.color.setHex(d.brick ? 0x4A4470 : d.wall); }
-    hemi.intensity = d.hemi; hemi.color.setHex(d.amb === 'night' ? 0xC4CCFF : 0xDDE9FF); hemi.groundColor.setHex(d.floor);
-    sun.intensity = d.sun; sun.color.setHex(d.sunC); lamp.intensity = d.amb === 'night' ? 0.7 : 0;
+    if (d.wall != null) { wallMat.color.setHex(d.wall); var tex = d.brick ? brick : null; if (wallMat.map !== tex) { wallMat.map = tex; wallMat.bumpMap = d.brick ? brickBump : null; wallMat.needsUpdate = true; } ledge.material.color.setHex(d.brick ? 0x4A4470 : d.wall); }
+    hemi.intensity = d.hemi * (d.amb === 'night' ? 0.72 : d.amb === 'day' ? 0.4 : 0.42); floor.material.envMapIntensity = d.amb === 'night' ? 1 : 0.25; wallMat.envMapIntensity = d.amb === 'night' ? 1 : 0.4;      /* de jour et à l'intérieur, on calme les reflets : sinon tout blanchit */      /* une partie de la lumière d'ambiance vient maintenant des reflets (voir « L'environnement ») */ hemi.color.setHex(d.amb === 'night' ? 0xC4CCFF : 0xDDE9FF); hemi.groundColor.setHex(d.floor);
+    sun.intensity = d.sun * (d.amb === 'night' ? 1 : 0.8); sun.color.setHex(d.sunC); lamp.intensity = d.amb === 'night' ? 0.7 : 0;
     starsG.forEach(function (o) { o.visible = d.amb === 'night'; }); flies.visible = d.amb === 'night'; clouds.visible = d.amb === 'day';
     moon.visible = d.amb !== 'in'; moon.material.color.setHex(d.amb === 'day' ? 0xFFE680 : 0xF3E9C6);
     box.visible = n === 0;                    /* le carton reste dans la ruelle de départ : le monstre a déménagé */
@@ -1301,7 +1359,19 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
     gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.3, 'rgba(255,255,255,.5)'); gr.addColorStop(0.65, 'rgba(255,255,255,.12)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
     cx.fillStyle = gr; cx.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(cv);
   }
-  var softTex = softTexture();
+  var softTex = softTexture(), ENVTEX = null;
+  /* L'environnement : une petite pièce imaginaire, avec un plafond clair, un côté chaud et un côté froid. Le moteur 3D s'en sert pour calculer
+     ce que les objets reflètent. C'est ce qui donne du brillant au métal et de la douceur aux couleurs. */
+  (function () {
+    try {
+      var pm = new THREE.PMREMGenerator(renderer), es = new THREE.Scene(), bm = function (r2, g2, b2) { return new THREE.MeshBasicMaterial({ color: new THREE.Color(r2, g2, b2), side: THREE.BackSide }); };
+      es.add(new THREE.Mesh(new THREE.BoxGeometry(12, 8, 12), bm(0.16, 0.17, 0.26)));
+      var pnl = function (w2, h2, x, y, z, rx, ry, m2) { var q = new THREE.Mesh(new THREE.PlaneGeometry(w2, h2), m2); q.material.side = THREE.DoubleSide; q.position.set(x, y, z); q.rotation.set(rx, ry, 0); es.add(q); };
+      pnl(7, 7, 0, 3.9, 0, Math.PI / 2, 0, bm(2.2, 2.2, 2.4)); pnl(5, 4, 5.9, 1, 1, 0, -Math.PI / 2, bm(2.4, 1.7, 1.0)); pnl(5, 4, -5.9, 1, -1, 0, Math.PI / 2, bm(0.9, 1.3, 2.4)); pnl(5, 3, 0, 0.5, 5.9, 0, Math.PI, bm(1.3, 1.3, 1.5));
+      ENVTEX = pm.fromScene(es, 0.04).texture; scene.environment = ENVTEX; pm.dispose();
+    } catch (e) {}
+  })();
+  var lampGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0xFFE2A0, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, fog: false, opacity: 0.75 })); lampGlow.position.set(-1.95, 3.5, -2.1); lampGlow.scale.setScalar(2.6); D[0].add(lampGlow);
   var skyMat = new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, fog: false,
     uniforms: { top: { value: new THREE.Color(0x15183A) }, low: { value: new THREE.Color(0x4A4A86) } },
     vertexShader: 'varying float h; void main() { h = normalize(position).y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
@@ -1630,7 +1700,7 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
   }
   /* ---------- Tous les autres cosmétiques : chacun est un petit assemblage de formes ---------- */
   var MET = { metalness: 0.6, roughness: 0.35 };
-  function qBox(w, hh, d, col, x, y, z, par, opt) { return mesh(new THREE.BoxGeometry(w, hh, d), mat(col, opt), x, y, z, par); }
+  function qBox(w, hh, d, col, x, y, z, par, opt) { return mesh(softBox(w, hh, d), mat(col, opt), x, y, z, par); }
   function qCyl(rt, rb, hh, col, x, y, z, par, opt) { return mesh(new THREE.CylinderGeometry(rt, rb, hh, 22), mat(col, opt), x, y, z, par); }
   function qSph(r, col, x, y, z, par, opt) { return mesh(new THREE.SphereGeometry(r, 18, 12), mat(col, opt), x, y, z, par); }
   function qCone(r, hh, col, x, y, z, par, opt) { return mesh(new THREE.ConeGeometry(r, hh, 16), mat(col, opt), x, y, z, par); }
@@ -1959,7 +2029,7 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
     var g, o, n, parts;
     /* Tostino Gattino : un grille-pain qui est aussi un chat */
     g = brNew('BrToast', 0x8C2F28); var red = mat(0xE8574A, { roughness: 0.35, metalness: 0.25 });
-    outline(mesh(new THREE.BoxGeometry(1.75, 1.45, 1.5), red, 0, 1.12, 0, g), 1.04);
+    outline(mesh(softBox(1.75, 1.45, 1.5, 0.2), red, 0, 1.12, 0, g), 1.04);
     mesh(new THREE.BoxGeometry(1.79, 0.26, 1.54), mat(0xF4EDE0, { roughness: 0.4 }), 0, 0.6, 0, g);
     parts = [];
     [-0.38, 0.38].forEach(function (x) {
@@ -3052,7 +3122,7 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
     k.ctx.imageSmoothingEnabled = true; k.ctx.imageSmoothingQuality = 'high';
     return (SHOTS[out] = k);
   }
-  var studio = new THREE.Scene(); studio.add(new THREE.HemisphereLight(0xFFFFFF, 0x555566, 0.8));
+  var studio = new THREE.Scene(); studio.add(new THREE.HemisphereLight(0xFFFFFF, 0x555566, 0.6)); if (ENVTEX) studio.environment = ENVTEX;
   var studioSun = new THREE.DirectionalLight(0xFFFFFF, 0.75); studioSun.position.set(2, 4, 5); studio.add(studioSun);
   var thumbCam = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
   var thumbCache = {};

@@ -442,6 +442,21 @@ Toutes les fenêtres du jeu suivent maintenant les mêmes règles de dessin (on 
 - **La plaque du nom** montre la photo du monstre.
 - **Des photos nettes** : elles sont dessinées plus grandes que nécessaire puis réduites, ce qui lisse les bords.
 
+### La qualité de la 3D
+
+Six techniques rendent la scène plus belle, pour tous les décors et tous les monstres :
+
+| Technique | Ce que ça change |
+|---|---|
+| **L'environnement** | Le moteur calcule ce que chaque objet reflète (un plafond clair, un côté chaud, un côté froid). Le métal brille, les couleurs sont plus douces |
+| **Les arêtes adoucies** | Les boîtes des décors n'ont plus d'arêtes parfaitement vives : la lumière accroche de petits arrondis, comme dans la vraie vie |
+| **Le mur de briques** | Chaque brique a sa teinte, avec un reflet en haut et une ombre en bas, et les joints sont en creux |
+| **Le sol** | Il a du grain, des taches, et des dalles avec leurs joints dans la ruelle |
+| **Les ombres** | Elles sont quatre fois plus fines |
+| **Les détails de la ruelle** | Un lampadaire allumé, des affiches, une flaque, de l'herbe au pied du mur, un tuyau, des nervures et une poignée sur les poubelles |
+
+De jour et à l'intérieur, les reflets sont calmés pour que les couleurs ne blanchissent pas.
+
 ### Le carnet du monstre
 
 En touchant la plaque du nom, on ouvre le carnet : une photo du monstre dans son décor (qu'on peut enregistrer), son niveau, le niveau de sa prochaine transformation, et six chiffres (âge, journées remplies, série, record de course, trophées, pauses bien-être).

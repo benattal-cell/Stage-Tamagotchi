@@ -33,9 +33,28 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 
 | | Idéal — 300 points | Correct — 100 points | Pas bien — 0 point | Réaction de la créature |
 |---|---|---|---|---|
-| **Sommeil** | 8 à 10 h | 7 à 8 h, ou plus de 10 h | Moins de 7 h | Animation de fatigue |
-| **Pas** | 15 000 et plus | 10 000 à 15 000 | Moins de 10 000 | Pas contente |
-| **Écran** | 3 h ou moins | 3 à 5 h | Plus de 5 h | Mal de tête : petit entre 3 et 5 h, gros au-delà |
+| **Sommeil** | Dans la fourchette de son âge | Un peu en dessous, ou au-dessus | Trop peu | Animation de fatigue |
+| **Pas** | L'objectif de son âge | Au moins les trois quarts de l'objectif | Moins | Pas contente |
+| **Écran de loisir** | Sous la limite de son âge | Jusqu'à 2 h de plus | Au-delà | Mal de tête : petit ou gros |
+
+**Les objectifs dépendent de l'âge du joueur.** Il le choisit en adoptant son monstre et peut le changer dans les paramètres. L'âge reste sur l'appareil.
+
+| Tranche d'âge | Sommeil idéal | Sommeil correct à partir de | Pas : idéal / correct | Écran : idéal / correct jusqu'à |
+|---|---|---|---|---|
+| 6 à 12 ans | 9 à 12 h | 8 h | 12 000 / 9 000 | 2 h / 4 h |
+| 13 à 17 ans | 8 à 10 h | 7 h | 10 000 / 7 500 | 2 h / 4 h |
+| 18 à 64 ans | 7 à 9 h | 6 h | 8 000 / 6 000 | 3 h / 5 h |
+| 65 ans et plus | 7 à 8 h | 6 h | 7 000 / 5 000 | 3 h / 5 h |
+
+**D'où viennent ces chiffres**
+
+- Sommeil : National Sleep Foundation, recommandations de 2015.
+- Pas des jeunes : Tudor-Locke et collègues, 2011 (nombre de pas qui correspond à 60 minutes d'activité par jour).
+- Pas des adultes : Paluch et collègues, 2022, étude sur 15 groupes de personnes suivies dans le temps.
+- Écran de loisir : directives canadiennes en matière de mouvement sur 24 heures (2 h au plus pour les 5-17 ans, 3 h pour les adultes).
+
+**Ce qui est solide et ce qui l'est moins.** La colonne « idéal » vient de ces recommandations. La colonne « correct » est un choix de l'équipe, pour récompenser les efforts. Pour le sommeil, les preuves sont solides. Pour les pas, ce sont des repères tirés d'études, pas une règle officielle. Pour l'écran, ce sont des avis d'experts : la science ne donne pas de limite exacte. Au début du projet, les règles étaient celles choisies par le chef de projet (15 000 pas, 3 h d'écran) ; elles ont été remplacées par celles-ci.
+
 
 - Maximum : **900 points par jour**, **6 300 par semaine**.
 

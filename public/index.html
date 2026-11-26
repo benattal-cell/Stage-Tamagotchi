@@ -453,6 +453,10 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
         <span class="lab" id="colLab">Sa couleur</span>
         <div class="row" id="swatches" role="group" aria-labelledby="colLab"></div>
       </div>
+      <div class="field">
+        <span class="lab" id="ageLab">Ton âge (pour régler tes objectifs)</span>
+        <div class="row" id="ageRow" role="group" aria-labelledby="ageLab"></div>
+      </div>
       <button type="submit" class="big" id="go">Adopter</button>
     </form>
   </div>
@@ -512,6 +516,10 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
         <label for="setSfxVol">Volume des bruitages : <span id="sfxVal"></span></label>
         <input type="range" id="setSfxVol" min="0" max="100" step="5">
       </div>
+      <div class="field">
+        <span class="lab" id="setAgeLab">Ton âge</span>
+        <div class="row" id="setAge" role="group" aria-labelledby="setAgeLab"></div>
+      </div>
       <div class="row">
         <button type="button" class="ghost" id="tutoOpen">Comment jouer</button>
         <button type="button" class="ghost" id="adminOpen">Administrateur</button>
@@ -523,6 +531,10 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   <div class="veil" id="entry" hidden>
     <form class="card" id="dayForm" role="dialog" aria-modal="true" aria-labelledby="entryTitle" novalidate>
       <h2 id="entryTitle">Ma journée</h2>
+      <p class="small" id="dayGoals"></p>
+      <details class="small"><summary>D'où viennent ces objectifs ?</summary>
+        <p>Sommeil : recommandations de la National Sleep Foundation (2015). Pas : études de Tudor-Locke (2011) pour les jeunes et de Paluch (2022) pour les adultes. Écran de loisir : directives canadiennes en matière de mouvement sur 24 heures. Ce sont des repères pour la plupart des gens, pas des règles médicales : chaque personne est différente.</p>
+      </details>
       <div class="day" id="dayCard" hidden>
         <div class="dayhead"><span class="lab">Déjà enregistré</span><strong id="dayPts"></strong></div>
         <div class="gauges">
@@ -1666,7 +1678,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
   var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null, back: null, fx: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0, calc: 0, suite: 0, stroop: 0, mots: 0, ordre: 0 }, tuto: false, stats: { well: 0, quiz: 0, quests: 0, brain: 0, gifts: 0 }, quest: { day: '', done: {}, all: false, brain: 0, stars: 0 }, quiz: { day: '', n: 0, ans: -1 }, trophies: [], well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0, calc: 0, suite: 0, stroop: 0, mots: 0, ordre: 0 }, tuto: false, age: 1, stats: { well: 0, quiz: 0, quests: 0, brain: 0, gifts: 0 }, quest: { day: '', done: {}, all: false, brain: 0, stars: 0 }, quiz: { day: '', n: 0, ans: -1 }, trophies: [], well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
   var G = freshG();
   function load() {
     try {
@@ -1681,7 +1693,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       G.decor = G.decors.indexOf(o.decor | 0) >= 0 ? (o.decor | 0) : 0;
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
-      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0), calc: Math.max(0, rc0.calc | 0), suite: Math.max(0, rc0.suite | 0), stroop: Math.max(0, rc0.stroop | 0), mots: Math.max(0, rc0.mots | 0), ordre: Math.max(0, rc0.ordre | 0) }; G.tuto = o.tuto === true || Object.keys(G.entries).length > 0;
+      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0), calc: Math.max(0, rc0.calc | 0), suite: Math.max(0, rc0.suite | 0), stroop: Math.max(0, rc0.stroop | 0), mots: Math.max(0, rc0.mots | 0), ordre: Math.max(0, rc0.ordre | 0) }; G.tuto = o.tuto === true || Object.keys(G.entries).length > 0; G.age = (o.age === 0 || o.age === 2 || o.age === 3) ? o.age : 1;
       var s0 = (o.stats && typeof o.stats === 'object') ? o.stats : {}; G.stats = { well: Math.max(0, s0.well | 0), quiz: Math.max(0, s0.quiz | 0), quests: Math.max(0, s0.quests | 0), brain: Math.max(0, s0.brain | 0), gifts: Math.max(0, s0.gifts | 0) };
       var q0 = (o.quest && typeof o.quest === 'object') ? o.quest : {}; G.quest = { day: typeof q0.day === 'string' ? q0.day : '', done: (q0.done && typeof q0.done === 'object') ? q0.done : {}, all: q0.all === true, brain: Math.max(0, q0.brain | 0), stars: Math.max(0, Math.min(5, q0.stars | 0)) };
       var z0 = (o.quiz && typeof o.quiz === 'object') ? o.quiz : {}; G.quiz = { day: typeof z0.day === 'string' ? z0.day : '', n: Math.max(0, z0.n | 0), ans: typeof z0.ans === 'number' ? Math.max(-1, Math.min(2, z0.ans | 0)) : -1 };
@@ -1696,9 +1708,20 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 
   /* ---------- Les règles de gestion : c'est ici que sont écrites les règles décidées pendant l'atelier ---------- */
   var PTS = [0, 100, 300], LVL = ['Pas bien', 'Correct', 'Idéal'];      /* niveau 0, 1 ou 2 */
-  function lvlSleep(h) { return (h >= 8 && h <= 10) ? 2 : h >= 7 ? 1 : 0; }   /* 8 à 10 h idéal · 7 à 8 h ou plus de 10 h correct */
-  function lvlSteps(n) { return n >= 15000 ? 2 : n >= 10000 ? 1 : 0; }        /* 15 000 idéal · 10 000 correct */
-  function lvlScreen(h) { return h <= 3 ? 2 : h <= 5 ? 1 : 0; }               /* 3 h ou moins idéal · jusqu'à 5 h correct */
+  /* Les objectifs dépendent de l'âge. Ils viennent de recommandations publiées :
+     sommeil : National Sleep Foundation (2015) ; pas : Tudor-Locke (2011) pour les jeunes, Paluch (2022) pour les adultes ;
+     écran de loisir : directives canadiennes en matière de mouvement sur 24 heures.
+     sleep : [idéal mini, idéal maxi, correct à partir de] · steps : [idéal, correct] · screen : [idéal jusqu'à, correct jusqu'à] */
+  var AGES = [
+    { name: '6 à 12 ans', sleep: [9, 12, 8], steps: [12000, 9000], screen: [2, 4] },
+    { name: '13 à 17 ans', sleep: [8, 10, 7], steps: [10000, 7500], screen: [2, 4] },
+    { name: '18 à 64 ans', sleep: [7, 9, 6], steps: [8000, 6000], screen: [3, 5] },
+    { name: '65 ans et plus', sleep: [7, 8, 6], steps: [7000, 5000], screen: [3, 5] }
+  ];
+  function rules() { return AGES[G.age] || AGES[1]; }
+  function lvlSleep(h) { var r = rules().sleep; return (h >= r[0] && h <= r[1]) ? 2 : h >= r[2] ? 1 : 0; }   /* au-dessus de l'idéal : « correct » */
+  function lvlSteps(n) { var r = rules().steps; return n >= r[0] ? 2 : n >= r[1] ? 1 : 0; }
+  function lvlScreen(h) { var r = rules().screen; return h <= r[0] ? 2 : h <= r[1] ? 1 : 0; }
   function score(e) {
     var l = [lvlSleep(e.sleep), lvlSteps(e.steps), lvlScreen(e.screen)];
     return { l: l, pts: PTS[l[0]] + PTS[l[1]] + PTS[l[2]] };
@@ -1733,9 +1756,9 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     var m = 'forme', lv = 1, ref = today || (n ? G.entries[keys[n - 1]] : null);   /* tant qu'aujourd'hui n'est pas rempli, elle garde l'état de la dernière journée */
     if (ref) {
       var sc = score(ref);
-      if (ref.screen > 5) { m = 'tete'; lv = 2; }             /* plus de 5 h d'écran : gros mal de tête */
+      if (sc.l[2] === 0) { m = 'tete'; lv = 2; }             /* plus de 5 h d'écran : gros mal de tête */
       else if (sc.l[0] === 0) m = 'fatigue';                  /* moins de 7 h de sommeil : fatiguée */
-      else if (ref.screen > 3) { m = 'tete'; lv = 1; }        /* entre 3 et 5 h d'écran : petit mal de tête */
+      else if (sc.l[2] === 1) { m = 'tete'; lv = 1; }        /* entre 3 et 5 h d'écran : petit mal de tête */
       else if (sc.l[1] === 0) m = 'triste';                   /* moins de 10 000 pas : pas contente */
     }
     coins += G.bonus - G.spent;                                       /* ce qu'on a gagné, moins ce qu'on a dépensé à la boutique */
@@ -1743,10 +1766,11 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     var whys = [], when = today ? 'aujourd\'hui' : 'la dernière fois';
     if (hp <= 40) whys.push({ s: 'Malade · vie à ' + hp + ' sur 100', l: 'Ma vie est tombée à ' + hp + ' sur 100. Si ça continue, je ne tiendrai pas… Une bonne journée me soignerait.' });
     if (ref) {
-      if (ref.screen > 5) whys.push({ s: 'Gros mal de tête · ' + hm(ref.screen) + ' d\'écran', l: hm(ref.screen) + ' d\'écran ' + when + ', c\'est beaucoup trop : j\'ai très mal à la tête !' });
-      else if (ref.screen > 3) whys.push({ s: 'Mal de tête · ' + hm(ref.screen) + ' d\'écran', l: hm(ref.screen) + ' d\'écran ' + when + '. Au-dessus de 3 h, ça me donne mal à la tête.' });
-      if (ref.sleep < 7) whys.push({ s: 'Fatigué · ' + hm(ref.sleep) + ' de sommeil', l: 'Je n\'ai dormi que ' + hm(ref.sleep) + ' ' + when + '. Il m\'en faut au moins 7 pour être en forme.' });
-      if (ref.steps < 10000) whys.push({ s: 'Pas en forme · ' + ref.steps.toLocaleString('fr-FR') + ' pas', l: 'Seulement ' + ref.steps.toLocaleString('fr-FR') + ' pas ' + when + '. J\'ai besoin de bouger : il m\'en faut 10 000 !' });
+      var rr = rules(), sw = score(ref).l;
+      if (sw[2] === 0) whys.push({ s: 'Gros mal de tête · ' + hm(ref.screen) + ' d\'écran', l: hm(ref.screen) + ' d\'écran ' + when + ', c\'est beaucoup trop : j\'ai très mal à la tête !' });
+      else if (sw[2] === 1) whys.push({ s: 'Mal de tête · ' + hm(ref.screen) + ' d\'écran', l: hm(ref.screen) + ' d\'écran ' + when + '. Au-dessus de ' + rr.screen[0] + ' h, ça me donne mal à la tête.' });
+      if (sw[0] === 0) whys.push({ s: 'Fatigué · ' + hm(ref.sleep) + ' de sommeil', l: 'Je n\'ai dormi que ' + hm(ref.sleep) + ' ' + when + '. Il m\'en faut au moins ' + rr.sleep[2] + ' pour être en forme.' });
+      if (sw[1] === 0) whys.push({ s: 'Pas en forme · ' + ref.steps.toLocaleString('fr-FR') + ' pas', l: 'Seulement ' + ref.steps.toLocaleString('fr-FR') + ' pas ' + when + '. J\'ai besoin de bouger : il m\'en faut ' + rr.steps[1].toLocaleString('fr-FR') + ' !' });
     }
     if (!whys.length && bad) whys.push({ s: 'En mauvais état', l: 'Ça fait plusieurs jours que ça ne va pas fort. Quelques bonnes journées et ça ira mieux.' });
     return { whys: whys, n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv, lvl: lvl, xp: rem, need: xpNeed(lvl), hp: hp, age: span + 1 };
@@ -1787,7 +1811,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   function auraName(lvl) { return lvl >= 20 ? 'Aura dorée' : lvl >= 15 ? 'Aura violette' : lvl >= 10 ? 'Aura bleue' : lvl >= 5 ? 'Aura verte' : ''; }
   /* Recalcule tout à partir des journées enregistrées et met l'écran à jour */
   function refresh(animate) {
-    var c = calc(); if (progressCheck(c)) c = calc(); var t = c.today; nightSync();
+    var c = calc(); if (progressCheck(c)) c = calc(); var t = c.today; nightSync(); paintGoals();
     mood = forceMood || c.mood; acheLv = forceMood ? 2 : c.acheLv;
     var st = forceStage == null ? c.stage : forceStage, bd = forceBad == null ? c.bad : forceBad;
     /* Monter de niveau rapporte des pièces, une seule fois par niveau */
@@ -1807,8 +1831,8 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     if (t) {
       var sc = score(t);
       $('dayPts').textContent = sc.pts + ' / 900 points';
-      gauge('gSleep', 'bSleep', hm(t.sleep), sc.l[0], Math.min(100, t.sleep / 10 * 100));
-      gauge('gSteps', 'bSteps', t.steps.toLocaleString('fr-FR'), sc.l[1], Math.min(100, t.steps / 15000 * 100));
+      gauge('gSleep', 'bSleep', hm(t.sleep), sc.l[0], Math.min(100, t.sleep / rules().sleep[1] * 100));
+      gauge('gSteps', 'bSteps', t.steps.toLocaleString('fr-FR'), sc.l[1], Math.min(100, t.steps / rules().steps[0] * 100));
       gauge('gScreen', 'bScreen', hm(t.screen), sc.l[2], Math.min(100, t.screen / 6 * 100));
       $('enterLab').textContent = 'Ma journée'; $('enterSub').textContent = sc.pts + ' / 900'; $('dayCard').hidden = false;
       [0, 1, 2].forEach(function (n) { $('d' + n).className = 'lvd' + sc.l[n]; });
@@ -1872,7 +1896,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.well = old.well; G.stats = old.stats; G.quest = old.quest; G.quiz = old.quiz; G.trophies = old.trophies; G.tuto = old.tuto === true; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
+    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.well = old.well; G.stats = old.stats; G.quest = old.quest; G.quiz = old.quiz; G.trophies = old.trophies; G.tuto = old.tuto === true; G.age = ageIndex; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
@@ -3388,6 +3412,16 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       'Ton point à travailler : l\'écran. Choisis des moments sans téléphone, par exemple les repas et l\'heure avant de dormir.'][worst];
     var tc = el('div', 'gcard'), tn = el('span', 'nm', 'Le conseil de ' + G.name); tn.appendChild(el('span', 'sub', tip)); tc.appendChild(tn); box.appendChild(tc);
   }
+  /* ---------- L'âge du joueur : il règle les objectifs. Il reste sur l'appareil. ---------- */
+  var ageIndex = G.age;
+  function paintGoals() { var r = rules(); $('dayGoals').textContent = 'Tes objectifs (' + r.name + ') : ' + r.sleep[0] + ' à ' + r.sleep[1] + ' h de sommeil · ' + r.steps[0].toLocaleString('fr-FR') + ' pas · ' + r.screen[0] + ' h d\'écran de loisir au plus.'; }
+  function paintAges() {
+    [['ageRow', false], ['setAge', true]].forEach(function (q) {
+      var box = $(q[0]); empty2(box);
+      AGES.forEach(function (a, n) { var b = btn('chip', a.name, function () { sfx('tick'); ageIndex = n; if (q[1] && phase === 'play') { G.age = n; saveG(); refresh(false); preview(); toast('Objectifs réglés pour ' + a.name); } paintAges(); }); b.setAttribute('aria-pressed', ageIndex === n ? 'true' : 'false'); box.appendChild(b); });
+    });
+  }
+  paintAges();
   /* ---------- La nuit : de 22 h à 6 h, le monstre dort et les jeux sont fermés ---------- */
   var forceNight = null;
   function isNight() { if (forceNight != null) return forceNight; var h = new Date().getHours(); return h >= 22 || h < 6; }
@@ -3739,7 +3773,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       setTimeout(function () {
         $('loading').classList.add('out');
         setTimeout(function () {
-          if (load()) { setColor(G.color); goPlay(G.name); if (G.dead) { phase = 'dead'; fallK = 1; show(null); $('gear').hidden = true; showDead(); } else if (!reduce) start('wave'); }
+          if (load()) { ageIndex = G.age; paintAges(); setColor(G.color); goPlay(G.name); if (G.dead) { phase = 'dead'; fallK = 1; show(null); $('gear').hidden = true; showDead(); } else if (!reduce) start('wave'); }
           else goTitle();
         }, 480);
       }, 450);

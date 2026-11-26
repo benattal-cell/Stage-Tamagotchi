@@ -2946,7 +2946,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   var LITE = false, fpsT = 0, fpsN = 0;
   function applyLite(on) {
     LITE = !!on; document.documentElement.classList.toggle('lite', LITE);
-    renderer.setPixelRatio(LITE ? 1 : Math.min(window.devicePixelRatio || 1, 2)); renderer.shadowMap.enabled = !LITE; sun.castShadow = !LITE;
+    renderer.setPixelRatio(LITE ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 2));      /* même en mode léger, on garde une image assez fine */ renderer.shadowMap.enabled = !LITE; sun.castShadow = !LITE;
     scene.traverse(function (o) { if (o.material) { var ms = Array.isArray(o.material) ? o.material : [o.material]; ms.forEach(function (m) { m.needsUpdate = true; }); } });
     resize();
   }
@@ -2964,29 +2964,39 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 
   /* ---------- Les images de la boutique et de l'atelier ----------
      Ce ne sont pas des fichiers : l'appli prend une vraie photo en 3D de TA créature avec l'objet, puis la range en mémoire. */
-  var TH = 160, rt = new THREE.WebGLRenderTarget(TH, TH); rt.texture.encoding = THREE.sRGBEncoding;
+  /* Les photos (vignettes) : on dessine deux fois plus grand que nécessaire, puis on réduit. C'est ce qui lisse les bords et rend l'image nette,
+     même sur un écran de téléphone très fin. Une photo normale fait 256 points de côté, une grande 512. */
+  var SHOTS = {};
+  function shotKit(out) {
+    if (SHOTS[out]) return SHOTS[out];
+    var R = out * 1.5, k = { R: R, out: out, rt: new THREE.WebGLRenderTarget(R, R), buf: new Uint8Array(R * R * 4), raw: document.createElement('canvas'), cv: document.createElement('canvas') };
+    k.rt.texture.encoding = THREE.sRGBEncoding; k.raw.width = k.raw.height = R; k.cv.width = k.cv.height = out; k.rawCtx = k.raw.getContext('2d'); k.ctx = k.cv.getContext('2d');
+    k.ctx.imageSmoothingEnabled = true; k.ctx.imageSmoothingQuality = 'high';
+    return (SHOTS[out] = k);
+  }
   var studio = new THREE.Scene(); studio.add(new THREE.HemisphereLight(0xFFFFFF, 0x555566, 0.8));
   var studioSun = new THREE.DirectionalLight(0xFFFFFF, 0.75); studioSun.position.set(2, 4, 5); studio.add(studioSun);
   var thumbCam = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
-  var tcv = document.createElement('canvas'); tcv.width = tcv.height = TH;
-  var tctx = tcv.getContext('2d'), tbuf = new Uint8Array(TH * TH * 4), thumbCache = {};
-  function snap(sc, cam) {
+  var thumbCache = {};
+  function snap(sc, cam, big) {
+    var lite = typeof LITE !== 'undefined' && LITE, k = shotKit(big ? (lite ? 320 : 512) : (lite ? 160 : 256)), R = k.R;      /* en mode léger, des photos plus petites pour ne pas ralentir */
     var oldT = renderer.getRenderTarget(), oldA = renderer.getClearAlpha(), oldC = new THREE.Color(); renderer.getClearColor(oldC);
-    renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(sc, cam);
-    renderer.readRenderTargetPixels(rt, 0, 0, TH, TH, tbuf);
+    renderer.setRenderTarget(k.rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(sc, cam);
+    renderer.readRenderTargetPixels(k.rt, 0, 0, R, R, k.buf);
     renderer.setRenderTarget(oldT); renderer.setClearColor(oldC, oldA);
-    var im = tctx.createImageData(TH, TH);
-    for (var y = 0; y < TH; y++) im.data.set(tbuf.subarray((TH - 1 - y) * TH * 4, (TH - y) * TH * 4), y * TH * 4);   /* l'image arrive à l'envers : on la retourne */
-    tctx.putImageData(im, 0, 0);
-    return tcv.toDataURL('image/png');
+    var im = k.rawCtx.createImageData(R, R);
+    for (var y = 0; y < R; y++) im.data.set(k.buf.subarray((R - 1 - y) * R * 4, (R - y) * R * 4), y * R * 4);   /* l'image arrive à l'envers : on la retourne */
+    k.rawCtx.putImageData(im, 0, 0);
+    k.ctx.clearRect(0, 0, k.out, k.out); k.ctx.drawImage(k.raw, 0, 0, R, R, 0, 0, k.out, k.out);                  /* on réduit : les bords deviennent lisses */
+    return k.cv.toDataURL('image/png');
   }
   function focusOf(focus) {
     if (!modelNow) return FOCUS[focus]; var A = modelNow.A;
     return focus === 'hat' ? [A.hatY + 0.3, 6] : focus === 'back' ? [A.backY + 0.2, 6.6] : focus === 'glasses' ? [A.eyeY, 4.8] : focus === 'neck' ? [A.neckY + 0.35, 5] : [modelNow.H / 2, 7.2];
   }
   var FOCUS = { all: [1.2, 7.2], back: [1.4, 6.6], hat: [2.45, 6], ears: [2.3, 5.6], glasses: [1.55, 4.6], eyes: [1.55, 4.6], teeth: [1.1, 3.9], neck: [0.9, 4.8] };   /* où regarder, et de quelle distance */
-  function thumbLook(look, focus) {
-    var key = focus + '|' + (modelNow ? modelNow.id + (G.hue || 0) + (G.skin || '') : 'p' + (BRAIN[G.species] ? G.species : '')) + '|' + colorIndex + '|' + badNow + '|' + JSON.stringify(look);
+  function thumbLook(look, focus, big) {
+    var key = (big ? 'B' : '') + focus + '|' + (modelNow ? modelNow.id + (G.hue || 0) + (G.skin || '') : 'p' + (BRAIN[G.species] ? G.species : '')) + '|' + colorIndex + '|' + badNow + '|' + JSON.stringify(look);
     if (thumbCache[key]) return thumbCache[key];
     try {
       buildEars(look.ears); buildEyes(look.eyes); buildTeeth(look.teeth); buildAcc(look); syncParts();
@@ -2995,7 +3005,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       pet.position.set(0, 0, 0); pet.rotation.set(0, focus === 'back' ? Math.PI * 0.8 : -0.3, 0); pet.scale.setScalar(1); bodyG.scale.set(1, 1, 1);
       liveEyes(); eyes.forEach(function (e) { e.scale.set(1, 1, 1); });
       var fc = focusOf(focus); thumbCam.position.set(0, fc[0] + 0.15, fc[1]); thumbCam.lookAt(0, fc[0], 0);
-      var url = snap(studio, thumbCam);
+      var url = snap(studio, thumbCam, big);
       par.add(pet); pet.visible = shown;
       return (thumbCache[key] = url);
     } catch (e) { if (pet.parent !== scene) scene.add(pet); return ''; }
@@ -4141,7 +4151,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     dress();
   }
   function paintLook() {
-    $('lookPrev').src = thumbLook(G.look, 'all');
+    $('lookPrev').src = thumbLook(G.look, 'all', true);
     var list = LOOKS.filter(function (l) { return (!l.native || G.species === 'peluche') && !(l.key === 'color' && BRAIN[G.species]); });   /* oreilles, yeux et dents ne se changent que sur la peluche */
     if (lookTab >= list.length) lookTab = 0;
     tabs('lookTabs', list.map(function (l) { return l.name; }), lookTab, function (n) { lookTab = n; paintLook(); });
@@ -4188,7 +4198,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
      On touche un article pour l'essayer sur son monstre, puis on décide de l'acheter ou non. */
   var shopSel = null;
   function paintShop() {
-    $('shopPrev').src = thumbLook(G.look, 'all');
+    $('shopPrev').src = thumbLook(G.look, 'all', true);
     tabs('shopTabs', [_T('Décors')].concat(SLOTS.map(function (q) { return q[1]; })).concat([_T('Monstres')]), shopTab, function (n) { shopTab = n; shopSel = null; paintShop(); });
     var box = $('shopList'), c = calc(), coins = c.coins; empty2(box);
     if (shopTab === 0) {
@@ -4233,7 +4243,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     });
     /* L'essayage : le monstre porte l'article choisi tant que la boutique est ouverte, même s'il n'est pas acheté */
     useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth);
-    var tryOn = JSON.parse(JSON.stringify(G.look)); if (sel) tryOn[slot] = sel.id; $('shopPrev').src = thumbLook(tryOn, 'all'); buildAcc(tryOn); syncParts(); paint();      /* la photo montre l'article essayé */
+    var tryOn = JSON.parse(JSON.stringify(G.look)); if (sel) tryOn[slot] = sel.id; $('shopPrev').src = thumbLook(tryOn, 'all', true); buildAcc(tryOn); syncParts(); paint();      /* la photo montre l'article essayé */
   }
   function closeSheets() { setTimeout(syncTab, 0); var was = !$('shop').hidden; $('well').hidden = true; $('quests').hidden = true; $('games').hidden = true; $('look').hidden = true; $('shop').hidden = true; focusCam = false; shopSel = null; if (was && phase === 'play') dress(); }
   $('navLook').addEventListener('click', function () { sfx('tick'); tabOpen('look'); });

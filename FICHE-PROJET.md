@@ -417,6 +417,18 @@ Deux offres sont affichées directement à gauche de l'écran principal, sans ri
 
 **Les réductions doivent être vraies.** Le Pack Complet affiche « −17 % » avec « 5,98 € » barré : c'est le vrai prix des deux packs qu'il contient, achetés séparément. Le chef de projet avait demandé de faire « comme s'il y avait des réductions » ; la MOA a refusé, car un faux prix barré est une pratique trompeuse, interdite en France et en Europe, et plus grave encore quand les joueurs sont mineurs. Pour une vraie promotion, il faut un vrai prix de départ, pratiqué pendant un temps, puis baissé.
 
+**Le prix de lancement.** Le chef de projet voulait une promotion sur toutes les offres. Chaque pack porte l'étiquette « Prix de lancement · ensuite X € » : pas de pourcentage inventé, pas de faux prix barré, seulement le prix d'après.
+
+| Pack | Prix de lancement | Prix normal ensuite |
+|---|---|---|
+| Pack Trésor | 4,99 € | 6,99 € |
+| Sans pub | 1,99 € | 2,99 € |
+| Pack Créatures | 2,99 € | 3,99 € |
+| Pack Décors | 2,99 € | 3,99 € |
+| Pack Complet | 4,99 € | 6,99 € |
+
+**Engagement à tenir :** cette étiquette n'est honnête que si les prix montent vraiment après le lancement. Il faut choisir une date de fin (un mois, par exemple), puis passer aux prix normaux et retirer l'étiquette. Un « lancement » qui ne finit jamais redevient une fausse promotion.
+
 **Le paiement n'est pas branché.** Le bouton du prix ouvre une fenêtre qui décrit le pack et dit que les achats arriveront avec le Play Store, avec l'accord d'un parent. Un vrai paiement passe par le magasin d'applis (Google Play) : c'est lui qui encaisse, vérifie l'accord parental et garde sa part. L'administrateur a un bouton « Débloquer les packs (test) ».
 
 **Avant de vendre pour de vrai**, il faudra : un adulte titulaire du compte développeur, un statut pour déclarer l'argent, une page de confidentialité, et choisir les prix définitifs (ceux-ci sont des exemples).

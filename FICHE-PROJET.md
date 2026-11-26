@@ -166,6 +166,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Course : bouclier et aimant à ramasser | Fait |
 | Récompenses de série : 3, 7, 14 et 30 jours réussis d'affilée | Fait |
 | Carnet du monstre avec sa photo (on touche la plaque du nom) | Fait |
+| Cinq langues : français, anglais, espagnol, chinois, hindi | Fait, à faire relire |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
@@ -325,6 +326,16 @@ Un bouton rond en haut à droite (la cible) ouvre l'écran des défis.
 - **Une étoile** et 15 pièces quand les trois défis du jour sont réussis. **À 5 étoiles, un cadeau de 100 pièces.**
 - **La question du jour** : une question sur le cerveau, le sommeil, le sport ou les écrans, avec l'explication. 5 pièces si la réponse est bonne. Il y a 20 questions.
 - **20 trophées** à collectionner (séries de jours, niveaux, records, bien-être...). Chacun rapporte 20 pièces.
+
+### Les langues
+
+Le jeu existe en cinq langues, les plus parlées dans le monde : anglais, chinois (mandarin), hindi, espagnol et français. Le joueur choisit dans les paramètres. À la première ouverture, le jeu prend la langue du téléphone.
+
+- Environ 840 textes sont traduits dans chaque langue. Les dictionnaires sont dans le dossier `traductions`.
+- **Les traductions ont été faites par une IA et pas encore relues** par des personnes dont c'est la langue maternelle. C'est à faire avant une vraie sortie.
+- Le jeu « Le mot mélangé » a sa propre liste de mots en anglais et en espagnol. Il est retiré en chinois et en hindi, où mélanger des lettres n'a pas de sens.
+- Restent en français : les messages d'erreur du serveur (comptes et amis) et le tri des déchets, qui suit les poubelles françaises.
+- L'arabe, sixième langue la plus parlée, s'écrit de droite à gauche : il demanderait de retourner toute l'interface.
 
 ### Le carnet du monstre
 

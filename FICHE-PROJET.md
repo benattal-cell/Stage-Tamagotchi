@@ -399,11 +399,12 @@ Elles gardent les yeux, la bouche, les bras et les pieds de la peluche, donc tou
 
 ### Les packs payants
 
-L'offre du Pack Trésor est affichée directement à gauche de l'écran principal, sans rien avoir à ouvrir : une pile de pièces avec « 10 000 », une flamme avec « ×3 » et le prix. La toucher ouvre la liste de tous les packs. Un pack s'achète avec du vrai argent.
+Deux offres sont affichées directement à gauche de l'écran principal, sans rien avoir à ouvrir et sans prix : le Pack Trésor (une pile de pièces avec « 10 000 » et une flamme avec « ×3 ») et l'offre Sans pub (le mot « AD » barré en rouge). Les toucher ouvre la liste de tous les packs, où les prix sont écrits. Un pack s'achète avec du vrai argent.
 
 | Pack | Contenu | Prix affiché |
 |---|---|---|
 | Pack Trésor | 10 000 pièces et 3 jokers de série. Il peut se racheter | 4,99 € |
+| Sans pub | Retire les publicités du jeu | 1,99 € |
 | Pack Créatures | Les cinq créatures spéciales | 2,99 € |
 | Pack Décors | Tous les décors | 2,99 € |
 | Pack Complet | Les créatures et tous les décors | 4,99 € |
@@ -411,6 +412,8 @@ L'offre du Pack Trésor est affichée directement à gauche de l'écran principa
 **Les jokers de série.** Une série, ce sont des jours d'affilée où les trois mesures sont au moins « correct ». Quand un jour raté casse la série, un joker le répare et la série repart. On touche la flamme (en haut à droite) pour voir sa série et ses jokers. Un joker ne répare qu'un jour récent (trois jours au plus) et seulement s'il y avait une série juste avant. On ne trouve des jokers que dans le Pack Trésor.
 
 **Décision du chef de projet : le Pack Trésor vend des pièces.** La MOA avait conseillé de ne vendre que de l'apparence. Le chef de projet a choisi de vendre aussi des pièces et des jokers. Conséquence à connaître : avec 10 000 pièces on achète presque toute la boutique, donc les pièces gagnées en dormant bien et en marchant comptent moins pour un joueur qui paie.
+
+**À régler avant de vendre « Sans pub » : il n'y a aucune publicité dans FormiLife.** Vendre « plus de pub » dans un jeu qui n'en a pas, c'est vendre du vide : la fenêtre de l'offre le dit honnêtement au joueur. Il faudra soit ajouter de la publicité (la MOA le déconseille : joueurs mineurs, données de santé, et un jeu qui demande de moins regarder son écran), soit retirer cette offre.
 
 **Le paiement n'est pas branché.** Le bouton du prix ouvre une fenêtre qui décrit le pack et dit que les achats arriveront avec le Play Store, avec l'accord d'un parent. Un vrai paiement passe par le magasin d'applis (Google Play) : c'est lui qui encaisse, vérifie l'accord parental et garde sa part. L'administrateur a un bouton « Débloquer les packs (test) ».
 

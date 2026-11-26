@@ -173,6 +173,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Tête du monstre dans le classement, nouveau logo | Fait |
 | Cinématique quand le monstre se transforme ou gagne une aura | Fait |
 | Cinq créatures « objet + animal » à acheter dans la boutique | Fait |
+| Rayon « Packs » payants dans la boutique | Vitrine faite, paiement non branché |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
@@ -395,6 +396,22 @@ Un rayon « Monstres » vend cinq créatures spéciales, dans l'esprit des « br
 Elles gardent les yeux, la bouche, les bras et les pieds de la peluche, donc toutes ses animations. À l'adolescence deux étoiles tournent autour d'elles, quatre à l'âge adulte. Une fois achetée, une créature reste au joueur et se retrouve dans l'atelier.
 
 **Pourquoi pas les vrais brainrots connus ?** On peut s'inspirer d'un genre (le mélange absurde, le nom qui rime), mais pas recopier un personnage précis : son nom et son apparence appartiennent à ceux qui l'ont créé. Une première version vendait six monstres « à effets » (or, galaxie, lave...) ; le chef de projet ne les a pas aimés, ils ont été retirés.
+
+### Les packs payants
+
+La boutique a un rayon « Packs ». Un pack s'achète avec du vrai argent et débloque tout de suite des choses qu'on peut aussi gagner en jouant.
+
+| Pack | Contenu | Prix affiché |
+|---|---|---|
+| Pack Créatures | Les cinq créatures spéciales | 2,99 € |
+| Pack Décors | Tous les décors | 2,99 € |
+| Pack Complet | Les créatures et tous les décors | 4,99 € |
+
+**Règle : un pack ne vend que de l'apparence.** Jamais de pièces, de vie ou de niveaux. Sinon, bien dormir et marcher ne serviraient plus à rien.
+
+**Le paiement n'est pas branché.** Pour l'instant, le bouton du prix ouvre une fenêtre qui décrit le pack et dit que les achats arriveront avec le Play Store, avec l'accord d'un parent. Un vrai paiement passe par le magasin d'applis (Google Play), pas par une page web : c'est lui qui encaisse, qui vérifie l'accord parental et qui garde sa part. L'administrateur a un bouton « Débloquer les packs (test) » pour voir le résultat.
+
+**Avant de vendre pour de vrai**, il faudra : un adulte titulaire du compte développeur, un statut pour déclarer l'argent, une page de confidentialité, et choisir les prix définitifs (ceux-ci sont des exemples).
 
 ### Le carnet du monstre
 

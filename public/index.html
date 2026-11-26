@@ -444,7 +444,16 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 .cine #hud, .cine .gear, .cine #rankBtn, .cine #toast { visibility: hidden; }
 #packBtn { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 172px; padding: 6px 12px 6px 9px; font-size: .88rem; gap: 6px; border-color: var(--coin); box-shadow: 0 0 0 3px rgba(247,201,72,.18), 0 4px 12px rgba(0,0,0,.28); }
 #streakPill { cursor: pointer; }
-#packs .sheet { max-height: 70%; }
+#packs .sheet { max-height: 76%; }
+.packcard { width: 100%; box-sizing: border-box; border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(160deg, #4A3A14, #2A2F4C 70%); border: 2px solid var(--coin); box-shadow: 0 0 18px rgba(247,201,72,.22); }
+.packcard h3 { margin: 0; font-family: var(--display); font-size: 1.2rem; }
+.packart { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.packart .pa { background: rgba(0,0,0,.28); border-radius: 16px; padding: 12px 6px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.packart .pa svg { width: 74px; height: 74px; filter: drop-shadow(0 4px 6px rgba(0,0,0,.35)); }
+.packart .pa strong { font-family: var(--display); font-weight: 800; font-size: 1.7rem; line-height: 1; color: #FFE072; text-shadow: 0 3px 0 rgba(0,0,0,.35); }
+.packart .pa.fl strong { color: #FFB07A; }
+.packart .plus { font-family: var(--display); font-weight: 800; font-size: 1.6rem; color: var(--muted); }
+.packcard .buy { width: 100%; min-height: 50px; font-size: 1.1rem; }
 </style>
 </head>
 <body>
@@ -4231,6 +4240,15 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   function paintPacks() {
     var box = $('packList'); empty2(box);
     PACKS.forEach(function (pk) {
+      if (pk[0] === 'tresor') {               /* le pack vedette : une image des pièces, et une flamme avec « ×3 » */
+        var card = el('div', 'packcard'), art = el('div', 'packart'), pa1 = el('div', 'pa'), pa2 = el('div', 'pa fl');
+        card.setAttribute('role', 'group'); card.setAttribute('aria-label', pk[1] + ' : ' + pk[2]);
+        card.appendChild(el('h3', '', pk[1]));
+        pa1.innerHTML = ART_COINS; pa1.appendChild(el('strong', '', '10 000')); pa2.innerHTML = ART_FLAME; pa2.appendChild(el('strong', '', '×3'));
+        art.appendChild(pa1); art.appendChild(el('span', 'plus', '+')); art.appendChild(pa2); card.appendChild(art);
+        card.appendChild(btn('buy', pk[3], function () { sfx('tick'); $('packTitle').textContent = pk[1]; $('packPrice').textContent = pk[3]; $('packWhat').textContent = pk[2]; $('packInfo').hidden = false; $('packClose').focus(); }));
+        box.appendChild(card); return;
+      }
       var have = pk[0] !== 'tresor' && hasPack(pk[0]);
       shopRow(box, pk[1], have ? _T('Débloqué') : pk[2], have ? _T('Débloqué') : pk[3], have ? 'on' : '', have, function () {
         sfx('tick'); $('packTitle').textContent = pk[1]; $('packPrice').textContent = pk[3]; $('packWhat').textContent = pk[2]; $('packInfo').hidden = false; $('packClose').focus();
@@ -4238,6 +4256,8 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     });
     dress();
   }
+  var ART_COINS = '<svg aria-hidden="true" viewBox="0 0 80 80"><g stroke="#B8860B" stroke-width="2.5"><ellipse cx="26" cy="62" rx="20" ry="8" fill="#D9A514"/><ellipse cx="26" cy="56" rx="20" ry="8" fill="#F7C948"/><ellipse cx="26" cy="50" rx="20" ry="8" fill="#FFE072"/><ellipse cx="54" cy="64" rx="20" ry="8" fill="#D9A514"/><ellipse cx="54" cy="58" rx="20" ry="8" fill="#F7C948"/><ellipse cx="54" cy="52" rx="20" ry="8" fill="#F7C948"/><ellipse cx="54" cy="46" rx="20" ry="8" fill="#FFE072"/><circle cx="40" cy="26" r="19" fill="#FFE072"/></g><circle cx="40" cy="26" r="12" fill="none" stroke="#B8860B" stroke-width="2.5"/><path d="M40 17l2.7 5.6 6.1.8-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.8z" fill="#F08A3C"/><path d="M12 14l2 4 4 2-4 2-2 4-2-4-4-2 4-2zM68 12l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5z" fill="#FFF6C2"/></svg>';
+  var ART_FLAME = '<svg aria-hidden="true" viewBox="0 0 80 80"><path d="M40 6c4 14 22 22 22 42a22 22 0 0 1-44 0c0-8 4-15 8-19 0 8 4 12 8 12 0-14 2-24 6-35z" fill="#FF8A4B" stroke="#C2491B" stroke-width="2.5" stroke-linejoin="round"/><path d="M40 34c2 8 11 11 11 21a11 11 0 0 1-22 0c0-4 2-7 4-9 0 4 2 6 4 6 0-7 1-12 3-18z" fill="#FFD35C"/><path d="M40 52c1 3 4 4 4 8a4 4 0 0 1-8 0c0-3 3-5 4-8z" fill="#FFF6C2"/></svg>';
   var COINPIC = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1E2233"/><circle cx="26" cy="38" r="15" fill="#F7C948" stroke="#B8860B" stroke-width="3"/><circle cx="40" cy="26" r="15" fill="#FFE072" stroke="#B8860B" stroke-width="3"/><path d="M40 17l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6-4.5-4.1 6-.7z" fill="#F08A3C"/></svg>');
   function openPacks() { closeSheets(); paintPacks(); $('packs').hidden = false; focusCam = true; $('packsClose').focus(); }
   $('packBtn').addEventListener('click', function () { sfx('tick'); openPacks(); });

@@ -172,6 +172,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Mode « graphismes légers », activé tout seul sur les téléphones lents | Fait |
 | Tête du monstre dans le classement, nouveau logo | Fait |
 | Cinématique quand le monstre se transforme ou gagne une aura | Fait |
+| Six monstres spéciaux à acheter dans la boutique | Fait |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
@@ -378,6 +379,21 @@ Quand le monstre change de forme (niveaux 5 et 12) ou gagne une aura (niveaux 5,
 4. La lueur retombe, les confettis partent, la fanfare joue et la bannière du niveau s'affiche.
 
 Toucher l'écran fait passer à l'étape suivante. Avec le réglage « réduire les animations » du téléphone, la cinématique ne se joue pas.
+
+### Les monstres de la boutique
+
+Un rayon « Monstres » vend six monstres spéciaux. Chacun est une espèce existante avec un effet visuel animé qu'on ne peut pas avoir autrement. Une fois acheté, il reste au joueur : il peut repasser à un monstre normal et y revenir dans l'atelier.
+
+| Monstre | Effet | Prix | Niveau demandé |
+|---|---|---|---|
+| Sorcier d'or | Tout en or, avec des éclats qui scintillent | 1 500 | 4 |
+| Poisson arc-en-ciel | Les couleurs de l'arc-en-ciel glissent sur lui | 2 000 | 6 |
+| Yéti des glaces | Bleu glacé et brillant | 2 500 | 8 |
+| Ninja fantôme | À moitié transparent, avec une lueur bleue | 3 000 | 10 |
+| Orc de lave | Roche noire traversée de fissures orange qui bougent | 4 000 | 13 |
+| Chat galaxie | Violet et bleu nuit, rempli d'étoiles | 5 000 | 16 |
+
+Ce sont des créations du projet. On n'a pas le droit de copier des personnages qui existent déjà (jeux, dessins animés, mèmes d'Internet) : ils appartiennent à ceux qui les ont créés.
 
 ### Le carnet du monstre
 

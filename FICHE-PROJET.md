@@ -371,6 +371,18 @@ Le jeu existe en cinq langues, les plus parlées dans le monde : anglais, chinoi
 - Restent en français : les messages d'erreur du serveur (comptes et amis) et le tri des déchets, qui suit les poubelles françaises.
 - L'arabe, sixième langue la plus parlée, s'écrit de droite à gauche : il demanderait de retourner toute l'interface.
 
+### Les signes de l'âge, communs à tous les monstres
+
+En plus de sa transformation à lui (cornes, baguette, collier...), chaque monstre porte des signes de son âge, à sa couleur :
+
+| Âge | Taille | Ce qu'il gagne |
+|---|---|---|
+| Bébé (niveaux 1 à 4) | Petit | Tétine, biberon, et trois bulles de savon qui tournent autour de lui |
+| Ado (niveaux 5 à 11) | Moyen | Un cercle de gemmes lumineuses qui tourne au sol, deux orbes en orbite, une lueur à ses pieds |
+| Adulte (niveau 12 et plus) | Grand | Un deuxième cercle, quatre orbes, une couronne dorée qui flotte au-dessus de sa tête, et deux ailes qui battent dans son dos |
+
+La couronne ne s'affiche pas s'il porte un chapeau, et les ailes ne s'affichent pas s'il porte quelque chose dans le dos : ses accessoires passent avant.
+
 ### La cinématique de transformation
 
 Quand le monstre change de forme (niveaux 5 et 12) ou gagne une aura (niveaux 5, 10, 15 et 20), une petite scène de sept secondes se joue :

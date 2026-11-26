@@ -1785,6 +1785,46 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
   function brEvo(a, h, t, b, c, g, orb) {      /* les créatures de la boutique : des étoiles tournent autour d'elles, deux à l'adolescence, quatre à l'âge adulte */
     var nb = a === 1 ? 2 : 4, i; for (i = 0; i < nb; i++) orb(qSph(0.1, 0xFFE072, 0, 0, 0, g, { emissive: 0x8A6A10 }), 1.55, 1.3, 1.1 + (i % 2) * 0.7, i * Math.PI * 2 / nb);
   }
+  /* ---------- Ce que toutes les transformations ont en commun ----------
+     En plus de sa transformation à lui, chaque monstre reçoit des signes de son âge, à sa couleur :
+     bébé : des bulles de savon ; ado : un cercle de gemmes au sol et deux orbes ; adulte : deux cercles, quatre orbes, une couronne et des ailes. */
+  var EVOCOL = { PinkBlob: 0xFF7FB0, GreenBlob: 0x6FD46F, GreenSpikyBlob: 0x8FE05A, Alien: 0xB07CFF, Mushnub: 0x6CC0FF, Mushnub_Evolved: 0xFF7A5C, Cactoro: 0x7FE08A, Yeti: 0x9FE4FF, Birb: 0xFFD35C, Pigeon: 0xB9C4E6, Chicken: 0xFFB84D,
+    Cat: 0xFFA24A, Dog: 0xFFD27A, Fish: 0x4FD0FF, Orc: 0x8FE05A, Ninja: 0xFF5C6C, Wizard: 0xB07CFF, BrToast: 0xFF7A5C, BrPizza: 0xFFC24A, BrLion: 0x6FD46F, BrRocket: 0xB79CFF, BrCrab: 0xFFE072 };
+  var EVOTICK = [];
+  function evoColor() { return EVOCOL[G.species] != null ? EVOCOL[G.species] : palette[colorIndex].fur; }
+  function evoBaby(g) {
+    for (var i = 0; i < 3; i++) {
+      var bu = noRay(new THREE.Mesh(new THREE.SphereGeometry(0.11 + i * 0.03, 14, 10), new THREE.MeshStandardMaterial({ color: 0xCFF3FF, transparent: true, opacity: 0.38, roughness: 0.05, metalness: 0.2, depthWrite: false })));
+      bu.castShadow = false; bu.userData = { r: 1.25 + i * 0.15, sp: 0.5 + i * 0.12, y: 1.3 + i * 0.45, ph: i * 2.1 }; orbits.push(bu); g.add(bu);
+    }
+  }
+  function evoCommon(a, t, b, g, orb) {
+    if (a < 1) return;
+    var col = evoColor(), glowM = mat(col, { emissive: col, emissiveIntensity: 0.75, roughness: 0.3 }), goldM = mat(0xF7C948, { metalness: 0.75, roughness: 0.22, emissive: 0x6A5210 }), i, o;
+    function gemRing(radius, nb, y, size, sp) {       /* un cercle de gemmes qui tourne au sol */
+      var rg = new THREE.Group(); for (i = 0; i < nb; i++) { var an = i / nb * Math.PI * 2; o = mesh(new THREE.OctahedronGeometry(size, 0), glowM, Math.cos(an) * radius, 0, Math.sin(an) * radius, rg); o.castShadow = false; o.scale.y = 1.5; }
+      o = mesh(new THREE.TorusGeometry(radius, 0.018, 6, 48), glowM, 0, 0, 0, rg); o.rotation.x = Math.PI / 2; o.castShadow = false;
+      g.add(rg); orb(rg, 0, sp, y, 0); return rg;
+    }
+    function orbBall(r, sp, y, ph, size) { o = mesh(new THREE.SphereGeometry(size, 14, 10), glowM, 0, 0, 0, g); o.castShadow = false; var hl = new THREE.Sprite(additive(col, 0.55)); hl.scale.setScalar(size * 5); o.add(hl); orb(o, r, sp, y, ph); }
+    var halo = new THREE.Sprite(additive(col, a === 1 ? 0.22 : 0.34)); halo.position.set(0, 0.25, 0); halo.scale.set(a === 1 ? 3.4 : 4.4, 1.3, 1); g.add(halo);      /* une lueur à ses pieds */
+    gemRing(1.3, 10, 0.1, 0.06, 0.5);
+    orbBall(1.45, 1.1, 1.0, 0, 0.1); orbBall(1.45, 1.1, 1.5, Math.PI, 0.1);
+    if (a < 2) return;
+    gemRing(1.62, 16, 0.16, 0.045, -0.35);
+    orbBall(1.7, -0.8, 2.0, Math.PI / 2, 0.08); orbBall(1.7, -0.8, 0.7, -Math.PI / 2, 0.08);
+    /* la couronne flotte au-dessus de sa tête (sauf s'il porte déjà un chapeau) */
+    var cr = new THREE.Group(); o = mesh(new THREE.CylinderGeometry(0.3, 0.27, 0.16, 20, 1, true), goldM, 0, 0, 0, cr); o.material.side = THREE.DoubleSide;
+    for (i = 0; i < 5; i++) { var a5 = i / 5 * Math.PI * 2; mesh(new THREE.ConeGeometry(0.075, 0.2, 4), goldM, Math.cos(a5) * 0.285, 0.17, Math.sin(a5) * 0.285, cr); o = mesh(new THREE.SphereGeometry(0.04, 8, 6), glowM, Math.cos(a5) * 0.3, 0, Math.sin(a5) * 0.3, cr); o.castShadow = false; }
+    t.add(cr); orb(cr, 0, 0.6, 2.72, 0);
+    /* deux ailes dans son dos (sauf s'il porte déjà quelque chose), qui battent doucement */
+    var wingM = mat(0xFFFFFF, { emissive: col, emissiveIntensity: 0.35, roughness: 0.5, side: THREE.DoubleSide });
+    [-1, 1].forEach(function (k) {
+      var wg = new THREE.Group(); wg.position.set(k * 0.22, 1.45, -0.86); b.add(wg);
+      [[0.95, 0.5, 0.55], [0.8, 0.12, 0.2], [0.6, -0.22, -0.15]].forEach(function (q, n) { o = mesh(new THREE.SphereGeometry(0.5, 12, 8), wingM, k * q[0] * 0.5, q[1], 0, wg); o.scale.set(q[0], 0.3 - n * 0.03, 0.07); o.rotation.z = k * q[2]; });
+      EVOTICK.push(function (tt) { wg.rotation.y = k * (0.35 + Math.sin(tt * 2.6) * 0.22); });
+    });
+  }
   var EVO = {
     BrToast: brEvo, BrPizza: brEvo, BrLion: brEvo, BrRocket: brEvo, BrCrab: brEvo,
     peluche: function (a, h, t, b, c, g, orb) {
@@ -1905,11 +1945,12 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
   function buildStage() {
     if (G.species !== 'peluche' && MODELS[bodyOf(G.species)] && modelNow !== MODELS[bodyOf(G.species)]) { dress(); return; }   /* le corps change avec l'âge : on rhabille tout */
     var M = modelNow, st = stageNow, key = (M ? M.id : 'p') + '|' + G.species + '|' + st + '|' + (G.look.hat || '') + '|' + (G.look.back || ''); if (key === stageKey) return;
-    stageKey = key; stageOwn.forEach(function (o) { if (o.parent) o.parent.remove(o); }); stageOwn = []; orbits = [];
+    stageKey = key; stageOwn.forEach(function (o) { if (o.parent) o.parent.remove(o); }); stageOwn = []; orbits = []; EVOTICK = [];
     if (M) { face = { x: M.A.mouthX, y: M.A.mouthY, z: M.A.mouthZ, k: Math.max(0.55, M.A.eyeK) }; headTop = M.H + 0.05; } else { face = { x: 0, y: 0.98, z: 0.98, k: 1 }; headTop = 2.4; }
     var fg = new THREE.Group(), gr = new THREE.Group(), o; fg.position.set(face.x, face.y, face.z); fg.scale.setScalar(face.k * 1.3); bodyG.add(fg); pet.add(gr); stageOwn.push(fg, gr);
     standY = 0;
     if (st === 0) {
+      evoBaby(gr);
       o = qSph(0.24, 0x5CC8FF, 0, 0, 0.06, fg, { roughness: 0.4 }); o.scale.set(1.15, 0.85, 0.3);                      /* la tétine */
       o = mesh(new THREE.TorusGeometry(0.13, 0.03, 8, 20), mat(0xFFFFFF), 0, -0.06, 0.2, fg); o.rotation.x = 0.5; qSph(0.07, 0xFFE680, 0, 0, 0.14, fg);
       if (!M && !BRAIN[G.species]) {
@@ -1931,7 +1972,9 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
         gs = Math.max(0.75, Math.min(1.15, kc)); h.userData.y = A.hatY; b.userData.y = A.backY; c.userData.y = M.H * 0.45;
       }
       gr.scale.setScalar(gs); bodyG.add(h); bodyG.add(b); bodyG.add(c); stageOwn.push(h, b, c);
-      EVO[G.species](st, h, t2, b, c, gr, function (obj, r, sp, y, ph) { obj.userData = { r: r, sp: sp, y: y, ph: ph || 0 }; orbits.push(obj); return obj; });
+      var orbF = function (obj, r, sp, y, ph) { obj.userData = { r: r, sp: sp, y: y, ph: ph || 0 }; orbits.push(obj); return obj; };
+      EVO[G.species](st, h, t2, b, c, gr, orbF);
+      evoCommon(st, t2, b, gr, orbF);
       [h, b, c, gr].forEach(function (grp) { grp.traverse(function (x) { x.raycast = function () {}; }); });
     }
     bodyG.position.y = standY;
@@ -2386,7 +2429,7 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
     /* Monter de niveau rapporte des pièces, une seule fois par niveau */
     var up = c.lvl > G.lvlSeen, reward = 0, lv2;
     if (up) { for (lv2 = G.lvlSeen + 1; lv2 <= c.lvl; lv2++) reward += 20 * lv2; G.bonus += reward; G.lvlSeen = c.lvl; saveG(); c.coins += reward; }
-    levelNow = c.lvl; sizeGoal = sizeOf(c.lvl);
+    levelNow = c.lvl; sizeGoal = sizeOf(c.lvl) * [0.86, 1, 1.13][st];      /* un bébé est plus petit, un adulte plus grand */
     $('hudName').textContent = G.name; plateAvatar();
     $('hudStage').textContent = _T('Niveau ') + c.lvl + ' · ' + TITLES[st] + (bd ? _T(' · en mauvais état') : '');
     $('hpBar').style.width = c.hp + '%'; $('hpTxt').textContent = c.hp; $('hpTrack').setAttribute('aria-valuenow', c.hp);
@@ -2890,7 +2933,8 @@ textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); f
       modelNow.mixer.update(dt * (phase === 'run' ? 1.9 : tired ? 0.5 : 1));
       if (talking && hb) { var tr = Math.sin(t * 15) * 0.06, ts = 1 + Math.sin(t * 15) * 0.035; hb.rotation.x += tr; hb.scale.y *= ts; hb.userData.talk = [tr, ts]; }
     } }
-    TIMEU.value = t; ambTick(t, dt); if (!modelNow && BRAIN[G.species] && BRAIN[G.species].tick && !reduce) BRAIN[G.species].tick(t);
+    TIMEU.value = t; ambTick(t, dt); if (!reduce) for (var et = 0; et < EVOTICK.length; et++) EVOTICK[et](t);
+    if (!modelNow && BRAIN[G.species] && BRAIN[G.species].tick && !reduce) BRAIN[G.species].tick(t);
     renderer.render(scene, camera);
     if (!$('bubble').hidden) {                /* la bulle suit la tête de la créature */
       v3.set(pet.position.x, pet.position.y + (2.75 + (G.look.hat ? 0.45 : 0)) * sc * stageK, pet.position.z).project(camera);

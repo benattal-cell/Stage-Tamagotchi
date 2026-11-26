@@ -141,6 +141,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Ma semaine : les sept derniers jours et un conseil | Fait |
 | Mode nuit : de 22 h à 6 h le monstre dort, les jeux sont fermés | Fait |
 | Tutoriel en cinq écrans à la première ouverture | Fait |
+| Graphismes : ciel en dégradé, halo de lune, étoiles filantes, lumière au sol, interface en verre dépoli | Fait |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |

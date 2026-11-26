@@ -171,6 +171,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Sauvegarde du monstre par un code à copier | Fait |
 | Mode « graphismes légers », activé tout seul sur les téléphones lents | Fait |
 | Tête du monstre dans le classement, nouveau logo | Fait |
+| Cinématique quand le monstre se transforme ou gagne une aura | Fait |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
@@ -366,6 +367,17 @@ Le jeu existe en cinq langues, les plus parlées dans le monde : anglais, chinoi
 - Le jeu « Le mot mélangé » a sa propre liste de mots en anglais et en espagnol. Il est retiré en chinois et en hindi, où mélanger des lettres n'a pas de sens.
 - Restent en français : les messages d'erreur du serveur (comptes et amis) et le tri des déchets, qui suit les poubelles françaises.
 - L'arabe, sixième langue la plus parlée, s'écrit de droite à gauche : il demanderait de retourner toute l'interface.
+
+### La cinématique de transformation
+
+Quand le monstre change de forme (niveaux 5 et 12) ou gagne une aura (niveaux 5, 10, 15 et 20), une petite scène de sept secondes se joue :
+
+1. Deux bandes noires arrivent, les menus disparaissent, la caméra s'approche et tourne autour du monstre.
+2. Le monstre s'élève, tourne de plus en plus vite et tremble dans une lueur qui grossit, avec un son qui monte.
+3. Un éclair blanc remplit l'écran : c'est à ce moment que sa forme change.
+4. La lueur retombe, les confettis partent, la fanfare joue et la bannière du niveau s'affiche.
+
+Toucher l'écran fait passer à l'étape suivante. Avec le réglage « réduire les animations » du téléphone, la cinématique ne se joue pas.
 
 ### Le carnet du monstre
 

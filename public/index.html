@@ -574,6 +574,77 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.96); } }
 @media (prefers-reduced-motion: reduce) { .sheet.fresh .gcard, .sheet.fresh .item, .sheet.fresh .tile, .sheet.fresh .stat, .sheet.fresh .prev, .big::after, .daybtn::after { animation: none !important; } #tabbar .tabb { animation: none !important; } }
 .lite .big::after, .lite .daybtn::after { display: none; }
+/* =====================================================================
+   Refonte générale : toutes les fenêtres, les formulaires et l'écran d'accueil
+   ===================================================================== */
+/* --- les fenêtres : une bannière de couleur, un fond en dégradé --- */
+.veil:not([hidden]) { background: rgba(9, 11, 22, .62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.lite .veil:not([hidden]) { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(9, 11, 22, .78); }
+.veil .card, #custom .card { --acc2: #7A5CC0; --accbg: rgba(155,126,222,.24); background: radial-gradient(130% 38% at 50% 0%, var(--accbg), rgba(0,0,0,0) 70%), linear-gradient(180deg, #282D4D, #181B2D 80%); border: 0; padding-top: 0; gap: 14px; box-shadow: 0 -18px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.1); }
+#mem .card, #tri .card, #brain .card, #runEnd .card { --acc2: #3D6FD9; --accbg: rgba(76,140,255,.24); }
+#zen .card, #amb .card, #grat .card, #feel .card { --acc2: #2FA58A; --accbg: rgba(63,200,160,.22); }
+#entry .card, #book .card, #streakInfo .card { --acc2: #D98A1A; --accbg: rgba(247,201,72,.2); }
+#quiz .card { --acc2: #E0603A; --accbg: rgba(240,120,70,.22); }
+#dead .card { --acc2: #B8344C; --accbg: rgba(255,107,139,.2); }
+.veil .card > h2:first-child, .veil .card > .sheethead:first-child, #custom .card > h2:first-child { position: sticky; top: 0; z-index: 3; margin: 0 calc(-1 * max(18px, env(safe-area-inset-left, 0px))) 0; padding: 16px 18px 13px; background: linear-gradient(135deg, var(--acc2), #2A2F55 90%); border-radius: 26px 26px 20px 20px; color: #fff; font-size: 1.55rem; text-shadow: 0 2px 0 rgba(0,0,0,.25); box-shadow: 0 8px 18px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.22); }
+.veil .card > .sheethead:first-child h2 { color: #fff; font-size: 1.55rem; text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+.veil .card > .sheethead:first-child .pill { background: rgba(0,0,0,.3); border-color: rgba(255,255,255,.25); color: #fff; }
+.veil .card > :first-child:not(h2):not(.sheethead), #custom .card > :first-child:not(h2) { margin-top: 18px; }
+.card p { color: #D5D8EE; line-height: 1.4; }
+/* --- les champs et les boutons --- */
+.inp, .num, #name { border-radius: 14px; border: 2px solid rgba(255,255,255,.14); background: rgba(0,0,0,.3); box-shadow: inset 0 2px 6px rgba(0,0,0,.35); color: var(--ink); }
+.inp:focus, .num:focus, #name:focus { border-color: var(--mint); box-shadow: inset 0 2px 6px rgba(0,0,0,.35), 0 0 0 4px rgba(127,232,207,.18); outline: none; }
+.field > .lab, .field > label, .fieldhead .lab { font-size: .82rem; letter-spacing: .05em; text-transform: uppercase; color: #B9BEDD; font-weight: 800; }
+.fieldhead span:last-child:not(:empty) { background: rgba(0,0,0,.3); border-radius: 999px; padding: 3px 10px; font-size: .82rem; }
+.st { border-radius: 50%; border: 0; background: linear-gradient(180deg, #4A5290, #2C3257); box-shadow: 0 5px 0 #191C36, inset 0 1px 0 rgba(255,255,255,.22); transition: transform .08s, box-shadow .08s; }
+.st:active { transform: translateY(4px); box-shadow: 0 1px 0 #191C36; background: linear-gradient(180deg, #4A5290, #2C3257); }
+.val, .stepper .num { background: rgba(0,0,0,.3); border-radius: 18px; box-shadow: inset 0 2px 8px rgba(0,0,0,.4); padding: 10px 0; }
+.chip { border-radius: 999px; background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.13); padding: 6px 16px; transition: transform .08s; }
+.chip:active { transform: scale(.96); }
+.chip[aria-pressed="true"] { background: linear-gradient(180deg, #FFE072, #F2B82A); border-color: transparent; color: var(--dark-ink); box-shadow: 0 4px 0 var(--coin-deep); }
+.ghost { border-radius: 14px; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.16); transition: transform .08s, background .15s; }
+.ghost:active { transform: scale(.97); background: rgba(255,255,255,.12); }
+.big { border-radius: 20px; text-shadow: 0 1px 0 rgba(255,255,255,.4); }
+.buy { border-radius: 14px; }
+.err:not([hidden]) { display: block; background: rgba(255,107,107,.16); border: 1px solid rgba(255,140,140,.4); border-radius: 12px; padding: 8px 12px; color: #FFC2BA; }
+.small { color: #B9BEDD; line-height: 1.4; }
+details.small summary { cursor: pointer; padding: 6px 0; font-weight: 800; color: var(--ink); }
+/* l'interrupteur et les curseurs des paramètres */
+.switch { background: rgba(255,255,255,.05); border-radius: 16px; padding: 6px 12px; }
+.switch input { -webkit-appearance: none; appearance: none; position: relative; width: 52px; height: 30px; flex: none; border-radius: 999px; background: rgba(0,0,0,.4); box-shadow: inset 0 2px 5px rgba(0,0,0,.45); transition: background .18s; order: 2; margin-left: auto; }
+.switch input::before { content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #C9CDE6; box-shadow: 0 2px 4px rgba(0,0,0,.4); transition: transform .18s, background .18s; }
+.switch input:checked { background: linear-gradient(180deg, #FFE072, #F2B82A); } .switch input:checked::before { transform: translateX(22px); background: #fff; }
+#setVol, #setSfxVol { -webkit-appearance: none; appearance: none; height: 12px; min-height: 12px; margin: 10px 0; border-radius: 6px; background: rgba(0,0,0,.4); box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
+#setVol::-webkit-slider-thumb, #setSfxVol::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(180deg, #FFE072, #F2B82A); border: 3px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,.45); }
+#setVol::-moz-range-thumb, #setSfxVol::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #F2B82A; border: 3px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,.45); }
+#setVol:disabled, #setSfxVol:disabled { opacity: .4; }
+/* --- les jeux en fenêtre --- */
+.triItem { background: linear-gradient(170deg, #1B2140, #12152A); border: 2px solid rgba(255,255,255,.1); box-shadow: inset 0 0 26px rgba(76,140,255,.18); border-radius: 22px; }
+.bin { border-radius: 18px; box-shadow: 0 6px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35); transition: transform .08s, box-shadow .08s; } .bin:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,.35); }
+.memc { border-radius: 16px; border: 0; background: linear-gradient(170deg, #4A5290, #2C3257); box-shadow: 0 5px 0 #191C36, inset 0 1px 0 rgba(255,255,255,.22); color: rgba(255,255,255,.55); }
+.memc.open { background: #1B2140; box-shadow: 0 0 0 3px var(--coin), 0 5px 0 #191C36; } .memc.done { background: #1F3F3A; box-shadow: 0 0 0 3px var(--mint); opacity: .8; }
+.moodb { border-radius: 16px; background: rgba(255,255,255,.07); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); } .moodb[aria-pressed="true"] { border-color: var(--mint); background: rgba(127,232,207,.16); }
+.veil .stat { background: linear-gradient(170deg, rgba(255,255,255,.1), rgba(0,0,0,.2)); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; }
+.barline { height: 12px; border-radius: 6px; background: rgba(0,0,0,.4); box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
+.zenwrap { background: radial-gradient(circle at 50% 50%, rgba(92,200,255,.14), rgba(0,0,0,0) 70%); border-radius: 22px; }
+.zentxt { font-family: var(--display); font-weight: 800; }
+textarea.inp { min-height: 54px; padding: 10px 12px; font-family: var(--body); font-weight: 700; font-size: 1rem; resize: none; }
+/* --- « Ma journée » --- */
+#entry .day { background: linear-gradient(170deg, rgba(247,201,72,.14), rgba(0,0,0,.22)); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; }
+.track { background: rgba(0,0,0,.4); box-shadow: inset 0 2px 4px rgba(0,0,0,.35); }
+.lv2 { color: #8FF0D8; } .lv1 { color: #FFE072; } .lv0 { color: #FFB4A8; }
+/* --- l'accueil --- */
+#plate { display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 10px; row-gap: 2px; align-items: center; padding: 8px 12px 9px 8px; border-radius: 20px; }
+#plateAv { grid-row: 1 / span 4; width: 56px; height: 56px; border-radius: 16px; background: radial-gradient(circle at 50% 35%, #4A5290, #1E2233); box-shadow: inset 0 0 0 2px rgba(255,255,255,.2), 0 4px 8px rgba(0,0,0,.3); object-fit: cover; }
+#plate > :not(#plateAv) { grid-column: 2; }
+#hudName { font-family: var(--display); font-size: 1.15rem; line-height: 1.05; }
+#hudStage { font-size: .78rem; font-weight: 800; color: #C9CDE6; }
+.gear:not([hidden]) { background: linear-gradient(180deg, rgba(64,71,112,.9), rgba(28,32,52,.92)); border-color: rgba(255,255,255,.18); box-shadow: 0 5px 12px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18); }
+#hudPills .pill { font-family: var(--display); font-size: .98rem; }
+#coinPill { border-color: rgba(247,201,72,.55); }
+#toast:not([hidden]) { background: linear-gradient(180deg, #FFE072, #F2B82A); border: 2px solid rgba(255,255,255,.6); box-shadow: 0 10px 24px rgba(0,0,0,.45), 0 0 18px rgba(247,201,72,.35); }
+#bubble { border-radius: 18px; font-family: var(--display); font-weight: 800; }
+#runHud .pill { background: linear-gradient(180deg, rgba(52,58,92,.9), rgba(22,25,42,.92)); border-color: rgba(255,255,255,.2); box-shadow: 0 5px 12px rgba(0,0,0,.35); }
 </style>
 </head>
 <body>
@@ -585,7 +656,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 
   <div class="ui" id="hud" hidden>
     <div class="topbar">
-      <div class="plate" id="plate"><strong id="hudName"></strong><span id="hudStage"></span>
+      <div class="plate" id="plate"><img id="plateAv" alt=""><strong id="hudName"></strong><span id="hudStage"></span>
         <div class="bar2"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 64 64"><path d="M32 56C4 36 6 10 22 10c6 0 10 5 10 10 0-5 4-10 10-10 16 0 18 26-10 46z" fill="#FF6B8B"/></svg><div class="track" role="progressbar" aria-label="Vie" aria-valuemin="0" aria-valuemax="100" id="hpTrack"><i id="hpBar"></i></div><span id="hpTxt"></span></div>
         <div class="bar2"><b aria-hidden="true">XP</b><div class="track" role="progressbar" aria-label="Expérience" aria-valuemin="0" aria-valuemax="100" id="xpTrack"><i id="xpBar"></i></div><span id="xpTxt"></span></div>
       </div>
@@ -2204,6 +2275,13 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     CINE.on = false; $('cine').hidden = true; $('app').classList.remove('cine'); nextSay = clock.getElapsedTime() + 3;
   }
   $('cine').addEventListener('click', function () { if (Date.now() - CINE.born < 500) return; if (!CINE.swapped) cineSwap(); else cineEnd(); });
+  /* La photo du monstre sur la plaque du nom : refaite seulement quand son apparence change */
+  var avKey = '';
+  function plateAvatar() {
+    if (phase !== 'play' || typeof thumbLook !== 'function') return;
+    var key = G.species + '|' + (G.hue || 0) + '|' + G.color + '|' + JSON.stringify(G.look); if (key === avKey) return; avKey = key;
+    var url = thumbLook(G.look, 'all'); dress(); if (url) $('plateAv').src = url;
+  }
   var lvlT = null;
   function levelBanner(lvl, msg) {
     var b = $('lvlUp'); $('lvlUpBig').textContent = (_T('Niveau ') + lvl).toUpperCase(); $('lvlUpMsg').textContent = msg.replace(/^[^!:\uFF01\uFF1A]*[!:\uFF01\uFF1A] ?/, ''); b.hidden = true; void b.offsetWidth; b.hidden = false;
@@ -2239,7 +2317,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     var up = c.lvl > G.lvlSeen, reward = 0, lv2;
     if (up) { for (lv2 = G.lvlSeen + 1; lv2 <= c.lvl; lv2++) reward += 20 * lv2; G.bonus += reward; G.lvlSeen = c.lvl; saveG(); c.coins += reward; }
     levelNow = c.lvl; sizeGoal = sizeOf(c.lvl);
-    $('hudName').textContent = G.name;
+    $('hudName').textContent = G.name; plateAvatar();
     $('hudStage').textContent = _T('Niveau ') + c.lvl + ' · ' + TITLES[st] + (bd ? _T(' · en mauvais état') : '');
     $('hpBar').style.width = c.hp + '%'; $('hpTxt').textContent = c.hp; $('hpTrack').setAttribute('aria-valuenow', c.hp);
     $('xpBar').style.width = Math.round(c.xp / c.need * 100) + '%'; $('xpTxt').textContent = c.xp + '/' + c.need; $('xpTrack').setAttribute('aria-valuenow', Math.round(c.xp / c.need * 100));
@@ -3934,7 +4012,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     $('bookNext').textContent = (next ? _T('Prochaine transformation au niveau ') + next + _T(' (encore ') + (next - c.lvl) + (next - c.lvl > 1 ? _T(' niveaux') : _T(' niveau')) + '). ' : _T('Il a atteint sa forme adulte. ')) + (c.streak >= 30 ? _T('Série de 30 jours atteinte : bravo !') : _T('Prochaine récompense de série à ') + (c.streak < 3 ? 3 : c.streak < 7 ? 7 : c.streak < 14 ? 14 : 30) + _T(' jours.'));
     var box = $('bookStats'); empty2(box);
     [[c.age + (c.age > 1 ? _T(' jours') : _T(' jour')), _T('âge')], [c.n, _T('journées remplies')], [c.streak, _T('série en cours')], [G.best + ' m', _T('record de course')], [G.trophies.length + ' / ' + TROPHIES.length, _T('trophées')], [G.stats.well, _T('pauses bien-être')]].forEach(function (q) { var d = el('div', 'stat'); d.appendChild(el('strong', '', String(q[0]))); d.appendChild(el('span', '', q[1])); box.appendChild(d); });
-    sfx('tick'); $('book').hidden = false; $('bookClose').focus();
+    sfx('tick'); $('book').hidden = false; try { $('bookClose').focus({ preventScroll: true }); } catch (e) {} $('book').querySelector('.card').scrollTop = 0;
   }
   $('plate').setAttribute('role', 'button'); $('plate').setAttribute('tabindex', '0'); $('plate').setAttribute('aria-label', _T('Ouvrir le carnet de ton monstre'));
   $('plate').addEventListener('click', openBook); $('plate').addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openBook(); } });

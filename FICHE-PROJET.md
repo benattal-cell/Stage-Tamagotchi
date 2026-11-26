@@ -431,6 +431,17 @@ En bas de l'écran, une barre de cinq onglets reste toujours visible, comme dans
 - Sur une page, glisser le doigt vers la gauche ou la droite passe à l'onglet voisin.
 - Les défis (la cible) et le carnet (la plaque du nom) s'ouvrent toujours depuis l'accueil.
 
+### Le style de l'interface
+
+Toutes les fenêtres du jeu suivent maintenant les mêmes règles de dessin (on appelle ça une charte graphique) :
+
+- **Une bannière de couleur en haut de chaque fenêtre**, avec son titre. La couleur dit de quoi on parle : doré pour la journée et le carnet, bleu pour les jeux, vert pour le bien-être, orange pour les défis et le quiz, violet pour les réglages, rouge pour la mort du monstre.
+- **Les mêmes boutons partout** : gros bouton jaune pour l'action principale, bouton discret pour fermer, pastilles rondes pour les choix.
+- **Les mêmes champs** : fond sombre creusé, bord qui s'allume en vert quand on écrit dedans.
+- **Des interrupteurs et des curseurs dessinés** dans les paramètres, à la place de ceux du navigateur.
+- **La plaque du nom** montre la photo du monstre.
+- **Des photos nettes** : elles sont dessinées plus grandes que nécessaire puis réduites, ce qui lisse les bords.
+
 ### Le carnet du monstre
 
 En touchant la plaque du nom, on ouvre le carnet : une photo du monstre dans son décor (qu'on peut enregistrer), son niveau, le niveau de sa prochaine transformation, et six chiffres (âge, journées remplies, série, record de course, trophées, pauses bien-être).

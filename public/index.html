@@ -492,6 +492,43 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 .daybtn { flex-direction: row; gap: 10px; min-height: 54px; width: 100%; font-size: .95rem; padding: 6px 14px; }
 .daybtn .navsub { margin-left: auto; } .daybtn svg { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .tabb, .tabb svg { transition: none; } }
+/* ----- Les pages : une couleur par catégorie, une bannière, des cartes illustrées ----- */
+#shop { --acc: #F7C948; --acc2: #F08A3C; --accbg: rgba(247,201,72,.2); }
+#look { --acc: #C3ADFF; --acc2: #7A5CC0; --accbg: rgba(155,126,222,.24); }
+#games { --acc: #7CC0FF; --acc2: #3D6FD9; --accbg: rgba(76,140,255,.24); }
+#well { --acc: #8FF0D8; --acc2: #2FA58A; --accbg: rgba(63,200,160,.22); }
+#shop .sheet, #look .sheet, #games .sheet, #well .sheet { background: radial-gradient(130% 46% at 50% 0%, var(--accbg), rgba(0,0,0,0) 70%), linear-gradient(180deg, #252A49, #161928 75%); padding-top: 0 !important; gap: 14px; }
+#shop .sheethead, #look .sheethead, #games .sheethead, #well .sheethead { position: sticky; top: 0; z-index: 3; margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0; padding: max(14px, env(safe-area-inset-top, 0px)) 16px 12px; background: linear-gradient(135deg, var(--acc2), #2A2F55 85%); border-radius: 0 0 22px 22px; box-shadow: 0 8px 18px rgba(0,0,0,.35), inset 0 -2px 0 rgba(255,255,255,.08); justify-content: flex-start; }
+#shop .sheethead h2, #look .sheethead h2, #games .sheethead h2, #well .sheethead h2 { color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.25); margin-right: auto; }
+.hicon { flex: none; width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.2); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); color: #fff; }
+.hicon svg { width: 26px; height: 26px; }
+.page .sheethead .pill { background: rgba(0,0,0,.3); border-color: rgba(255,255,255,.25); color: #fff; }
+#shop .tab[aria-selected="true"], #look .tab[aria-selected="true"] { background: linear-gradient(180deg, var(--acc), var(--acc2)); border-color: transparent; color: var(--dark-ink); box-shadow: 0 4px 0 rgba(0,0,0,.25); }
+#shop .tab, #look .tab { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); }
+.prev { box-shadow: inset 0 0 0 2px rgba(255,255,255,.14), 0 10px 22px rgba(0,0,0,.35), 0 0 0 5px var(--accbg); }
+/* les jeux : une grille de cartes */
+#gmList { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+#gmList .ghead { grid-column: 1 / -1; color: #fff; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; } #gmList .ghead::after { content: ''; flex: 1; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(255,255,255,.25), rgba(255,255,255,0)); }
+#gmList .gcard { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 10px 10px; border-radius: 20px; background: linear-gradient(170deg, #343B68, #23284A); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 6px 14px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.1); }
+#gmList .gcard .nm { display: flex; flex-direction: column; gap: 3px; font-size: .98rem; line-height: 1.15; }
+#gmList .gcard .sub { font-size: .76rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+#gmList .gcard .sub.rar3 { display: inline-block; align-self: flex-start; background: rgba(247,201,72,.16); color: #FFE072; border-radius: 999px; padding: 2px 8px; }
+#gmList .gcard .buy { width: 100%; margin-top: auto; }
+.gicon { flex: none; width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; color: #fff; box-shadow: 0 5px 10px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.35); }
+.gicon svg { width: 32px; height: 32px; }
+#games .stats .stat { background: linear-gradient(170deg, rgba(76,140,255,.28), rgba(30,34,54,.6)); border: 1px solid rgba(255,255,255,.1); }
+#games .stats .stat strong { color: #fff; }
+/* le bien-être : des lignes avec une pastille illustrée */
+#wellList .gcard { border-radius: 18px; padding: 10px; gap: 10px; background: linear-gradient(170deg, #2F4A54, #232B45); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 5px 12px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); }
+#wellList .gcard .gicon { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(160deg, #6FE0C4, #2FA58A); }
+#wellList .gcard .gicon svg { width: 26px; height: 26px; }
+#wellList .gcard.ok { border: 2px solid #3FA890; background: linear-gradient(170deg, #25564C, #1F2C40); }
+#wellList .gcard.ok .gicon { background: linear-gradient(160deg, #B9F5E6, #5FD6BA); color: #14483C; }
+#well .sheet > .small { background: rgba(255,255,255,.07); border-radius: 14px; padding: 8px 12px; }
+/* la boutique et l'atelier */
+#shop .item { border-radius: 18px; background: linear-gradient(170deg, #3A3A5C, #262A48); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 5px 12px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); }
+#shop .tile, #look .tile { border-radius: 18px; box-shadow: 0 5px 12px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); }
+#look .tile[aria-pressed="true"], #shop .tile[aria-pressed="true"] { border-color: var(--acc); box-shadow: 0 0 0 3px var(--accbg), 0 5px 12px rgba(0,0,0,.25); }
 </style>
 </head>
 <body>
@@ -3560,11 +3597,11 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     WELL.forEach(function (a) {
       var S = SESS[a.key] || a, done = !!w.done[a.key]; if (done) nb++;
       var row = el('div', 'gcard' + (done ? ' ok' : '')), nm = el('span', 'nm', S.name); nm.appendChild(el('span', 'sub', S.sub)); if (done) nm.appendChild(el('span', 'sub tick', _T('Fait aujourd\'hui')));
-      row.appendChild(nm); row.appendChild(btn('buy' + (done ? ' on' : ''), done ? _T('Refaire') : _T('Commencer'), a.go)); box.appendChild(row);
+      row.appendChild(wicon(a.key)); row.appendChild(nm); row.appendChild(btn('buy' + (done ? ' on' : ''), done ? _T('Refaire') : _T('Commencer'), a.go)); box.appendChild(row);
     });
     /* les verres d'eau : un simple compteur */
     var wd = !!w.done.eau, row2 = el('div', 'gcard' + (wd ? ' ok' : '')), nm2 = el('span', 'nm', _T('Verres d\'eau : ') + w.water + _T(' sur 6')); nm2.appendChild(el('span', 'sub', _T('Appuie à chaque verre bu. À 6, c\'est gagné.'))); if (wd) { nb++; nm2.appendChild(el('span', 'sub tick', _T('Fait aujourd\'hui'))); }
-    row2.appendChild(nm2); var wb = btn('buy' + (wd ? ' on' : ''), _T('+ 1 verre'), function () { var w2 = wellDay(); w2.water = Math.min(12, w2.water + 1); saveG(); sfx('pop'); if (w2.water >= 6) wellDone('eau'); else refresh(false); paintWell(); }); wb.id = 'waterPlus'; row2.appendChild(wb); box.appendChild(row2);
+    row2.appendChild(wicon('eau')); row2.appendChild(nm2); var wb = btn('buy' + (wd ? ' on' : ''), _T('+ 1 verre'), function () { var w2 = wellDay(); w2.water = Math.min(12, w2.water + 1); saveG(); sfx('pop'); if (w2.water >= 6) wellDone('eau'); else refresh(false); paintWell(); }); wb.id = 'waterPlus'; row2.appendChild(wb); box.appendChild(row2);
     $('wellCount').textContent = nb + ' / ' + (WELL.length + 1);
   }
   $('navWell').addEventListener('click', function () { sfx('tick'); tabOpen('well'); });
@@ -3942,23 +3979,44 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 
   /* ---------- La liste des jeux ---------- */
   var GAMES = [
-    { name: _T('La course des poubelles'), sub: _T('Esquive, saute et glisse à travers cinq zones.'), rec: function () { return G.best ? _T('Record : ') + G.best + ' m' : ''; }, go: runStart },
-    { name: _T('Attrape-fruits'), sub: _T('Attrape ce qui est bon, évite les bonbons et les écrans.'), rec: function () { return G.rec.catch ? _T('Record : ') + G.rec.catch : ''; }, go: catchStart },
-    { name: _T('Mémoire'), sub: _T('Retrouve les paires de cosmétiques.'), rec: function () { return G.rec.mem ? _T('Record : ') + G.rec.mem + _T(' coups') : ''; }, go: memStart },
-    { name: _T('Tri des déchets'), sub: _T('45 secondes pour mettre chaque déchet dans la bonne poubelle.'), rec: function () { return G.rec.tri ? _T('Record : ') + G.rec.tri : ''; }, go: triStart },
-    { head: _T('Jeux de cerveau'), name: _T('Calcul éclair'), sub: _T('45 secondes de calcul mental, de plus en plus corsé.'), rec: function () { return G.rec.calc ? _T('Record : ') + G.rec.calc : ''; }, go: function () { brStart('calc'); } },
-    { name: _T('La suite lumineuse'), sub: _T('Retiens la suite et refais-la. Elle s\'allonge à chaque tour.'), rec: function () { return G.rec.suite ? _T('Record : suite de ') + G.rec.suite : ''; }, go: function () { brStart('suite'); } },
-    { name: _T('Couleurs pièges'), sub: _T('Appuie sur la couleur de l\'encre, pas sur le mot écrit.'), rec: function () { return G.rec.stroop ? _T('Record : ') + G.rec.stroop : ''; }, go: function () { brStart('stroop'); } },
-    { name: _T('Le mot mélangé'), sub: _T('Remets les lettres dans l\'ordre pour retrouver le mot.'), rec: function () { return G.rec.mots ? _T('Record : ') + G.rec.mots + _T(' mots') : ''; }, go: function () { brStart('mots'); }, words: true },
-    { name: _T('Chasse aux nombres'), sub: _T('Touche les nombres dans l\'ordre, le plus vite possible.'), rec: function () { return G.rec.ordre ? _T('Record : ') + G.rec.ordre : ''; }, go: function () { brStart('ordre'); } }
+    { ic: 'run', name: _T('La course des poubelles'), sub: _T('Esquive, saute et glisse à travers cinq zones.'), rec: function () { return G.best ? _T('Record : ') + G.best + ' m' : ''; }, go: runStart },
+    { ic: 'apple', name: _T('Attrape-fruits'), sub: _T('Attrape ce qui est bon, évite les bonbons et les écrans.'), rec: function () { return G.rec.catch ? _T('Record : ') + G.rec.catch : ''; }, go: catchStart },
+    { ic: 'cards', name: _T('Mémoire'), sub: _T('Retrouve les paires de cosmétiques.'), rec: function () { return G.rec.mem ? _T('Record : ') + G.rec.mem + _T(' coups') : ''; }, go: memStart },
+    { ic: 'bin', name: _T('Tri des déchets'), sub: _T('45 secondes pour mettre chaque déchet dans la bonne poubelle.'), rec: function () { return G.rec.tri ? _T('Record : ') + G.rec.tri : ''; }, go: triStart },
+    { head: _T('Jeux de cerveau'), ic: 'calc', name: _T('Calcul éclair'), sub: _T('45 secondes de calcul mental, de plus en plus corsé.'), rec: function () { return G.rec.calc ? _T('Record : ') + G.rec.calc : ''; }, go: function () { brStart('calc'); } },
+    { ic: 'pads', name: _T('La suite lumineuse'), sub: _T('Retiens la suite et refais-la. Elle s\'allonge à chaque tour.'), rec: function () { return G.rec.suite ? _T('Record : suite de ') + G.rec.suite : ''; }, go: function () { brStart('suite'); } },
+    { ic: 'drop', name: _T('Couleurs pièges'), sub: _T('Appuie sur la couleur de l\'encre, pas sur le mot écrit.'), rec: function () { return G.rec.stroop ? _T('Record : ') + G.rec.stroop : ''; }, go: function () { brStart('stroop'); } },
+    { ic: 'abc', name: _T('Le mot mélangé'), sub: _T('Remets les lettres dans l\'ordre pour retrouver le mot.'), rec: function () { return G.rec.mots ? _T('Record : ') + G.rec.mots + _T(' mots') : ''; }, go: function () { brStart('mots'); }, words: true },
+    { ic: 'num', name: _T('Chasse aux nombres'), sub: _T('Touche les nombres dans l\'ordre, le plus vite possible.'), rec: function () { return G.rec.ordre ? _T('Record : ') + G.rec.ordre : ''; }, go: function () { brStart('ordre'); } }
   ];
   if (LANG === 'zh' || LANG === 'hi') GAMES = GAMES.filter(function (gq) { return !gq.words; });      /* mélanger des lettres n'a pas de sens dans ces écritures */
+  /* Les dessins des cartes : [tracé, couleur de fond] */
+  var SVG0 = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">';
+  var GICON = {
+    run: ['<path d="M13 2L4 14h6l-1 8 9-12h-6z" fill="currentColor"/>', 'linear-gradient(160deg,#FFB347,#F0683C)'],
+    apple: ['<path d="M12 8c-3-2.4-7 0-7 4.8S8 21 12 20c4 1 7-2.400 7-7.200S15 5.600 12 8z" fill="currentColor"/><path d="M12 8c0-2 1-4 3-5"/>', 'linear-gradient(160deg,#FF7A8A,#D9365A)'],
+    cards: ['<rect x="3" y="6" width="10" height="14" rx="2"/><rect x="11" y="3" width="10" height="14" rx="2" fill="currentColor"/>', 'linear-gradient(160deg,#B79CFF,#7A5CC0)'],
+    bin: ['<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13M10 11v6M14 11v6"/>', 'linear-gradient(160deg,#7FE0A0,#2F9E5E)'],
+    calc: ['<path d="M5 8h6M8 5v6M14 8h5M5 17h6M14 15l4 4M18 15l-4 4"/>', 'linear-gradient(160deg,#7CC0FF,#3D6FD9)'],
+    pads: ['<rect x="4" y="4" width="7" height="7" rx="2" fill="currentColor"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2" fill="currentColor"/>', 'linear-gradient(160deg,#FFD35C,#E59A1F)'],
+    drop: ['<path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z" fill="currentColor"/>', 'linear-gradient(160deg,#FF8FD0,#C0489A)'],
+    abc: ['<path d="M4 19l4-12 4 12M5.500 15h5M15 7h5M15 12h5M15 17h5"/>', 'linear-gradient(160deg,#6FE0C4,#2FA58A)'],
+    num: ['<path d="M5 9l2-2v10M11 8.500c0-2 4-2 4 0 0 2-4 4-4 8h4M18 7h3l-2 4c2 0 2.500 2 2 3.500-.5 1.500-2.500 1.500-3.200.5"/>', 'linear-gradient(160deg,#9AA7FF,#5562D9)']
+  };
+  var WICON = {
+    calme: '<path d="M3 9h10a3 3 0 1 0-3-3M3 14h14a3 3 0 1 1-3 3M3 19h6"/>', carree: '<rect x="5" y="5" width="14" height="14" rx="3"/><circle cx="5" cy="5" r="1.600" fill="currentColor"/>',
+    coeur: '<path d="M12 20c-5-3-8-6.500-8-10a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 3.500-3 7-8 10z" fill="currentColor"/>', scan: '<circle cx="12" cy="5" r="2.500"/><path d="M12 8v7M8 11h8M9 21l3-6 3 6"/>',
+    nuage: '<path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.600-1A4.500 4.500 0 0 1 17 18z" fill="currentColor"/>', etire: '<circle cx="12" cy="4" r="2"/><path d="M4 9l8 2 8-2M12 11v5M8 21l4-5 4 5"/>',
+    sons: '<path d="M4 12h.5M8 8v8M12 5v14M16 8v8M20 12h.5"/>', merci: '<path d="M6 4h11a1 1 0 0 1 1 1v15H6zM6 4v16M10 9h5M10 13h5"/>',
+    humeur: '<circle cx="12" cy="12" r="9"/><path d="M8 14c1.500 2 6.500 2 8 0M9 9.500v.5M15 9.500v.5"/>', eau: '<path d="M7 4h10l-1.500 16h-7zM8 10h8"/>'
+  };
+  function wicon(key) { var w = el('span', 'gicon'); w.innerHTML = SVG0 + (WICON[key] || WICON.coeur) + '</svg>'; return w; }
   function paintGames() {
     var gm = gameDay(), left = playsLeft(), box = $('gmList'); empty2(box);
     $('gmRuns').textContent = left + ' / ' + RUNS_PER_DAY; $('gmCoins').textContent = gm.coins + ' / ' + COINS_PER_DAY;
     GAMES.forEach(function (gq) {
       if (gq.head) box.appendChild(el('h3', 'ghead', gq.head));
-      var row = el('div', 'gcard'), nm = el('span', 'nm', gq.name); nm.appendChild(el('span', 'sub', gq.sub)); var rc = gq.rec(); if (rc) nm.appendChild(el('span', 'sub rar3', rc));
+      var row = el('div', 'gcard'), nm = el('span', 'nm', gq.name), gi = el('span', 'gicon'), gk = GICON[gq.ic] || GICON.run; gi.innerHTML = SVG0 + gk[0] + '</svg>'; gi.style.background = gk[1]; row.appendChild(gi); nm.appendChild(el('span', 'sub', gq.sub)); var rc = gq.rec(); if (rc) nm.appendChild(el('span', 'sub rar3', rc));
       var b = btn('buy', _T('Jouer'), gq.go); b.disabled = (!gq.free && left <= 0) || isNight(); row.appendChild(nm); row.appendChild(b); box.appendChild(row);
     });
     $('gmNote').textContent = isNight() ? _T('Ton monstre dort : les jeux sont fermés de 22 h à 6 h. Le bien-être reste ouvert. Bonne nuit !') : left > 0 ? _T('Les jeux rapportent un peu de pièces. Les vraies récompenses viennent de ton sommeil, de tes pas et de ton temps d\'écran.') : _T('Plus de partie pour aujourd\'hui. L\'espace bien-être reste ouvert. Reviens demain !');
@@ -4135,6 +4193,9 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
      L'onglet de la page ouverte est mis en avant ; « Accueil » referme tout. Sur une page, glisser le doigt de côté passe à l'onglet voisin. */
   var TABORDER = ['shop', 'look', 'home', 'games', 'well'], TABBTN = { shop: 'navShop', look: 'navLook', games: 'navGames', well: 'navWell' }, swipe0 = null;
   function syncTab() { var cur = 'home'; ['shop', 'look', 'games', 'well'].forEach(function (k) { if (!$(k).hidden) cur = k; }); $('tabbar').setAttribute('data-tab', cur); TABORDER.forEach(function (k) { $(k === 'home' ? 'navHome' : TABBTN[k]).setAttribute('aria-current', k === cur ? 'page' : 'false'); }); }
+  [['shop', 'navShop', 'shopTitle'], ['look', 'navLook', 'lookTitle'], ['games', 'navGames', 'gamesTitle'], ['well', 'navWell', 'wellTitle']].forEach(function (q) {
+    var ic = el('span', 'hicon'), sv = $(q[1]).querySelector('svg'); if (sv) ic.appendChild(sv.cloneNode(true)); ic.setAttribute('aria-hidden', 'true'); $(q[2]).parentNode.insertBefore(ic, $(q[2]));
+  });
   var tabTok = 0;
   function tabNow() { var cur = 'home'; ['shop', 'look', 'games', 'well'].forEach(function (k) { if (!$(k).hidden) cur = k; }); return cur; }
   function tabOpen(k) {                       /* la page arrive du côté où se trouve son onglet */

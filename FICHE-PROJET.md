@@ -424,6 +424,7 @@ En bas de l'écran, une barre de cinq onglets reste toujours visible, comme dans
 | Jeux | La liste des mini-jeux |
 | Bien-être | Les dix activités |
 
+- **Chaque page a sa couleur** : doré pour la Boutique, violet pour l'Atelier, bleu pour les Jeux, vert pour le Bien-être. Une bannière porte l'icône et le nom de la page. Les jeux sont présentés en grille de cartes, chacune avec son dessin ; les activités bien-être ont chacune une pastille illustrée.
 - **Les pages glissent de côté.** Une page arrive du côté où se trouve son onglet (la Boutique vient de la gauche, les Jeux de la droite) et repart par le même côté.
 - L'onglet de la page ouverte est doré et surélevé.
 - Toucher « Accueil » ou retoucher l'onglet ouvert ramène au monstre.

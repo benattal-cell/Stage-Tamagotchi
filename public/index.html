@@ -3219,18 +3219,39 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   /* Les sons apaisants : du bruit filtré, comme pour les bruitages, mais qui dure */
   var AMB = { node: null, key: '', timer: null, t: 0 };
   var AMBS = [['pluie', _T('La pluie')], ['vagues', _T('Les vagues')], ['vent', _T('Le vent dans les arbres')]];
-  function ambStop() { if (AMB.node) { try { AMB.node.g.gain.setTargetAtTime(0, actx.currentTime, 0.4); var nd = AMB.node; setTimeout(function () { try { nd.src.stop(); nd.lfo.stop(); } catch (e) {} }, 1500); } catch (e) {} } AMB.node = null; AMB.key = ''; clearInterval(AMB.timer); musicSync(); ambPaint(); }
+  function ambStop() { if (AMB.node) { try { AMB.node.g.gain.setTargetAtTime(0, actx.currentTime, 0.4); var nd = AMB.node; clearInterval(nd.drops); setTimeout(function () { try { nd.src.stop(); nd.lfo.stop(); if (nd.low) nd.low.stop(); } catch (e) {} }, 1500); } catch (e) {} } AMB.node = null; AMB.key = ''; clearInterval(AMB.timer); musicSync(); ambPaint(); }
+  /* Un bruit « rose » : plus grave et plus doux à l'oreille que le souffle blanc. Fabriqué une fois, puis joué en boucle. */
+  function pinkBuffer() {
+    if (AMB.pink) return AMB.pink;
+    var n = Math.floor(actx.sampleRate * 5), bf = actx.createBuffer(1, n, actx.sampleRate), d = bf.getChannelData(0), b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, w, i;
+    for (i = 0; i < n; i++) { w = Math.random() * 2 - 1; b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852; b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898; d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11; b6 = w * 0.115926; }
+    for (i = 0; i < 2000; i++) { var k = i / 2000; d[i] = d[i] * k + d[n - 2000 + i] * (1 - k); }      /* la fin se fond dans le début : la boucle ne claque pas */
+    AMB.pink = bf; return bf;
+  }
   function ambPlay(key) {
     unlock(); if (!actx) { $('ambNote').textContent = _T('Le son n\'est pas disponible sur cet appareil.'); return; }
     ambStop(); if (actx.state === 'suspended') actx.resume();
     var src = actx.createBufferSource(), fl = actx.createBiquadFilter(), g2 = actx.createGain(), lfo = actx.createOscillator(), lg = actx.createGain(), vol = Math.max(0.25, prefs.sfxVolume / 100) * 0.5;
-    src.buffer = noiseBuf; src.loop = true;
-    if (key === 'pluie') { fl.type = 'highpass'; fl.frequency.value = 1400; lfo.frequency.value = 0.35; lg.gain.value = vol * 0.12; }
+    src.buffer = key === 'pluie' ? pinkBuffer() : noiseBuf; src.loop = true;
+    var low = null, drops = null, level = vol, tail = fl;
+    if (key === 'pluie') {
+      /* Une pluie douce : un fond grave et feutré (sans les aigus qui sifflent), un grondement léger, et quelques gouttes */
+      fl.type = 'lowpass'; fl.frequency.value = 4200; fl.Q.value = 0.3; lfo.frequency.value = 0.1; lg.gain.value = vol * 0.14; level = vol * 2.2;
+      var hp = actx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 350; fl.connect(hp); tail = hp;
+      low = actx.createBufferSource(); low.buffer = pinkBuffer(); low.loop = true; low.playbackRate.value = 0.5; var lf = actx.createBiquadFilter(); lf.type = 'lowpass'; lf.frequency.value = 320; var lgn = actx.createGain(); lgn.gain.value = 0.3; low.connect(lf); lf.connect(lgn); lgn.connect(g2); low.start();
+      drops = setInterval(function () {
+        if (!actx || Math.random() > 0.3) return;
+        var ds = actx.createBufferSource(), df = actx.createBiquadFilter(), dg = actx.createGain(), at = actx.currentTime + Math.random() * 0.08;
+        ds.buffer = noiseBuf; df.type = 'bandpass'; df.frequency.value = 1200 + Math.random() * 2000; df.Q.value = 5;
+        dg.gain.setValueAtTime(0, at); dg.gain.linearRampToValueAtTime(0.1 + Math.random() * 0.12, at + 0.004); dg.gain.exponentialRampToValueAtTime(0.001, at + 0.05 + Math.random() * 0.05);
+        ds.connect(df); df.connect(dg); dg.connect(g2); ds.start(at, Math.random() * 0.5, 0.12);
+      }, 110);
+    }
     else if (key === 'vagues') { fl.type = 'lowpass'; fl.frequency.value = 520; lfo.frequency.value = 0.11; lg.gain.value = vol * 0.7; }
     else { fl.type = 'bandpass'; fl.frequency.value = 420; fl.Q.value = 0.6; lfo.frequency.value = 0.19; lg.gain.value = vol * 0.45; }
-    g2.gain.value = 0; g2.gain.setTargetAtTime(vol, actx.currentTime, 0.8); lfo.connect(lg); lg.connect(g2.gain);     /* le volume monte et descend lentement, comme des vagues */
-    src.connect(fl); fl.connect(g2); g2.connect(actx.destination); src.start(); lfo.start();
-    AMB.node = { src: src, g: g2, lfo: lfo }; AMB.key = key; AMB.t = 0; master.gain.setTargetAtTime(0, actx.currentTime, 0.3);   /* la musique du jeu se tait */
+    g2.gain.value = 0; g2.gain.setTargetAtTime(level, actx.currentTime, 1.2); lfo.connect(lg); lg.connect(g2.gain);     /* le volume monte et descend lentement, comme des vagues */
+    src.connect(fl); tail.connect(g2); g2.connect(actx.destination); src.start(); lfo.start();
+    AMB.node = { src: src, g: g2, lfo: lfo, low: low, drops: drops }; AMB.key = key; AMB.t = 0; master.gain.setTargetAtTime(0, actx.currentTime, 0.3);   /* la musique du jeu se tait */
     clearInterval(AMB.timer); AMB.timer = setInterval(function () { AMB.t++; $('ambLeft').textContent = Math.max(0, 180 - AMB.t) + ' s'; if (AMB.t === 60 && wellDone('sons')) $('ambNote').textContent = _T('Une minute d\'écoute : +5 pièces.'); if (AMB.t >= 180) { ambStop(); $('ambNote').textContent = _T('C\'est fini. Tu peux relancer un son.'); } }, 1000);
     $('ambLeft').textContent = '180 s'; $('ambNote').textContent = ''; ambPaint();
   }

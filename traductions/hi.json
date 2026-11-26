@@ -59,7 +59,7 @@
 " pas ": " कदम ",
 "En mauvais état": "बुरी हालत में",
 "Ça fait plusieurs jours que ça ne va pas fort. Quelques bonnes journées et ça ira mieux.": "कई दिनों से हाल कुछ ठीक नहीं है। कुछ अच्छे दिन और सब बेहतर हो जाएगा।",
-"Bébé": "बच्चा",
+"Bébé": "शिशु",
 "Ado": "किशोर",
 "Adulte": "बड़ा",
 "à remplir": "भरना बाकी",
@@ -908,5 +908,9 @@
 "Méditer": "ध्यान करो",
 "Bouger": "हिलो-डुलो",
 "Prendre soin de soi": "अपना ख़याल रखो",
-"Nouvelle forme !": "नया रूप!"
+"Nouvelle forme !": "नया रूप!",
+"Enfant": "बच्चा",
+"Champion": "चैंपियन",
+"Légende": "लीजेंड",
+"Il a atteint sa forme de légende. ": "यह अपने लीजेंड रूप तक पहुँच गया है। "
 }

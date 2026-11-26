@@ -371,21 +371,34 @@ Le jeu existe en cinq langues, les plus parlées dans le monde : anglais, chinoi
 - Restent en français : les messages d'erreur du serveur (comptes et amis) et le tri des déchets, qui suit les poubelles françaises.
 - L'arabe, sixième langue la plus parlée, s'écrit de droite à gauche : il demanderait de retourner toute l'interface.
 
-### Les signes de l'âge, communs à tous les monstres
+### Les six âges et les transformations
 
-En plus de sa transformation à lui (cornes, baguette, collier...), chaque monstre reçoit des effets à sa couleur. Le but fixé par le chef de projet : que le joueur soit émerveillé en découvrant sa transformation.
+Le monstre passe par **six âges**. Les premiers arrivent vite, pour donner envie ; les derniers demandent des semaines.
 
-| Âge | Taille | Ce qu'il gagne |
-|---|---|---|
-| Bébé (niveaux 1 à 4) | Petit | Tétine, biberon, et trois bulles de savon qui tournent autour de lui |
-| Ado (niveaux 5 à 11) | Moyen | Une aura qui respire, un cercle magique qui tourne au sol, des étincelles qui montent, deux orbes en orbite, de petites ailes de lumière, un liseré lumineux sur le corps |
-| Adulte (niveau 12 et plus) | Grand | Tout cela en plus fort : deux cercles magiques, quatre orbes, de grandes ailes déployées qui battent, une couronne dorée qui flotte, une colonne de lumière, et des paillettes sur le corps |
+| Âge | À partir du niveau | Avec des journées parfaites | Ce qu'il gagne |
+|---|---|---|---|
+| Bébé | 1 | Au départ | Tétine, biberon, bulles de savon |
+| Enfant | 3 | 2 jours | Plus de tétine. Une petite aura, ses premières particules, un orbe |
+| Ado | 6 | 5 jours | Un cercle magique au sol, de petites ailes, deux orbes, sa première transformation propre |
+| Adulte | 10 | 12 jours | De grandes ailes, ce qui flotte au-dessus de sa tête, deux cercles, quatre orbes, sa deuxième transformation propre |
+| Champion | 15 | 26 jours | Une deuxième paire d'ailes, une colonne de lumière, des paillettes sur le corps |
+| Légende | 22 | 53 jours | Une roue de rayons dorés, un troisième cercle, des orbes dorés, tout en plus grand |
 
-Les ailes sont déployées sur les côtés pour être vues de face. La couronne se place plus haut si le monstre porte un chapeau.
+Il grandit aussi en taille à chaque âge.
+
+**Chaque monstre a son style.** Trois choses changent d'un monstre à l'autre, et aucun n'a la même combinaison :
+
+| | Les choix possibles |
+|---|---|
+| Ses ailes | Plumes, chauve-souris, flammes, cristaux, feuilles, nageoires, papillon, lames de lumière |
+| Au-dessus de sa tête | Couronne, auréole, étoile, flamme, cristal, laurier, cornes de lumière, gemme |
+| Autour de lui | Étincelles, braises, bulles, feuilles, pétales, flocons, étoiles |
+
+Exemples : le chat a des ailes de flammes, une étoile et des braises ; le yéti des ailes de cristal, un cristal et des flocons ; le poisson des nageoires, une couronne et des bulles ; le blob rose des ailes de papillon, une auréole et des pétales. Le tout à la couleur du monstre.
 
 ### La cinématique de transformation
 
-Quand le monstre change de forme (niveaux 5 et 12) ou gagne une aura (niveaux 5, 10, 15 et 20), une petite scène d'environ neuf secondes se joue :
+Quand le monstre change d'âge (niveaux 3, 6, 10, 15 et 22) ou gagne une aura (niveaux 5, 10, 15 et 20), une petite scène d'environ neuf secondes se joue :
 
 1. Deux bandes noires arrivent, les menus disparaissent, la caméra s'approche et tourne autour du monstre.
 2. Le monstre s'élève, tourne de plus en plus vite et tremble dans une lueur qui grossit, pendant que des étincelles tournent en spirale vers lui, avec un son qui monte.

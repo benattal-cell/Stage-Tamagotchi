@@ -412,6 +412,20 @@ Une série, ce sont des jours d'affilée où les trois mesures sont au moins « 
 - Les jokers se gagnent en jouant : un avec chaque cadeau des 5 étoiles, et un à chaque palier de série de 7, 14 et 30 jours.
 - Un joker répare la série, pas la santé du monstre : un jour raté lui fait quand même perdre de la vie.
 
+### La barre d'onglets
+
+En bas de l'écran, une barre de cinq onglets reste toujours visible, comme dans beaucoup de jeux sur téléphone. Chaque catégorie a sa page.
+
+| Onglet | Ce qu'il ouvre |
+|---|---|
+| Boutique | Les décors, les accessoires et les créatures. Le monstre reste visible en haut pour essayer |
+| Atelier | L'apparence du monstre, lui aussi visible en haut |
+| **Accueil** (au milieu) | Le monstre dans son décor, avec le bouton « Ma journée » |
+| Jeux | La liste des mini-jeux, en pleine page |
+| Bien-être | Les dix activités, en pleine page |
+
+L'onglet de la page ouverte est doré et surélevé. Toucher « Accueil » ou retoucher l'onglet ouvert ramène au monstre. Sur une page, glisser le doigt vers la gauche ou la droite passe à l'onglet voisin. Les boutons « Terminé » de ces pages ont disparu : c'est la barre qui sert à naviguer. Les défis (la cible) et le carnet (la plaque du nom) s'ouvrent toujours depuis l'accueil.
+
 ### Le carnet du monstre
 
 En touchant la plaque du nom, on ouvre le carnet : une photo du monstre dans son décor (qu'on peut enregistrer), son niveau, le niveau de sa prochaine transformation, et six chiffres (âge, journées remplies, série, record de course, trophées, pauses bien-être).

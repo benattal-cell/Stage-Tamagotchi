@@ -399,7 +399,7 @@ Elles gardent les yeux, la bouche, les bras et les pieds de la peluche, donc tou
 
 ### Les packs payants
 
-Un bouton « Packs » est posé à gauche de l'écran principal. Un pack s'achète avec du vrai argent.
+L'offre du Pack Trésor est affichée directement à gauche de l'écran principal, sans rien avoir à ouvrir : une pile de pièces avec « 10 000 », une flamme avec « ×3 » et le prix. La toucher ouvre la liste de tous les packs. Un pack s'achète avec du vrai argent.
 
 | Pack | Contenu | Prix affiché |
 |---|---|---|

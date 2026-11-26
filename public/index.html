@@ -403,6 +403,24 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 #bubble { box-shadow: 0 8px 22px rgba(0,0,0,.35); }
 #toast { box-shadow: 0 8px 24px rgba(0,0,0,.4); }
 .trophy.got { background: linear-gradient(160deg, rgba(247,201,72,.2), rgba(30,34,51,.9)); box-shadow: 0 0 14px rgba(247,201,72,.18); }
+/* ----- Bannière de niveau, pièces qui volent, fondu, carnet ----- */
+#lvlUp { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; overflow: hidden; }
+#lvlUp .rays { position: absolute; width: 150vmax; height: 150vmax; background: repeating-conic-gradient(from 0deg, rgba(247,201,72,.2) 0 10deg, rgba(247,201,72,0) 10deg 20deg); animation: rays 6s linear infinite, lvlFade 2.8s ease-out both; }
+#lvlUp .box { position: relative; text-align: center; animation: lvlPop 2.8s cubic-bezier(.2,1.4,.4,1) both; padding: 0 16px; }
+#lvlUp strong { display: block; font-family: var(--display); font-weight: 800; font-size: clamp(2.6rem, 14vw, 4.6rem); line-height: 1; color: #FFE072; text-shadow: 0 4px 0 #B8860B, 0 10px 24px rgba(0,0,0,.5); }
+#lvlUp span { display: inline-block; margin-top: 10px; background: rgba(20,23,42,.85); border-radius: 999px; padding: 8px 16px; font-weight: 800; }
+@keyframes rays { to { transform: rotate(360deg); } }
+@keyframes lvlFade { 0% { opacity: 0; } 12% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes lvlPop { 0% { transform: scale(.2); opacity: 0; } 14% { transform: scale(1.12); opacity: 1; } 22% { transform: scale(1); } 78% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.3); opacity: 0; } }
+.flycoin { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFF2A8, #F7C948 55%, #C8930F); box-shadow: 0 2px 6px rgba(0,0,0,.35); pointer-events: none; z-index: 30; }
+#fade { position: absolute; inset: 0; background: #0D0F1E; opacity: 0; pointer-events: none; }
+#fade.go { animation: fadeOut .5s ease-out both; }
+@keyframes fadeOut { from { opacity: .7; } to { opacity: 0; } }
+#plate { cursor: pointer; }
+#bookPic { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: 50% 62%; border-radius: 16px; display: block; background: var(--night); }
+#book .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#book a.ghost { display: grid; place-items: center; text-decoration: none; box-sizing: border-box; }
+@media (prefers-reduced-motion: reduce) { #lvlUp .rays { animation: lvlFade 2.8s both; } #lvlUp .box { animation: lvlFade 2.8s both; } #fade.go { animation: none; } }
 </style>
 </head>
 <body>
@@ -410,6 +428,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 <div id="app">
   <div id="stage" role="img" aria-label="Une ruelle la nuit, avec des poubelles et un carton abandonné"></div>
   <div id="nightTint" hidden></div>
+  <div id="fade"></div>
 
   <div class="ui" id="hud" hidden>
     <div class="topbar">
@@ -770,6 +789,17 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       <button type="button" class="big" id="deadNew">Adopter un nouveau monstre</button>
     </div>
   </div>
+  <div class="veil" id="book" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="bookTitle">
+      <div class="sheethead"><h2 id="bookTitle"></h2><span class="pill" id="bookLvl"></span></div>
+      <img id="bookPic" alt="">
+      <p class="small" id="bookNext"></p>
+      <div class="stats" id="bookStats"></div>
+      <a class="ghost" id="bookSave" download="formilife.jpg">Enregistrer la photo</a>
+      <button type="button" class="ghost" id="bookClose">Fermer</button>
+    </div>
+  </div>
+  <div id="lvlUp" hidden><div class="rays"></div><div class="box"><strong id="lvlUpBig"></strong><span id="lvlUpMsg"></span></div></div>
   <div id="bubble" hidden></div>
   <div id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -998,6 +1028,13 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   var lightPool = noRay(new THREE.Mesh(new THREE.PlaneGeometry(9, 9), new THREE.MeshBasicMaterial({ map: softTex, color: 0xFFD98A, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0.2 })));
   lightPool.rotation.x = -Math.PI / 2; lightPool.position.set(HOME.x, 0.012, HOME.z); scene.add(lightPool);
   var shoot = new THREE.Sprite(additive(0xFFFFFF, 0)); shoot.scale.set(2.6, 0.09, 1); shoot.material.rotation = -0.5; shoot.visible = false; scene.add(shoot);
+  var bflies = [], motes = [];
+  [0xFF4F8B, 0xFFB300, 0x3D9BFF].forEach(function (col, n) {
+    var bf = new THREE.Group(), wm = new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide, fog: false }), wg = new THREE.CircleGeometry(0.12, 14); wg.scale(1, 1.35, 1); wg.translate(0.11, 0, 0);
+    var w1 = noRay(new THREE.Mesh(wg, wm)), w2 = noRay(new THREE.Mesh(wg, wm)); w2.scale.x = -1; bf.add(w1); bf.add(w2); var bd2 = noRay(new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.2, 0.03), new THREE.MeshBasicMaterial({ color: 0x3A2E3F, fog: false }))); bf.add(bd2); bf.userData = { a: n * 2.1, s: 0.35 + n * 0.09, w1: w1, w2: w2 }; bf.visible = false; scene.add(bf); bflies.push(bf);
+  });
+  for (var mo = 0; mo < 16; mo++) { var ms = new THREE.Sprite(additive(0xFFE9B0, 0.5)); ms.userData = { x: HOME.x + (Math.random() - 0.5) * 6, z: HOME.z - 2.4 + Math.random() * 3.2, a: Math.random() * 6, s: 0.06 + Math.random() * 0.1, ph: Math.random() }; ms.scale.setScalar(0.07 + Math.random() * 0.1); ms.visible = false; scene.add(ms); motes.push(ms); }
+  var shieldM = noRay(new THREE.Mesh(new THREE.SphereGeometry(1.55, 20, 14), new THREE.MeshBasicMaterial({ color: 0x7FD4FF, transparent: true, opacity: 0.28, depthWrite: false }))); shieldM.visible = false; scene.add(shieldM);
   var shootT = -1, shootNext = 9, shootFrom = new THREE.Vector3(), ambNow = 'night';
   function ambDecor(d) {
     ambNow = d.amb; var sky = new THREE.Color(d.sky);
@@ -1010,6 +1047,11 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   }
   /* Appelé à chaque image : cache l'ambiance pendant la course, fait respirer le halo et lance de temps en temps une étoile filante */
   function ambTick(t, dt) {
+    var inRun = typeof RUN !== 'undefined' && RUN && phase === 'run';
+    shieldM.visible = !!(inRun && RUN.shield); if (shieldM.visible) { shieldM.position.set(pet.position.x, pet.position.y + 0.75, pet.position.z); shieldM.scale.setScalar(0.62 * (1 + Math.sin(t * 6) * 0.04)); }
+    var day = phase !== 'run' && phase !== 'catch' && ambNow === 'day' && !reduce, ins = phase !== 'run' && phase !== 'catch' && ambNow === 'in' && !reduce;
+    bflies.forEach(function (bf) { bf.visible = day; if (!day) return; var q = bf.userData, a = t * q.s + q.a; bf.position.set(HOME.x + Math.sin(a) * 2.4, 1.5 + Math.sin(a * 1.7) * 0.55, HOME.z - 0.8 + Math.cos(a * 0.8) * 1.3); bf.rotation.set(-0.5, Math.cos(a) > 0 ? 0.5 : -0.5, Math.sin(a * 2) * 0.3); var fl = 0.15 + Math.abs(Math.sin(t * 13 + q.a)) * 1.15; q.w1.rotation.y = -fl; q.w2.rotation.y = fl; });
+    motes.forEach(function (ms) { ms.visible = ins; if (!ins) return; var q = ms.userData, l = (t * q.s + q.ph) % 1; ms.position.set(q.x + Math.sin(t * 0.4 + q.a) * 0.3, 0.3 + l * 3.4, q.z); ms.material.opacity = Math.sin(Math.PI * l) * 0.55; ms.material.color.setHex(decorNow === 6 ? 0xFFD766 : 0xFFF0D0); });
     var home = phase !== 'run'; skyDome.visible = home; lightPool.visible = home; moonHalo.visible = home && ambNow !== 'in'; craters.visible = home && ambNow === 'night';
     if (!home) { shoot.visible = false; return; }
     if (!reduce) moonHalo.material.opacity = (ambNow === 'day' ? 0.4 : 0.45) * (0.92 + 0.08 * Math.sin(t * 0.9));
@@ -1689,7 +1731,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
   var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null, back: null, fx: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0, calc: 0, suite: 0, stroop: 0, mots: 0, ordre: 0 }, tuto: false, age: 1, ageOk: false, stats: { well: 0, quiz: 0, quests: 0, brain: 0, gifts: 0 }, quest: { day: '', done: {}, all: false, brain: 0, stars: 0 }, quiz: { day: '', n: 0, ans: -1 }, trophies: [], well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0, calc: 0, suite: 0, stroop: 0, mots: 0, ordre: 0 }, tuto: false, age: 1, ageOk: false, stats: { well: 0, quiz: 0, quests: 0, brain: 0, gifts: 0, streakPaid: 0 }, quest: { day: '', done: {}, all: false, brain: 0, stars: 0 }, quiz: { day: '', n: 0, ans: -1 }, trophies: [], well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
   var G = freshG();
   function load() {
     try {
@@ -1705,7 +1747,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
       var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0), calc: Math.max(0, rc0.calc | 0), suite: Math.max(0, rc0.suite | 0), stroop: Math.max(0, rc0.stroop | 0), mots: Math.max(0, rc0.mots | 0), ordre: Math.max(0, rc0.ordre | 0) }; G.tuto = o.tuto === true || Object.keys(G.entries).length > 0; G.age = (o.age === 0 || o.age === 2 || o.age === 3) ? o.age : 1; G.ageOk = o.ageOk === true;
-      var s0 = (o.stats && typeof o.stats === 'object') ? o.stats : {}; G.stats = { well: Math.max(0, s0.well | 0), quiz: Math.max(0, s0.quiz | 0), quests: Math.max(0, s0.quests | 0), brain: Math.max(0, s0.brain | 0), gifts: Math.max(0, s0.gifts | 0) };
+      var s0 = (o.stats && typeof o.stats === 'object') ? o.stats : {}; G.stats = { well: Math.max(0, s0.well | 0), quiz: Math.max(0, s0.quiz | 0), quests: Math.max(0, s0.quests | 0), brain: Math.max(0, s0.brain | 0), gifts: Math.max(0, s0.gifts | 0), streakPaid: Math.max(0, s0.streakPaid | 0) };
       var q0 = (o.quest && typeof o.quest === 'object') ? o.quest : {}; G.quest = { day: typeof q0.day === 'string' ? q0.day : '', done: (q0.done && typeof q0.done === 'object') ? q0.done : {}, all: q0.all === true, brain: Math.max(0, q0.brain | 0), stars: Math.max(0, Math.min(5, q0.stars | 0)) };
       var z0 = (o.quiz && typeof o.quiz === 'object') ? o.quiz : {}; G.quiz = { day: typeof z0.day === 'string' ? z0.day : '', n: Math.max(0, z0.n | 0), ans: typeof z0.ans === 'number' ? Math.max(-1, Math.min(2, z0.ans | 0)) : -1 };
       G.trophies = Array.isArray(o.trophies) ? o.trophies.filter(function (x) { return typeof x === 'string'; }).slice(0, 60) : [];
@@ -1786,7 +1828,8 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     if (!whys.length && bad) whys.push({ s: 'En mauvais état', l: 'Ça fait plusieurs jours que ça ne va pas fort. Quelques bonnes journées et ça ira mieux.' });
     return { whys: whys, n: n, today: today, coins: coins, stage: stage, bad: bad, streak: streak, mood: m, acheLv: lv, lvl: lvl, xp: rem, need: xpNeed(lvl), hp: hp, age: span + 1 };
   }
-  function show(id) { ['loading', 'title', 'custom', 'hud', 'runHud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; $('rankBtn').hidden = id !== 'hud'; if (id !== 'hud') $('nightTint').hidden = true; }
+  function show(id) { ['loading', 'title', 'custom', 'hud', 'runHud'].forEach(function (k) { $(k).hidden = k !== id; }); $('gear').hidden = id === 'loading'; $('rankBtn').hidden = id !== 'hud'; if (id !== 'hud') $('nightTint').hidden = true; if (id !== lastShown) { lastShown = id; var fd = $('fade'); fd.classList.remove('go'); void fd.offsetWidth; fd.classList.add('go'); } }
+  var lastShown = '';
   function setColor(i) {
     colorIndex = i; paint();
     Array.prototype.forEach.call($('swatches').children, function (x, n) { x.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
@@ -1811,6 +1854,23 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   function liveEyes() { eyes = (modelNow && modelNow.eyes && modelNow.eyes.length) ? modelNow.eyes : pelEyes; }
   function dress() { useSpecies(G.species); buildEars(G.look.ears); buildEyes(G.look.eyes); buildTeeth(G.look.teeth); buildAcc(G.look); syncParts(); stageKey = ''; paint(); liveEyes(); }
   var toastT = null;
+  var lvlT = null;
+  function levelBanner(lvl, msg) {
+    var b = $('lvlUp'); $('lvlUpBig').textContent = 'NIVEAU ' + lvl; $('lvlUpMsg').textContent = msg.replace(/^Niveau \d+ ?[!:] ?/, ''); b.hidden = true; void b.offsetWidth; b.hidden = false;
+    clearTimeout(lvlT); lvlT = setTimeout(function () { b.hidden = true; }, 2800);
+    $('toast').textContent = msg;                         /* pour les lecteurs d'écran */
+  }
+  /* Des pièces s'envolent du monstre vers le compteur */
+  function coinFly(n) {
+    if (reduce || !$('coinPill').getBoundingClientRect || !document.body.animate) return;
+    var app = $('app'), ar = app.getBoundingClientRect(), to = $('coinPill').getBoundingClientRect(), x0 = ar.width / 2, y0 = ar.height * 0.56, x1 = to.left - ar.left + 16, y1 = to.top - ar.top + to.height / 2;
+    for (var k = 0; k < n; k++) (function (k2) {
+      var e = document.createElement('i'); e.className = 'flycoin'; e.style.left = x0 + 'px'; e.style.top = y0 + 'px'; app.appendChild(e);
+      var mx = (Math.random() - 0.5) * 120, my = -40 - Math.random() * 70;
+      var an = e.animate([{ transform: 'translate(0,0) scale(.4)', opacity: 0 }, { transform: 'translate(' + mx + 'px,' + my + 'px) scale(1.1)', opacity: 1, offset: 0.3 }, { transform: 'translate(' + (x1 - x0) + 'px,' + (y1 - y0) + 'px) scale(.6)', opacity: 1 }], { duration: 750, delay: k2 * 60, easing: 'cubic-bezier(.5,0,.3,1)', fill: 'both' });
+      an.onfinish = function () { if (e.parentNode) e.parentNode.removeChild(e); if (k2 === n - 1) { var pl = $('coinPill'); pl.classList.remove('pop'); void pl.offsetWidth; pl.classList.add('pop'); } };
+    })(k);
+  }
   function toast(msg) { $('toast').textContent = msg; $('toast').hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { $('toast').hidden = true; }, 3200); }
   function gauge(id, bar, txt, lv, pct) {
     $(id).textContent = txt; var kid = 'k' + id.slice(1); $(kid).textContent = lv == null ? 'à remplir' : LVL[lv]; $(kid).className = 'gk' + (lv == null ? '' : ' lv' + lv);
@@ -1834,6 +1894,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     $('hpBar').style.width = c.hp + '%'; $('hpTxt').textContent = c.hp; $('hpTrack').setAttribute('aria-valuenow', c.hp);
     $('xpBar').style.width = Math.round(c.xp / c.need * 100) + '%'; $('xpTxt').textContent = c.xp + '/' + c.need; $('xpTrack').setAttribute('aria-valuenow', Math.round(c.xp / c.need * 100));
     $('plate').className = 'plate' + (c.hp <= 30 ? ' low' : '');
+    if (coinShown >= 0 && c.coins > coinGoal && phase === 'play') coinFly(Math.min(9, 3 + Math.floor((c.coins - coinGoal) / 20)));
     coinGoal = c.coins; todayDone = !!t; hpNow = c.hp;
     whyNow = c.whys; if (forceMood && forceMood !== 'forme' && !whyNow.length) whyNow = [{ s: { fatigue: 'Fatigué', tete: 'Mal de tête', triste: 'Pas en forme' }[forceMood] + ' (test)', l: 'C\'est l\'administrateur qui m\'a mis dans cet état, pour tester.' }];
     $('why').hidden = !whyNow.length; if (whyNow.length) $('whyTxt').textContent = whyNow[0].s + (whyNow.length > 1 ? ' (+' + (whyNow.length - 1) + ')' : '');
@@ -1859,7 +1920,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       var msg = up ? 'Niveau ' + c.lvl + ' ! +' + reward + ' pièces' : bd ? G.name + ' ne va pas bien…' : G.name + ' va mieux !';
       if (up && auraName(c.lvl) !== auraName(c.lvl - 1)) msg = 'Niveau ' + c.lvl + ' : ' + auraName(c.lvl) + ' débloquée !';
       else if (up && st > stageNow) msg = 'Niveau ' + c.lvl + ' : ' + G.name + ' devient ' + TITLES[st].toLowerCase() + ' !';
-      if (animate && !reduce && phase === 'play') { pending = { stage: st, bad: bd }; act = null; start('evolve'); toast(msg); if (up) party(); }
+      if (animate && !reduce && phase === 'play') { pending = { stage: st, bad: bd }; act = null; start('evolve'); if (up) { levelBanner(c.lvl, msg); party(); } else toast(msg); }
       else { stageNow = st; badNow = bd; paint(); if (animate && up) toast(msg); }
       return true;
     }
@@ -2778,7 +2839,18 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     o.position.set(type === 'bar3' ? 0 : lane * LANE, 0, z); o.rotation.y = (type === 'bin' || type === 'crt') ? Math.random() * 0.5 - 0.25 : 0; o.visible = true;
     return o;
   }
-  function coin(lane, y, z) { var c2 = freeOf(rcoins); if (c2) { c2.userData.on = true; c2.position.set(lane * LANE, y, z); c2.visible = true; } }
+  var pows = [];
+  [['shield', 0x7FD4FF], ['magnet', 0xFF5C7A]].forEach(function (q) {
+    var pm = mesh(q[0] === 'shield' ? new THREE.SphereGeometry(0.34, 18, 14) : new THREE.TorusGeometry(0.26, 0.1, 10, 20, Math.PI), new THREE.MeshStandardMaterial({ color: q[1], emissive: q[1], emissiveIntensity: 0.55, roughness: 0.3 }), 0, 0, 0, runG);
+    pm.visible = false; pm.castShadow = false; pm.userData = { on: false, kind: q[0] }; pows.push(pm);
+  });
+  function runCrash(o) {                       /* avec un bouclier, le premier choc ne compte pas */
+    if (RUN.shield) { RUN.shield = false; o.userData.on = false; o.visible = false; RUN.shake = 0.25; sfx('pop'); toast('Bouclier cassé : ouf !'); return; }
+    runOver(true);
+  }
+  function coin(lane, y, z) {
+    if (RUN.state === 'go' && RUN.dist > RUN.nextPow) { var pw = pows[Math.random() < 0.5 ? 0 : 1]; if (pw.userData.on || (pw.userData.kind === 'shield' && RUN.shield)) pw = pows[pw === pows[0] ? 1 : 0]; if (!pw.userData.on) { RUN.nextPow = RUN.dist + 150 + Math.random() * 130; pw.userData.on = true; pw.position.set(lane * LANE, y + 0.1, z); pw.visible = true; return; } }
+    var c2 = freeOf(rcoins); if (c2) { c2.userData.on = true; c2.position.set(lane * LANE, y, z); c2.visible = true; } }
   function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
   /* Le générateur de parcours.
      Règle d'or : il existe toujours un chemin. Une « voie sûre » se déplace d'une voie au plus entre deux rangées ;
@@ -2830,7 +2902,8 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     closeSheets(); $('bubble').hidden = true; $('runEnd').hidden = true;
     applyDecor(0); D.forEach(function (gr) { gr.visible = false; }); wall.visible = ledge.visible = false; box.visible = false; floor.visible = false; flies.visible = false; runG.visible = true;
     scene.fog.near = 26; scene.fog.far = 66;
-    obst.concat(rcoins).forEach(function (o) { o.userData.on = false; o.visible = false; }); warns.forEach(function (wm) { wm.material.opacity = 0; });
+    obst.concat(rcoins).concat(pows).forEach(function (o) { o.userData.on = false; o.visible = false; }); warns.forEach(function (wm) { wm.material.opacity = 0; });
+    RUN.shield = false; RUN.magnet = 0; RUN.nextPow = 90;
     RUN.state = 'ready'; RUN.lane = 0; RUN.x = 0; RUN.y = 0; RUN.vy = 0; RUN.slide = 0; RUN.v = 9; RUN.dist = 0; RUN.coins = 0; RUN.next = 2; RUN.safe = 0; RUN.hist = [0, 0, 0]; RUN.zone = 0; RUN.shake = 0; RUN.t0 = clock.getElapsedTime();
     paintZone(); act = null; spin = 0; phase = 'run'; curGame = 'run'; show('runHud'); $('gear').hidden = true; $('runCount').hidden = false; $('runTip').hidden = false; $('runLives').hidden = true;
     $('runTip').textContent = 'Glisse à gauche ou à droite pour changer de voie, vers le haut pour sauter, vers le bas pour passer sous les barrières';
@@ -2874,7 +2947,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       RUN.vy -= 24 * dt; RUN.y += RUN.vy * dt; if (RUN.y <= 0) { RUN.y = 0; RUN.vy = 0; }
       if (RUN.slide > 0) RUN.slide -= dt;
       var low = RUN.slide > 0 && RUN.y < 0.05, warnOn = [false, false, false];
-      function hitTruck(o) { if (o.position.z > -0.6 && o.position.z < 6.2 && Math.abs(o.position.x - RUN.x) < 0.85) runOver(true); }
+      function hitTruck(o) { if (o.position.z > -0.6 && o.position.z < 6.2 && Math.abs(o.position.x - RUN.x) < 0.85) runCrash(o); }
       dashes.forEach(function (o) { o.position.z += dz; if (o.position.z > 8) o.position.z -= 102; });
       arches.forEach(function (o) { o.position.z += dz; if (o.position.z > 10) o.position.z -= 168; });
       towers.forEach(function (o) { o.position.z += dz * 0.7; if (o.position.z > 14) o.position.z -= 180; });
@@ -2898,12 +2971,22 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
         else if (u.type === 'bar') hit = az < 0.42 && ax < 0.8 && !low;
         else if (u.type === 'bar3') hit = az < 0.42 && !low;
         else if (u.type === 'cart') hit = az < 0.6 && ax < 0.8 && RUN.y < 1.15;
-        if (hit) runOver(true);
+        if (hit) runCrash(o);
       });
       rcoins.forEach(function (o) {
         if (!o.userData.on || RUN.state !== 'go') return; o.position.z += dz; o.rotation.z = t * 5;
+        if (RUN.magnet > 0 && o.position.z > -11) { var mk = Math.min(1, dt * 8); o.position.x += (RUN.x - o.position.x) * mk; o.position.y += (0.7 + RUN.y - o.position.y) * mk; }      /* l'aimant attire les pièces proches */
         if (o.position.z > 8) { o.userData.on = false; o.visible = false; return; }
         if (Math.abs(o.position.z) < 0.8 && Math.abs(o.position.x - RUN.x) < 0.75 && Math.abs(o.position.y - 0.7 - RUN.y) < 1.1) { o.userData.on = false; o.visible = false; RUN.coins++; sfx('coin', 0.6); $('runCoins').textContent = RUN.coins; }
+      });
+      if (RUN.magnet > 0) RUN.magnet -= dt;
+      pows.forEach(function (o) {
+        if (!o.userData.on || RUN.state !== 'go') return; o.position.z += dz; o.rotation.y = t * 3;
+        if (o.position.z > 8) { o.userData.on = false; o.visible = false; return; }
+        if (Math.abs(o.position.z) < 0.9 && Math.abs(o.position.x - RUN.x) < 0.8 && Math.abs(o.position.y - 0.8 - RUN.y) < 1.2) {
+          o.userData.on = false; o.visible = false; sfx('fanfare', 0.5);
+          if (o.userData.kind === 'shield') { RUN.shield = true; toast('Bouclier : le prochain choc ne compte pas'); } else { RUN.magnet = 7; toast('Aimant : les pièces viennent à toi pendant 7 secondes'); }
+        }
       });
       warns.forEach(function (wm, n) { wm.material.opacity = warnOn[n] ? 0.22 + Math.abs(Math.sin(t * 11)) * 0.3 : 0; });
       flashM.color.setHex(Math.sin(t * 14) > 0 ? 0xFF8A3C : 0x5A2A10);
@@ -3365,6 +3448,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     checking = true; var q = questDay(), list = questList(), msgs = [], gain = 0, nb = 0;
     list.forEach(function (it, n) { if (!q.done[n] && it[1]() >= it[2]) { q.done[n] = true; gain += 10; G.stats.quests++; msgs.push('Défi réussi : +10 pièces'); } if (q.done[n]) nb++; });
     if (!q.all && nb === 3) { q.all = true; gain += 15; q.stars = Math.min(5, q.stars + 1); msgs.push('Les trois défis du jour : +15 pièces et une étoile'); }
+    [[3, 50], [7, 150], [14, 300], [30, 800]].forEach(function (m) { if (c.streak >= m[0] && (G.stats.streakPaid || 0) < m[0]) { G.stats.streakPaid = m[0]; gain += m[1]; msgs.push('Série de ' + m[0] + ' jours : +' + m[1] + ' pièces'); } });
     TROPHIES.forEach(function (t) { if (G.trophies.indexOf(t[0]) < 0 && t[3](c)) { G.trophies.push(t[0]); gain += 20; msgs.push('Trophée « ' + t[1] + ' » : +20 pièces'); } });
     $('questTxt').textContent = nb + '/3'; $('questPill').setAttribute('aria-label', 'Défis du jour : ' + nb + ' sur 3' + (q.stars >= 5 ? '. Un cadeau t\'attend' : '')); $('questPill').className = 'pill' + (nb < 3 || q.stars >= 5 ? ' todo' : '');
     checking = false; if (!msgs.length) return false;
@@ -3424,6 +3508,23 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       'Ton point à travailler : l\'écran. Choisis des moments sans téléphone, par exemple les repas et l\'heure avant de dormir.'][worst];
     var tc = el('div', 'gcard'), tn = el('span', 'nm', 'Le conseil de ' + G.name); tn.appendChild(el('span', 'sub', tip)); tc.appendChild(tn); box.appendChild(tc);
   }
+  /* ---------- Le carnet du monstre : on touche la plaque du nom ---------- */
+  function openBook() {
+    if (phase !== 'play') return;
+    closeSheets(); var c = calc(), st = c.stage, next = st === 0 ? 5 : st === 1 ? 12 : 0;
+    $('bookTitle').textContent = G.name; $('bookLvl').textContent = 'Niveau ' + c.lvl + ' · ' + TITLES[st];
+    var hidden = $('bubble').hidden; $('bubble').hidden = true; renderer.render(scene, camera);      /* la photo : on redessine la scène et on la copie tout de suite */
+    var url = ''; try { url = renderer.domElement.toDataURL('image/jpeg', 0.9); } catch (e) {}
+    $('bubble').hidden = hidden; $('bookPic').src = url; $('bookPic').alt = 'Photo de ' + G.name; $('bookSave').href = url; $('bookSave').hidden = !url;
+    $('bookNext').textContent = (next ? 'Prochaine transformation au niveau ' + next + ' (encore ' + (next - c.lvl) + (next - c.lvl > 1 ? ' niveaux' : ' niveau') + '). ' : 'Il a atteint sa forme adulte. ') + (c.streak >= 30 ? 'Série de 30 jours atteinte : bravo !' : 'Prochaine récompense de série à ' + (c.streak < 3 ? 3 : c.streak < 7 ? 7 : c.streak < 14 ? 14 : 30) + ' jours.');
+    var box = $('bookStats'); empty2(box);
+    [[c.age + (c.age > 1 ? ' jours' : ' jour'), 'âge'], [c.n, 'journées remplies'], [c.streak, 'série en cours'], [G.best + ' m', 'record de course'], [G.trophies.length + ' / ' + TROPHIES.length, 'trophées'], [G.stats.well, 'pauses bien-être']].forEach(function (q) { var d = el('div', 'stat'); d.appendChild(el('strong', '', String(q[0]))); d.appendChild(el('span', '', q[1])); box.appendChild(d); });
+    sfx('tick'); $('book').hidden = false; $('bookClose').focus();
+  }
+  $('plate').setAttribute('role', 'button'); $('plate').setAttribute('tabindex', '0'); $('plate').setAttribute('aria-label', 'Ouvrir le carnet de ton monstre');
+  $('plate').addEventListener('click', openBook); $('plate').addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openBook(); } });
+  $('bookClose').addEventListener('click', function () { sfx('tick'); $('book').hidden = true; $('bookPic').removeAttribute('src'); });
+  $('book').addEventListener('keydown', function (ev) { if (ev.key === 'Escape') $('bookClose').click(); });
   /* ---------- L'âge du joueur : il règle les objectifs. Il reste sur l'appareil. ---------- */
   var ageIndex = -1;                           /* -1 : on ne connaît pas encore l'âge du joueur */
   function ageBand(v) { var n = Number(String(v).trim()); if (!n || n !== Math.floor(n) || n < 6 || n > 99) return -1; return n < 13 ? 0 : n < 18 ? 1 : n < 65 ? 2 : 3; }
@@ -3778,7 +3879,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       loader.load('models/' + sp.id + MODEL_EXT, function (g) { try { addModel(sp.id, g); } catch (e) {} end(); }, undefined, end);
     });
   });
-  if (location.hash === '#reglage') window.__fl = { shootNow: function () { shootNext = 0; }, decor: function (n) { G.decor = n; applyDecor(n); }, head: function () { return modelNow && modelNow.headBone ? [modelNow.headBone.scale.y, modelNow.headBone.rotation.x] : null; }, talk: function (sec) { say('Bla bla bla bla bla bla', sec * 1000); talkUntil = clock.getElapsedTime() + sec; }, night: function (v) { forceNight = v; nightSync(); }, MOTS: MOTS, BR: BR, breakCheck: breakCheck, state: function () { return G; }, CT: CT, foods: foods, MEM: MEM, TRI: TRI, WS: WS, AMB: AMB, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
+  if (location.hash === '#reglage') window.__fl = { pows: pows, banner: levelBanner, fly: coinFly, shootNow: function () { shootNext = 0; }, decor: function (n) { G.decor = n; applyDecor(n); }, head: function () { return modelNow && modelNow.headBone ? [modelNow.headBone.scale.y, modelNow.headBone.rotation.x] : null; }, talk: function (sec) { say('Bla bla bla bla bla bla', sec * 1000); talkUntil = clock.getElapsedTime() + sec; }, night: function (v) { forceNight = v; nightSync(); }, MOTS: MOTS, BR: BR, breakCheck: breakCheck, state: function () { return G; }, CT: CT, foods: foods, MEM: MEM, TRI: TRI, WS: WS, AMB: AMB, stage: function (n) { forceStage = n; refresh(false); }, RUN: RUN, obst: obst, runMove: runMove, LANE: LANE, MODELS: MODELS, FIT: FIT, snap: function (id, look) { var k = G.species; G.species = id; useSpecies(id); paint(); delete thumbCache.x; var u = thumbLook(look, 'all'); G.species = k; dress(); return u; } };
   var msgs = ['On allume le lampadaire…', 'On sort les poubelles…', 'On pose le carton…', 'Quelque chose bouge dedans…'];
   var stepN = 0;
   function loadStep() {

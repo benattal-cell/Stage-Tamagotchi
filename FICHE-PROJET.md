@@ -161,6 +161,11 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Mode nuit : de 22 h à 6 h le monstre dort, les jeux sont fermés | Fait |
 | Tutoriel en cinq écrans à la première ouverture | Fait |
 | Graphismes : ciel en dégradé, halo de lune, étoiles filantes, lumière au sol, interface en verre dépoli | Fait |
+| Bannière de montée de niveau, pièces qui volent vers le compteur, fondus entre les écrans | Fait |
+| Décors vivants : papillons le jour, poussières dorées à l'intérieur | Fait |
+| Course : bouclier et aimant à ramasser | Fait |
+| Récompenses de série : 3, 7, 14 et 30 jours réussis d'affilée | Fait |
+| Carnet du monstre avec sa photo (on touche la plaque du nom) | Fait |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
@@ -320,6 +325,18 @@ Un bouton rond en haut à droite (la cible) ouvre l'écran des défis.
 - **Une étoile** et 15 pièces quand les trois défis du jour sont réussis. **À 5 étoiles, un cadeau de 100 pièces.**
 - **La question du jour** : une question sur le cerveau, le sommeil, le sport ou les écrans, avec l'explication. 5 pièces si la réponse est bonne. Il y a 20 questions.
 - **20 trophées** à collectionner (séries de jours, niveaux, records, bien-être...). Chacun rapporte 20 pièces.
+
+### Le carnet du monstre
+
+En touchant la plaque du nom, on ouvre le carnet : une photo du monstre dans son décor (qu'on peut enregistrer), son niveau, le niveau de sa prochaine transformation, et six chiffres (âge, journées remplies, série, record de course, trophées, pauses bien-être).
+
+### Les récompenses de série
+
+Une série, ce sont des jours d'affilée où les trois mesures sont au moins « correct ». Elle rapporte une prime une seule fois par palier : 50 pièces à 3 jours, 150 à 7 jours, 300 à 14 jours, 800 à 30 jours.
+
+### Les bonus de la course
+
+Deux objets apparaissent de temps en temps sur la piste, à la place d'une pièce. Le **bouclier** (boule bleue) annule le prochain choc. L'**aimant** (arc rouge) attire les pièces proches pendant 7 secondes.
 
 ### Ma semaine
 

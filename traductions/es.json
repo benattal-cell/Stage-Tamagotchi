@@ -851,5 +851,16 @@
 "Nuit mesurée : ": "Noche medida: ",
 ". Tu peux corriger avant de valider.": ". Puedes corregirla antes de guardar.",
 "Bonne nuit ! Demain matin, rouvre FormiLife : je compterai ta nuit.": "¡Buenas noches! Mañana por la mañana abre FormiLife: contaré tu noche.",
-"Bonne nuit ! À demain.": "¡Buenas noches! Hasta mañana."
+"Bonne nuit ! À demain.": "¡Buenas noches! Hasta mañana.",
+"Graphismes légers": "Gráficos ligeros",
+"Graphismes allégés pour que le jeu reste fluide.": "Gráficos aligerados para que el juego vaya fluido.",
+"Installer l'appli": "Instalar la app",
+"Sauvegarde": "Copia",
+"Sauvegarde de ton monstre": "Copia de tu monstruo",
+"Ce code contient ton monstre et tes journées. Copie-le et garde-le pour toi : il permet de retrouver ton monstre sur un autre téléphone.": "Este código contiene tu monstruo y tus días. Cópialo y guárdalo para ti: sirve para recuperar tu monstruo en otro teléfono.",
+"Ce code n'est pas valable.": "Este código no es válido.",
+"Copier le code": "Copiar el código",
+"Code copié": "Código copiado",
+"Restaurer ce code": "Restaurar este código",
+"Appuie encore pour remplacer ton monstre": "Toca otra vez para reemplazar tu monstruo"
 }

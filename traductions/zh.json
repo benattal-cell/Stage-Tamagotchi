@@ -851,5 +851,16 @@
 "Nuit mesurée : ": "测得睡眠： ",
 ". Tu peux corriger avant de valider.": "。保存前可以修改。",
 "Bonne nuit ! Demain matin, rouvre FormiLife : je compterai ta nuit.": "晚安！明早再打开 FormiLife，我会算出你睡了多久。",
-"Bonne nuit ! À demain.": "晚安！明天见。"
+"Bonne nuit ! À demain.": "晚安！明天见。",
+"Graphismes légers": "省电画质",
+"Graphismes allégés pour que le jeu reste fluide.": "已降低画质，让游戏更流畅。",
+"Installer l'appli": "安装应用",
+"Sauvegarde": "备份",
+"Sauvegarde de ton monstre": "备份你的小怪兽",
+"Ce code contient ton monstre et tes journées. Copie-le et garde-le pour toi : il permet de retrouver ton monstre sur un autre téléphone.": "这段代码包含你的小怪兽和每天的记录。复制并自己保管好：换手机时可以用它找回小怪兽。",
+"Ce code n'est pas valable.": "这段代码无效。",
+"Copier le code": "复制代码",
+"Code copié": "已复制",
+"Restaurer ce code": "用这段代码恢复",
+"Appuie encore pour remplacer ton monstre": "再点一次，替换现在的小怪兽"
 }

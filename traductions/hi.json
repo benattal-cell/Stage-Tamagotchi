@@ -851,5 +851,16 @@
 "Nuit mesurée : ": "रात का माप: ",
 ". Tu peux corriger avant de valider.": "। पक्का करने से पहले बदल सकते हो।",
 "Bonne nuit ! Demain matin, rouvre FormiLife : je compterai ta nuit.": "शुभ रात्रि! कल सुबह FormiLife खोलना: मैं तुम्हारी रात गिन लूँगा।",
-"Bonne nuit ! À demain.": "शुभ रात्रि! कल मिलते हैं।"
+"Bonne nuit ! À demain.": "शुभ रात्रि! कल मिलते हैं।",
+"Graphismes légers": "हल्के ग्राफ़िक्स",
+"Graphismes allégés pour que le jeu reste fluide.": "गेम को स्मूद रखने के लिए ग्राफ़िक्स हल्के किए गए।",
+"Installer l'appli": "ऐप इंस्टॉल करो",
+"Sauvegarde": "बैकअप",
+"Sauvegarde de ton monstre": "तुम्हारे मॉन्स्टर का बैकअप",
+"Ce code contient ton monstre et tes journées. Copie-le et garde-le pour toi : il permet de retrouver ton monstre sur un autre téléphone.": "इस कोड में तुम्हारा मॉन्स्टर और तुम्हारे दिन हैं। इसे कॉपी करके अपने पास रखो: इससे दूसरे फ़ोन पर मॉन्स्टर वापस मिल जाएगा।",
+"Ce code n'est pas valable.": "यह कोड सही नहीं है।",
+"Copier le code": "कोड कॉपी करो",
+"Code copié": "कोड कॉपी हो गया",
+"Restaurer ce code": "इस कोड से वापस लाओ",
+"Appuie encore pour remplacer ton monstre": "मॉन्स्टर बदलने के लिए फिर दबाओ"
 }

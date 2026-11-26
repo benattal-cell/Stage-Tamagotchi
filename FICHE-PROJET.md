@@ -167,6 +167,10 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Récompenses de série : 3, 7, 14 et 30 jours réussis d'affilée | Fait |
 | Carnet du monstre avec sa photo (on touche la plaque du nom) | Fait |
 | Cinq langues : français, anglais, espagnol, chinois, hindi | Fait, à faire relire |
+| Installation comme une appli et jeu sans connexion | Fait |
+| Sauvegarde du monstre par un code à copier | Fait |
+| Mode « graphismes légers », activé tout seul sur les téléphones lents | Fait |
+| Tête du monstre dans le classement, nouveau logo | Fait |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
@@ -338,6 +342,20 @@ Une appli web n'a pas le droit de lire le podomètre ni le temps d'écran du té
 | Pas | Rien : impossible depuis une page web | Lire le nombre dans l'appli Santé du téléphone et le recopier |
 
 Une nuit de moins de 3 heures n'est pas comptée automatiquement (c'est peut-être un oubli), et une « nuit » de plus de 16 heures est ignorée. Pour tout mesurer automatiquement, il faudrait une vraie appli Android installée : c'est noté pour une version 2.
+
+### Installer l'appli et jouer sans connexion
+
+Sur le vrai site (Railway), FormiLife peut s'installer sur l'écran d'accueil du téléphone, comme une appli : un bouton « Installer l'appli » apparaît dans les paramètres quand le téléphone le permet (Android avec Chrome). Sur iPhone, on passe par le menu Partager, puis « Sur l'écran d'accueil ».
+
+Après une première visite, le jeu s'ouvre aussi sans connexion : le navigateur garde une copie de la page et des modèles 3D (fichier `public/sw.js`). Les comptes, les amis et les classements ont toujours besoin d'Internet.
+
+### La sauvegarde du monstre
+
+Le monstre est enregistré sur l'appareil. Pour changer de téléphone sans le perdre, les paramètres proposent « Sauvegarde » : un long code à copier. Collé sur un autre téléphone, puis « Restaurer ce code » (deux appuis, pour éviter les erreurs), il ramène le monstre, ses journées et ses achats. Ce code contient les journées du joueur : il ne faut pas le partager.
+
+### Les graphismes légers
+
+Pendant les premières secondes de jeu, l'appli mesure sa vitesse. Sous 24 images par seconde, elle passe toute seule en « graphismes légers » : moins de pixels, pas d'ombres, pas de flou ni de papillons. Le joueur peut changer ce réglage dans les paramètres.
 
 ### Les langues
 

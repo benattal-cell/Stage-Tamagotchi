@@ -851,5 +851,16 @@
 "Nuit mesurée : ": "Night measured: ",
 ". Tu peux corriger avant de valider.": ". You can adjust it before saving.",
 "Bonne nuit ! Demain matin, rouvre FormiLife : je compterai ta nuit.": "Good night! Open FormiLife tomorrow morning: I'll count your night.",
-"Bonne nuit ! À demain.": "Good night! See you tomorrow."
+"Bonne nuit ! À demain.": "Good night! See you tomorrow.",
+"Graphismes légers": "Light graphics",
+"Graphismes allégés pour que le jeu reste fluide.": "Graphics lightened so the game stays smooth.",
+"Installer l'appli": "Install the app",
+"Sauvegarde": "Backup",
+"Sauvegarde de ton monstre": "Your monster backup",
+"Ce code contient ton monstre et tes journées. Copie-le et garde-le pour toi : il permet de retrouver ton monstre sur un autre téléphone.": "This code holds your monster and your days. Copy it and keep it to yourself: it lets you get your monster back on another phone.",
+"Ce code n'est pas valable.": "This code isn't valid.",
+"Copier le code": "Copy the code",
+"Code copié": "Code copied",
+"Restaurer ce code": "Restore this code",
+"Appuie encore pour remplacer ton monstre": "Tap again to replace your monster"
 }

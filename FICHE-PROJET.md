@@ -37,7 +37,7 @@ Le joueur donne trois infos par jour : son sommeil, ses pas et son temps d'écra
 | **Pas** | L'objectif de son âge | Au moins les trois quarts de l'objectif | Moins | Pas contente |
 | **Écran de loisir** | Sous la limite de son âge | Jusqu'à 2 h de plus | Au-delà | Mal de tête : petit ou gros |
 
-**Les objectifs dépendent de l'âge du joueur.** Il le choisit en adoptant son monstre et peut le changer dans les paramètres. L'âge reste sur l'appareil.
+**Les objectifs dépendent de l'âge du joueur.** À la première ouverture, il doit écrire son âge (entre 6 et 99 ans) pour adopter son monstre : c'est obligatoire. L'appli ne garde que la tranche d'âge, pas l'âge exact, et elle reste sur l'appareil. On peut changer de tranche dans les paramètres. Un joueur qui avait déjà un monstre se voit poser la question une seule fois.
 
 | Tranche d'âge | Sommeil idéal | Sommeil correct à partir de | Pas : idéal / correct | Écran : idéal / correct jusqu'à |
 |---|---|---|---|---|

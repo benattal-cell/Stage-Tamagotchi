@@ -453,9 +453,11 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
         <span class="lab" id="colLab">Sa couleur</span>
         <div class="row" id="swatches" role="group" aria-labelledby="colLab"></div>
       </div>
-      <div class="field">
-        <span class="lab" id="ageLab">Ton âge (pour régler tes objectifs)</span>
-        <div class="row" id="ageRow" role="group" aria-labelledby="ageLab"></div>
+      <div class="field" id="ageField">
+        <label class="lab" for="ageNum">Ton âge</label>
+        <input class="inp" id="ageNum" type="number" inputmode="numeric" min="6" max="99" placeholder="Par exemple 14" autocomplete="off">
+        <span class="small" id="ageHint">Il sert à régler tes objectifs de sommeil, de pas et d'écran. Il reste sur ton téléphone.</span>
+        <span class="err" id="ageErr" role="alert" hidden>Écris ton âge en chiffres, entre 6 et 99 ans.</span>
       </div>
       <button type="submit" class="big" id="go">Adopter</button>
     </form>
@@ -654,6 +656,15 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       <button type="button" class="big" id="triAgain" hidden>Rejouer</button>
       <button type="button" class="ghost" id="triClose">Fermer</button>
     </div>
+  </div>
+  <div class="veil" id="ageAsk" hidden>
+    <form class="card" id="ageForm" role="dialog" aria-modal="true" aria-labelledby="ageAskTitle" novalidate>
+      <h2 id="ageAskTitle">Quel âge as-tu ?</h2>
+      <p class="small">Tes objectifs de sommeil, de pas et d'écran dépendent de ton âge. Il reste sur ton téléphone.</p>
+      <input class="inp" id="ageNum2" type="number" inputmode="numeric" min="6" max="99" placeholder="Par exemple 14" aria-labelledby="ageAskTitle" autocomplete="off">
+      <span class="err" id="ageErr2" role="alert" hidden>Écris ton âge en chiffres, entre 6 et 99 ans.</span>
+      <button type="submit" class="big">Valider</button>
+    </form>
   </div>
   <div class="veil" id="tuto" hidden>
     <div class="card" role="dialog" aria-modal="true" aria-labelledby="tutoTitle">
@@ -1678,7 +1689,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   var SAVE = 'formilife.creature';
   /* La partie : le nom, la couleur, et une ligne par jour avec le sommeil, les pas et l'écran */
   var LOOK0 = { ears: 'pointues', eyes: 'bizarres', teeth: 'trois', hat: null, glasses: null, neck: null, back: null, fx: null };
-  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0, calc: 0, suite: 0, stroop: 0, mots: 0, ordre: 0 }, tuto: false, age: 1, stats: { well: 0, quiz: 0, quests: 0, brain: 0, gifts: 0 }, quest: { day: '', done: {}, all: false, brain: 0, stars: 0 }, quiz: { day: '', n: 0, ans: -1 }, trophies: [], well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
+  function freshG() { return { name: '', color: 0, entries: {}, dayOffset: 0, look: JSON.parse(JSON.stringify(LOOK0)), owned: [], decors: [0], decor: 0, spent: 0, bonus: 0, species: 'peluche', natural: true, hue: 0, xpBonus: 0, hpFrom: '', lvlSeen: 1, dead: false, born: '', game: { day: '', runs: 0, coins: 0, zen: false }, best: 0, rec: { catch: 0, mem: 0, tri: 0, calc: 0, suite: 0, stroop: 0, mots: 0, ordre: 0 }, tuto: false, age: 1, ageOk: false, stats: { well: 0, quiz: 0, quests: 0, brain: 0, gifts: 0 }, quest: { day: '', done: {}, all: false, brain: 0, stars: 0 }, quiz: { day: '', n: 0, ans: -1 }, trophies: [], well: { day: '', done: {}, water: 0, notes: {}, feel: {} } }; }
   var G = freshG();
   function load() {
     try {
@@ -1693,7 +1704,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       G.decor = G.decors.indexOf(o.decor | 0) >= 0 ? (o.decor | 0) : 0;
       G.spent = Math.max(0, Number(o.spent) || 0); G.bonus = Math.max(0, Number(o.bonus) || 0);
       G.species = SPECIES.some(function (sp) { return sp.id === o.species; }) ? o.species : 'peluche'; G.natural = o.natural !== false; G.hue = Math.max(0, Math.min(7, o.hue | 0));
-      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0), calc: Math.max(0, rc0.calc | 0), suite: Math.max(0, rc0.suite | 0), stroop: Math.max(0, rc0.stroop | 0), mots: Math.max(0, rc0.mots | 0), ordre: Math.max(0, rc0.ordre | 0) }; G.tuto = o.tuto === true || Object.keys(G.entries).length > 0; G.age = (o.age === 0 || o.age === 2 || o.age === 3) ? o.age : 1;
+      var gm = (o.game && typeof o.game === 'object') ? o.game : {}; G.game = { day: typeof gm.day === 'string' ? gm.day : '', runs: Math.max(0, gm.runs | 0), coins: Math.max(0, gm.coins | 0) }; G.game.zen = gm.zen === true; G.best = Math.max(0, o.best | 0); var rc0 = (o.rec && typeof o.rec === 'object') ? o.rec : {}; G.rec = { catch: Math.max(0, rc0.catch | 0), mem: Math.max(0, rc0.mem | 0), tri: Math.max(0, rc0.tri | 0), calc: Math.max(0, rc0.calc | 0), suite: Math.max(0, rc0.suite | 0), stroop: Math.max(0, rc0.stroop | 0), mots: Math.max(0, rc0.mots | 0), ordre: Math.max(0, rc0.ordre | 0) }; G.tuto = o.tuto === true || Object.keys(G.entries).length > 0; G.age = (o.age === 0 || o.age === 2 || o.age === 3) ? o.age : 1; G.ageOk = o.ageOk === true;
       var s0 = (o.stats && typeof o.stats === 'object') ? o.stats : {}; G.stats = { well: Math.max(0, s0.well | 0), quiz: Math.max(0, s0.quiz | 0), quests: Math.max(0, s0.quests | 0), brain: Math.max(0, s0.brain | 0), gifts: Math.max(0, s0.gifts | 0) };
       var q0 = (o.quest && typeof o.quest === 'object') ? o.quest : {}; G.quest = { day: typeof q0.day === 'string' ? q0.day : '', done: (q0.done && typeof q0.done === 'object') ? q0.done : {}, all: q0.all === true, brain: Math.max(0, q0.brain | 0), stars: Math.max(0, Math.min(5, q0.stars | 0)) };
       var z0 = (o.quiz && typeof o.quiz === 'object') ? o.quiz : {}; G.quiz = { day: typeof z0.day === 'string' ? z0.day : '', n: Math.max(0, z0.n | 0), ans: typeof z0.ans === 'number' ? Math.max(-1, Math.min(2, z0.ans | 0)) : -1 };
@@ -1704,7 +1715,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     } catch (e) { return false; }
   }
   function saveG() { try { localStorage.setItem(SAVE, JSON.stringify(G)); } catch (e) {} }
-  function wipe() { G = freshG(); try { localStorage.removeItem(SAVE); } catch (e) {} }
+  function wipe() { ageIndex = -1; G = freshG(); try { localStorage.removeItem(SAVE); } catch (e) {} }
 
   /* ---------- Les règles de gestion : c'est ici que sont écrites les règles décidées pendant l'atelier ---------- */
   var PTS = [0, 100, 300], LVL = ['Pas bien', 'Correct', 'Idéal'];      /* niveau 0, 1 ou 2 */
@@ -1870,7 +1881,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     $('dead').hidden = false; $('deadNew').focus();
   }
   function goTitle() { phase = 'title'; flapT = 0; setMood('forme'); spin = 0; stageNow = 0; badNow = false; pending = null; forceMood = forceStage = forceBad = null; levelNow = 1; sizeGoal = 0.72; fallK = 0; $('dead').hidden = true; closeSheets(); $('bubble').hidden = true; dress(); applyDecor(0); show('title'); musicSync(); }
-  function goCustom() { phase = 'custom'; paintStrip(); show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
+  function goCustom() { $('ageField').hidden = ageIndex >= 0; $('ageErr').hidden = true; phase = 'custom'; paintStrip(); show('custom'); if (!reduce) start('wave'); try { $('name').focus({ preventScroll: true }); } catch (e) {} }
   function goPlay(name) {
     phase = 'play'; flapT = 1; show('hud'); musicSync(); dress(); applyDecor(G.decor); coinShown = -1; refresh(false); nextSay = clock.getElapsedTime() + 9; setTimeout(welcome, 900);
   }
@@ -1896,7 +1907,8 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     ev.preventDefault();
     var name = $('name').value.trim().slice(0, 12);
     if (!name) { $('nameErr').hidden = false; $('name').focus(); return; }
-    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.well = old.well; G.stats = old.stats; G.quest = old.quest; G.quiz = old.quiz; G.trophies = old.trophies; G.tuto = old.tuto === true; G.age = ageIndex; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
+    if (ageIndex < 0) { var bd = ageBand($('ageNum').value); if (bd < 0) { $('ageErr').hidden = false; $('ageNum').focus(); return; } ageIndex = bd; }
+    var old = G; G = freshG(); G.name = name; G.color = colorIndex; G.species = old.species; G.owned = old.owned; G.decors = old.decors; G.bonus = old.bonus; G.best = old.best; G.game = old.game; G.rec = old.rec; G.well = old.well; G.stats = old.stats; G.quest = old.quest; G.quiz = old.quiz; G.trophies = old.trophies; G.tuto = old.tuto === true; G.age = ageIndex; G.ageOk = true; G.born = dayKey(0); saveG();   /* un nouveau monstre : on garde ce que le joueur a acheté */
     goPlay(name); sfx('fanfare'); start('jump');
   });
   /* Les animations : une seule action à la fois, par-dessus la vie « au repos » */
@@ -3413,12 +3425,19 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     var tc = el('div', 'gcard'), tn = el('span', 'nm', 'Le conseil de ' + G.name); tn.appendChild(el('span', 'sub', tip)); tc.appendChild(tn); box.appendChild(tc);
   }
   /* ---------- L'âge du joueur : il règle les objectifs. Il reste sur l'appareil. ---------- */
-  var ageIndex = G.age;
+  var ageIndex = -1;                           /* -1 : on ne connaît pas encore l'âge du joueur */
+  function ageBand(v) { var n = Number(String(v).trim()); if (!n || n !== Math.floor(n) || n < 6 || n > 99) return -1; return n < 13 ? 0 : n < 18 ? 1 : n < 65 ? 2 : 3; }
+  $('ageNum').addEventListener('input', function () { $('ageErr').hidden = true; var bd = ageBand($('ageNum').value); $('ageHint').textContent = bd < 0 ? 'Il sert à régler tes objectifs de sommeil, de pas et d\'écran. Il reste sur ton téléphone.' : 'Objectifs « ' + AGES[bd].name + ' » : ' + AGES[bd].sleep[0] + ' à ' + AGES[bd].sleep[1] + ' h de sommeil, ' + AGES[bd].steps[0].toLocaleString('fr-FR') + ' pas, ' + AGES[bd].screen[0] + ' h d\'écran au plus.'; });
+  $('ageNum2').addEventListener('input', function () { $('ageErr2').hidden = true; });
+  $('ageForm').addEventListener('submit', function (ev) {
+    ev.preventDefault(); var bd = ageBand($('ageNum2').value); if (bd < 0) { $('ageErr2').hidden = false; $('ageNum2').focus(); return; }
+    ageIndex = bd; G.age = bd; G.ageOk = true; saveG(); $('ageAsk').hidden = true; sfx('coin'); paintAges(); refresh(false); toast('Objectifs réglés pour ' + AGES[bd].name); setTimeout(welcome, 600);
+  });
   function paintGoals() { var r = rules(); $('dayGoals').textContent = 'Tes objectifs (' + r.name + ') : ' + r.sleep[0] + ' à ' + r.sleep[1] + ' h de sommeil · ' + r.steps[0].toLocaleString('fr-FR') + ' pas · ' + r.screen[0] + ' h d\'écran de loisir au plus.'; }
   function paintAges() {
-    [['ageRow', false], ['setAge', true]].forEach(function (q) {
+    [['setAge', true]].forEach(function (q) {
       var box = $(q[0]); empty2(box);
-      AGES.forEach(function (a, n) { var b = btn('chip', a.name, function () { sfx('tick'); ageIndex = n; if (q[1] && phase === 'play') { G.age = n; saveG(); refresh(false); preview(); toast('Objectifs réglés pour ' + a.name); } paintAges(); }); b.setAttribute('aria-pressed', ageIndex === n ? 'true' : 'false'); box.appendChild(b); });
+      AGES.forEach(function (a, n) { var b = btn('chip', a.name, function () { sfx('tick'); ageIndex = n; if (q[1] && phase === 'play') { G.age = n; G.ageOk = true; saveG(); refresh(false); preview(); toast('Objectifs réglés pour ' + a.name); } paintAges(); }); b.setAttribute('aria-pressed', ageIndex === n ? 'true' : 'false'); box.appendChild(b); });
     });
   }
   paintAges();
@@ -3447,6 +3466,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
   /* En arrivant : le tutoriel la première fois, sinon un petit mot d'accueil */
   function welcome() {
     if (phase !== 'play') return;
+    if (!G.ageOk) { closeSheets(); $('ageNum2').value = ''; $('ageErr2').hidden = true; $('ageAsk').hidden = false; $('ageNum2').focus(); return; }      /* une ancienne sauvegarde : on demande l'âge une fois */
     if (!G.tuto) { tutoShow(); return; }
     if (isNight()) return;
     var q = questDay(), left = 3 - Object.keys(q.done).length;
@@ -3773,7 +3793,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
       setTimeout(function () {
         $('loading').classList.add('out');
         setTimeout(function () {
-          if (load()) { ageIndex = G.age; paintAges(); setColor(G.color); goPlay(G.name); if (G.dead) { phase = 'dead'; fallK = 1; show(null); $('gear').hidden = true; showDead(); } else if (!reduce) start('wave'); }
+          if (load()) { ageIndex = G.ageOk ? G.age : -1; paintAges(); setColor(G.color); goPlay(G.name); if (G.dead) { phase = 'dead'; fallK = 1; show(null); $('gear').hidden = true; showDead(); } else if (!reduce) start('wave'); }
           else goTitle();
         }, 480);
       }, 450);

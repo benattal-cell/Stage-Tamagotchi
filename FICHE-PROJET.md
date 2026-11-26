@@ -373,24 +373,24 @@ Le jeu existe en cinq langues, les plus parlées dans le monde : anglais, chinoi
 
 ### Les signes de l'âge, communs à tous les monstres
 
-En plus de sa transformation à lui (cornes, baguette, collier...), chaque monstre porte des signes de son âge, à sa couleur :
+En plus de sa transformation à lui (cornes, baguette, collier...), chaque monstre reçoit des effets à sa couleur. Le but fixé par le chef de projet : que le joueur soit émerveillé en découvrant sa transformation.
 
 | Âge | Taille | Ce qu'il gagne |
 |---|---|---|
 | Bébé (niveaux 1 à 4) | Petit | Tétine, biberon, et trois bulles de savon qui tournent autour de lui |
-| Ado (niveaux 5 à 11) | Moyen | Un cercle de gemmes lumineuses qui tourne au sol, deux orbes en orbite, une lueur à ses pieds |
-| Adulte (niveau 12 et plus) | Grand | Un deuxième cercle, quatre orbes, une couronne dorée qui flotte au-dessus de sa tête, et deux ailes qui battent dans son dos |
+| Ado (niveaux 5 à 11) | Moyen | Une aura qui respire, un cercle magique qui tourne au sol, des étincelles qui montent, deux orbes en orbite, de petites ailes de lumière, un liseré lumineux sur le corps |
+| Adulte (niveau 12 et plus) | Grand | Tout cela en plus fort : deux cercles magiques, quatre orbes, de grandes ailes déployées qui battent, une couronne dorée qui flotte, une colonne de lumière, et des paillettes sur le corps |
 
-La couronne ne s'affiche pas s'il porte un chapeau, et les ailes ne s'affichent pas s'il porte quelque chose dans le dos : ses accessoires passent avant.
+Les ailes sont déployées sur les côtés pour être vues de face. La couronne se place plus haut si le monstre porte un chapeau.
 
 ### La cinématique de transformation
 
-Quand le monstre change de forme (niveaux 5 et 12) ou gagne une aura (niveaux 5, 10, 15 et 20), une petite scène de sept secondes se joue :
+Quand le monstre change de forme (niveaux 5 et 12) ou gagne une aura (niveaux 5, 10, 15 et 20), une petite scène d'environ neuf secondes se joue :
 
 1. Deux bandes noires arrivent, les menus disparaissent, la caméra s'approche et tourne autour du monstre.
-2. Le monstre s'élève, tourne de plus en plus vite et tremble dans une lueur qui grossit, avec un son qui monte.
+2. Le monstre s'élève, tourne de plus en plus vite et tremble dans une lueur qui grossit, pendant que des étincelles tournent en spirale vers lui, avec un son qui monte.
 3. Un éclair blanc remplit l'écran : c'est à ce moment que sa forme change.
-4. La lueur retombe, les confettis partent, la fanfare joue et la bannière du niveau s'affiche.
+4. Une onde de choc part au sol, les étincelles jaillissent, l'écran tremble un instant. Puis la lueur retombe, les confettis partent, la fanfare joue et la bannière « NOUVELLE FORME ! » s'affiche. On découvre le monstre avec ses ailes et son cercle magique.
 
 Toucher l'écran fait passer à l'étape suivante. Avec le réglage « réduire les animations » du téléphone, la cinématique ne se joue pas.
 

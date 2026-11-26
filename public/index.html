@@ -456,7 +456,8 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
 @media (max-height: 620px) { #offers { top: 210px; transform: scale(.86); transform-origin: left top; } .offer { animation: none; } }
 #streakPill { cursor: pointer; }
 #packs .sheet { max-height: 76%; }
-.deal { display: inline-block; margin-top: 4px; background: #FF5C5C; color: #fff; border-radius: 999px; padding: 2px 9px; font-weight: 800; font-size: .78rem; } .deal s { opacity: .85; font-weight: 700; margin-left: 4px; } .deal.launch { background: #F08A3C; margin-right: 4px; } .packcard .deal { align-self: flex-start; }
+.deal { display: inline-block; margin-top: 4px; background: #FF5C5C; color: #fff; border-radius: 999px; padding: 2px 9px; font-weight: 800; font-size: .78rem; } .deal s { opacity: .85; font-weight: 700; margin-left: 4px; } .deal.launch { background: #F08A3C; margin-right: 4px; } .packcard .deals { align-self: flex-start; } .deals { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; } .deals .deal { margin-top: 4px; font-size: .78rem; } .deals .deal:first-child:not(.launch) { font-size: .95rem; padding: 3px 10px; }
+.offer { position: relative; } .offer .tag { position: absolute; top: -9px; right: -8px; background: #FF5C5C; color: #fff; border-radius: 999px; padding: 2px 7px; font-weight: 800; font-size: .74rem; box-shadow: 0 2px 6px rgba(0,0,0,.35); transform: rotate(8deg); }
 .packcard { width: 100%; box-sizing: border-box; border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(160deg, #4A3A14, #2A2F4C 70%); border: 2px solid var(--coin); box-shadow: 0 0 18px rgba(247,201,72,.22); }
 .packcard h3 { margin: 0; font-family: var(--display); font-size: 1.2rem; }
 .packart { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
@@ -3988,7 +3989,12 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
      à condition de vraiment passer au prix normal ensuite. */
   var PACKS = [['tresor', _T('Pack Trésor'), _T('10 000 pièces et 3 jokers de série.'), '4,99 €', '6,99 €'], ['nopub', _T('Sans pub'), _T('Retire les publicités du jeu. Pour l\'instant, il n\'y a aucune publicité dans FormiLife.'), '1,99 €', '2,99 €'],
     ['creatures', _T('Pack Créatures'), _T('Les cinq créatures spéciales, tout de suite.'), '2,99 €', '3,99 €'], ['decors', _T('Pack Décors'), _T('Tous les décors, tout de suite.'), '2,99 €', '3,99 €'], ['complet', _T('Pack Complet'), _T('Les créatures et tous les décors.'), '4,99 €', '6,99 €']];
-  function launchTag(pk) { return el('span', 'deal launch', _T('Prix de lancement') + _T(' · ensuite ') + pk[4]); }
+  function euros(txt) { return Number(String(txt).replace(/[^0-9,]/g, '').replace(',', '.')) || 0; }
+  function cut(pk) { var now = euros(pk[3]), later = euros(pk[4]); return later > now ? Math.round((1 - now / later) * 100) : 0; }      /* la réduction par rapport au prix normal à venir */
+  function launchTag(pk) {
+    var w = el('span', 'deals'), k = cut(pk); if (k) w.appendChild(el('span', 'deal', '−' + k + ' %'));
+    w.appendChild(el('span', 'deal launch', _T('Prix de lancement') + _T(' · ensuite ') + pk[4])); return w;
+  }
   var packsOwned = []; try { var pk0 = JSON.parse(localStorage.getItem('formilife.packs') || '[]'); if (Array.isArray(pk0)) packsOwned = pk0.filter(function (x) { return typeof x === 'string'; }); } catch (e) {}
   function hasPack(id) { return packsOwned.indexOf(id) >= 0 || (id !== 'complet' && packsOwned.indexOf('complet') >= 0); }
   function grantPack(id) {                    /* donne le contenu du pack au joueur */
@@ -4289,6 +4295,7 @@ button.pill { color: var(--ink); font-family: inherit; cursor: pointer; pointer-
     $('packBtn').setAttribute('aria-label', tr[1] + ' : ' + tr[2]);
     $('poAd').innerHTML = ART_NOAD; $('adBtn').setAttribute('aria-label', PACKS[1][1]);
     $('adBtn').addEventListener('click', function () { sfx('tick'); openPacks(); });
+    [['packBtn', PACKS[0]], ['adBtn', PACKS[1]]].forEach(function (q) { var k = cut(q[1]); if (k) $(q[0]).appendChild(el('span', 'tag', '−' + k + ' %')); });      /* la réduction de lancement, visible sur l'écran principal */
   })();
   function openPacks() { closeSheets(); paintPacks(); $('packs').hidden = false; focusCam = true; $('packsClose').focus(); }
   $('packBtn').addEventListener('click', function () { sfx('tick'); openPacks(); });

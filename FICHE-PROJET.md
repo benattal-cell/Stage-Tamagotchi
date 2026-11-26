@@ -417,7 +417,7 @@ Deux offres sont affichées directement à gauche de l'écran principal, sans ri
 
 **Les réductions doivent être vraies.** Le Pack Complet affiche « −17 % » avec « 5,98 € » barré : c'est le vrai prix des deux packs qu'il contient, achetés séparément. Le chef de projet avait demandé de faire « comme s'il y avait des réductions » ; la MOA a refusé, car un faux prix barré est une pratique trompeuse, interdite en France et en Europe, et plus grave encore quand les joueurs sont mineurs. Pour une vraie promotion, il faut un vrai prix de départ, pratiqué pendant un temps, puis baissé.
 
-**Le prix de lancement.** Le chef de projet voulait une promotion sur toutes les offres. Chaque pack porte l'étiquette « Prix de lancement · ensuite X € » : pas de pourcentage inventé, pas de faux prix barré, seulement le prix d'après.
+**Le prix de lancement.** Le chef de projet voulait une promotion sur toutes les offres. Chaque pack porte une pastille rouge avec sa réduction de lancement (de −25 % à −33 %) et l'étiquette « Prix de lancement · ensuite X € ». Le pourcentage est calculé par rapport au prix normal qui viendra après : il n'y a pas de faux prix barré. Les deux offres de l'écran principal portent aussi leur pastille.
 
 | Pack | Prix de lancement | Prix normal ensuite |
 |---|---|---|

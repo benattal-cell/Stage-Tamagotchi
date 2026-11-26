@@ -838,5 +838,18 @@
 "Langue": "Language",
 " à ": " to ",
 " ! +": "! +",
-" » : ": ": "
+" » : ": ": ",
+"Je vais dormir": "I'm going to sleep",
+"Je me réveille": "I'm awake",
+"Annuler la nuit": "Cancel the night",
+"Couché depuis ": "In bed for ",
+"Appuie sur « Je vais dormir » en te couchant : FormiLife comptera ta nuit.": "Tap \"I'm going to sleep\" at bedtime: FormiLife will count your night.",
+"Tes pas sont dans l'appli Santé de ton téléphone (Google Fit, Samsung Health, Santé sur iPhone).": "Your steps are in your phone's health app (Google Fit, Samsung Health, Health on iPhone).",
+"Dont FormiLife aujourd'hui : ": "Including FormiLife today: ",
+"Le total est dans les réglages de ton téléphone : « Bien-être numérique » sur Android, « Temps d'écran » sur iPhone.": "The total is in your phone settings: \"Digital Wellbeing\" on Android, \"Screen Time\" on iPhone.",
+"Cette nuit était trop courte ou trop longue pour être comptée.": "That night was too short or too long to count.",
+"Nuit mesurée : ": "Night measured: ",
+". Tu peux corriger avant de valider.": ". You can adjust it before saving.",
+"Bonne nuit ! Demain matin, rouvre FormiLife : je compterai ta nuit.": "Good night! Open FormiLife tomorrow morning: I'll count your night.",
+"Bonne nuit ! À demain.": "Good night! See you tomorrow."
 }

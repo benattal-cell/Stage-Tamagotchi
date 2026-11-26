@@ -838,5 +838,18 @@
 "Langue": "भाषा",
 " à ": " से ",
 " ! +": "! +",
-" » : ": " » : "
+" » : ": " » : ",
+"Je vais dormir": "मैं सोने जा रहा हूँ",
+"Je me réveille": "मैं जाग गया",
+"Annuler la nuit": "रात रद्द करो",
+"Couché depuis ": "सोए हुए: ",
+"Appuie sur « Je vais dormir » en te couchant : FormiLife comptera ta nuit.": "सोते समय «मैं सोने जा रहा हूँ» दबाओ: FormiLife तुम्हारी रात गिन लेगा।",
+"Tes pas sont dans l'appli Santé de ton téléphone (Google Fit, Samsung Health, Santé sur iPhone).": "तुम्हारे कदम फ़ोन के हेल्थ ऐप में हैं (Google Fit, Samsung Health, iPhone पर Health)।",
+"Dont FormiLife aujourd'hui : ": "इसमें से आज FormiLife: ",
+"Le total est dans les réglages de ton téléphone : « Bien-être numérique » sur Android, « Temps d'écran » sur iPhone.": "कुल समय फ़ोन की सेटिंग में है: Android पर «Digital Wellbeing», iPhone पर «Screen Time»।",
+"Cette nuit était trop courte ou trop longue pour être comptée.": "यह रात गिनने के लिए बहुत छोटी या बहुत लंबी थी।",
+"Nuit mesurée : ": "रात का माप: ",
+". Tu peux corriger avant de valider.": "। पक्का करने से पहले बदल सकते हो।",
+"Bonne nuit ! Demain matin, rouvre FormiLife : je compterai ta nuit.": "शुभ रात्रि! कल सुबह FormiLife खोलना: मैं तुम्हारी रात गिन लूँगा।",
+"Bonne nuit ! À demain.": "शुभ रात्रि! कल मिलते हैं।"
 }

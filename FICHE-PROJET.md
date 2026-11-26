@@ -327,6 +327,18 @@ Un bouton rond en haut à droite (la cible) ouvre l'écran des défis.
 - **La question du jour** : une question sur le cerveau, le sommeil, le sport ou les écrans, avec l'explication. 5 pièces si la réponse est bonne. Il y a 20 questions.
 - **20 trophées** à collectionner (séries de jours, niveaux, records, bien-être...). Chacun rapporte 20 pièces.
 
+### Ce que l'appli mesure toute seule
+
+Une appli web n'a pas le droit de lire le podomètre ni le temps d'écran du téléphone. Elle fait ce qu'elle peut :
+
+| Mesure | Ce que fait l'appli | Ce que le joueur fait encore |
+|---|---|---|
+| Sommeil | Le joueur appuie sur « Je vais dormir » en se couchant. Quand il rouvre l'appli le matin, la nuit est comptée et le formulaire est pré-rempli | Corriger si besoin, puis valider |
+| Temps d'écran | L'appli compte le temps passé dans FormiLife | Lire le total dans les réglages du téléphone et le recopier |
+| Pas | Rien : impossible depuis une page web | Lire le nombre dans l'appli Santé du téléphone et le recopier |
+
+Une nuit de moins de 3 heures n'est pas comptée automatiquement (c'est peut-être un oubli), et une « nuit » de plus de 16 heures est ignorée. Pour tout mesurer automatiquement, il faudrait une vraie appli Android installée : c'est noté pour une version 2.
+
 ### Les langues
 
 Le jeu existe en cinq langues, les plus parlées dans le monde : anglais, chinois (mandarin), hindi, espagnol et français. Le joueur choisit dans les paramètres. À la première ouverture, le jeu prend la langue du téléphone.

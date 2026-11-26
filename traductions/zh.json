@@ -838,5 +838,18 @@
 "Langue": "语言",
 " à ": " 至 ",
 " ! +": "！+",
-" » : ": " » : "
+" » : ": " » : ",
+"Je vais dormir": "我要睡觉了",
+"Je me réveille": "我醒了",
+"Annuler la nuit": "取消这一晚",
+"Couché depuis ": "已躺下 ",
+"Appuie sur « Je vais dormir » en te couchant : FormiLife comptera ta nuit.": "睡前点“我要睡觉了”：FormiLife 会帮你计算睡眠时间。",
+"Tes pas sont dans l'appli Santé de ton téléphone (Google Fit, Samsung Health, Santé sur iPhone).": "步数可以在手机的健康应用里查看（Google Fit、Samsung Health、iPhone 的“健康”）。",
+"Dont FormiLife aujourd'hui : ": "其中今天玩 FormiLife： ",
+"Le total est dans les réglages de ton téléphone : « Bien-être numérique » sur Android, « Temps d'écran » sur iPhone.": "总时间在手机设置里：安卓的“数字健康”，iPhone 的“屏幕使用时间”。",
+"Cette nuit était trop courte ou trop longue pour être comptée.": "这一晚太短或太长，无法计算。",
+"Nuit mesurée : ": "测得睡眠： ",
+". Tu peux corriger avant de valider.": "。保存前可以修改。",
+"Bonne nuit ! Demain matin, rouvre FormiLife : je compterai ta nuit.": "晚安！明早再打开 FormiLife，我会算出你睡了多久。",
+"Bonne nuit ! À demain.": "晚安！明天见。"
 }

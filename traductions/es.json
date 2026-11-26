@@ -838,5 +838,18 @@
 "Langue": "Idioma",
 " à ": " a ",
 " ! +": ". +",
-" » : ": " » : "
+" » : ": " » : ",
+"Je vais dormir": "Me voy a dormir",
+"Je me réveille": "Ya me desperté",
+"Annuler la nuit": "Cancelar la noche",
+"Couché depuis ": "En la cama desde hace ",
+"Appuie sur « Je vais dormir » en te couchant : FormiLife comptera ta nuit.": "Toca «Me voy a dormir» al acostarte: FormiLife contará tu noche.",
+"Tes pas sont dans l'appli Santé de ton téléphone (Google Fit, Samsung Health, Santé sur iPhone).": "Tus pasos están en la app de salud de tu teléfono (Google Fit, Samsung Health, Salud en iPhone).",
+"Dont FormiLife aujourd'hui : ": "De ello, FormiLife hoy: ",
+"Le total est dans les réglages de ton téléphone : « Bien-être numérique » sur Android, « Temps d'écran » sur iPhone.": "El total está en los ajustes de tu teléfono: «Bienestar digital» en Android, «Tiempo de uso» en iPhone.",
+"Cette nuit était trop courte ou trop longue pour être comptée.": "Esa noche fue demasiado corta o demasiado larga para contarla.",
+"Nuit mesurée : ": "Noche medida: ",
+". Tu peux corriger avant de valider.": ". Puedes corregirla antes de guardar.",
+"Bonne nuit ! Demain matin, rouvre FormiLife : je compterai ta nuit.": "¡Buenas noches! Mañana por la mañana abre FormiLife: contaré tu noche.",
+"Bonne nuit ! À demain.": "¡Buenas noches! Hasta mañana."
 }

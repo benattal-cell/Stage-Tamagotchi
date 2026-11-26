@@ -172,7 +172,7 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Mode « graphismes légers », activé tout seul sur les téléphones lents | Fait |
 | Tête du monstre dans le classement, nouveau logo | Fait |
 | Cinématique quand le monstre se transforme ou gagne une aura | Fait |
-| Six monstres spéciaux à acheter dans la boutique | Fait |
+| Cinq créatures « objet + animal » à acheter dans la boutique | Fait |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
@@ -380,20 +380,21 @@ Quand le monstre change de forme (niveaux 5 et 12) ou gagne une aura (niveaux 5,
 
 Toucher l'écran fait passer à l'étape suivante. Avec le réglage « réduire les animations » du téléphone, la cinématique ne se joue pas.
 
-### Les monstres de la boutique
+### Les créatures de la boutique
 
-Un rayon « Monstres » vend six monstres spéciaux. Chacun est une espèce existante avec un effet visuel animé qu'on ne peut pas avoir autrement. Une fois acheté, il reste au joueur : il peut repasser à un monstre normal et y revenir dans l'atelier.
+Un rayon « Monstres » vend cinq créatures spéciales, dans l'esprit des « brainrots » d'Internet : un objet mélangé à un animal, avec un nom rigolo qui sonne italien. Elles sont inventées pour FormiLife et construites avec des formes simples (boîtes, boules, cônes).
 
-| Monstre | Effet | Prix | Niveau demandé |
-|---|---|---|---|
-| Sorcier d'or | Tout en or, avec des éclats qui scintillent | 1 500 | 4 |
-| Poisson arc-en-ciel | Les couleurs de l'arc-en-ciel glissent sur lui | 2 000 | 6 |
-| Yéti des glaces | Bleu glacé et brillant | 2 500 | 8 |
-| Ninja fantôme | À moitié transparent, avec une lueur bleue | 3 000 | 10 |
-| Orc de lave | Roche noire traversée de fissures orange qui bougent | 4 000 | 13 |
-| Chat galaxie | Violet et bleu nuit, rempli d'étoiles | 5 000 | 16 |
+| Créature | Le mélange | Ce qui bouge | Prix | Niveau demandé |
+|---|---|---|---|---|
+| Tostino Gattino | Un grille-pain et un chat | Les tartines sautent | 1 500 | 4 |
+| Pinguino Pizzarino | Une pizza et un manchot | | 2 000 | 6 |
+| Brocolino Leonino | Un brocoli et un lion | La crinière de brocoli respire | 2 500 | 8 |
+| Polpetto Razzetto | Une fusée et une pieuvre | Les tentacules ondulent | 3 500 | 11 |
+| Granchio Lampadino | Une ampoule et un crabe | L'ampoule pulse | 5 000 | 15 |
 
-Ce sont des créations du projet. On n'a pas le droit de copier des personnages qui existent déjà (jeux, dessins animés, mèmes d'Internet) : ils appartiennent à ceux qui les ont créés.
+Elles gardent les yeux, la bouche, les bras et les pieds de la peluche, donc toutes ses animations. À l'adolescence deux étoiles tournent autour d'elles, quatre à l'âge adulte. Une fois achetée, une créature reste au joueur et se retrouve dans l'atelier.
+
+**Pourquoi pas les vrais brainrots connus ?** On peut s'inspirer d'un genre (le mélange absurde, le nom qui rime), mais pas recopier un personnage précis : son nom et son apparence appartiennent à ceux qui l'ont créé. Une première version vendait six monstres « à effets » (or, galaxie, lave...) ; le chef de projet ne les a pas aimés, ils ont été retirés.
 
 ### Le carnet du monstre
 

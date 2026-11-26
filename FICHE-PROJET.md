@@ -173,7 +173,8 @@ On construit une petite version qui marche, on la teste, puis on ajoute. Chaque 
 | Tête du monstre dans le classement, nouveau logo | Fait |
 | Cinématique quand le monstre se transforme ou gagne une aura | Fait |
 | Cinq créatures « objet + animal » à acheter dans la boutique | Fait |
-| Rayon « Packs » payants dans la boutique | Vitrine faite, paiement non branché |
+| Jokers de série, gagnés en jouant | Fait |
+| Packs payants | Essayés puis retirés : le jeu n'a rien de payant |
 | Défis du jour, étoiles, cadeau, question du jour et 20 trophées | Fait |
 | Pause écran : un rappel toutes les 20 minutes | Fait |
 | Espace bien-être : respirations, méditations, étirements, sons, carnet, humeur, eau | Fait |
@@ -397,41 +398,19 @@ Elles gardent les yeux, la bouche, les bras et les pieds de la peluche, donc tou
 
 **Pourquoi pas les vrais brainrots connus ?** On peut s'inspirer d'un genre (le mélange absurde, le nom qui rime), mais pas recopier un personnage précis : son nom et son apparence appartiennent à ceux qui l'ont créé. Une première version vendait six monstres « à effets » (or, galaxie, lave...) ; le chef de projet ne les a pas aimés, ils ont été retirés.
 
-### Les packs payants
+### Pas d'achats avec du vrai argent
 
-Deux offres sont affichées directement à gauche de l'écran principal, sans rien avoir à ouvrir et sans prix : le Pack Trésor (une pile de pièces avec « 10 000 » et une flamme avec « ×3 ») et l'offre Sans pub (le mot « AD » barré en rouge). Les toucher ouvre la liste de tous les packs, où les prix sont écrits. Un pack s'achète avec du vrai argent.
+**Décision du chef de projet : FormiLife n'a rien de payant.** Une vitrine de packs payants a été essayée (pièces, jokers, créatures, décors, offre sans pub, réductions de lancement), puis entièrement retirée. Il n'y a ni prix, ni offre, ni publicité dans le jeu. Tout se gagne en jouant et en prenant soin de soi.
 
-| Pack | Contenu | Prix affiché |
-|---|---|---|
-| Pack Trésor | 10 000 pièces et 3 jokers de série. Il peut se racheter | 4,99 € |
-| Sans pub | Retire les publicités du jeu | 1,99 € |
-| Pack Créatures | Les cinq créatures spéciales | 2,99 € |
-| Pack Décors | Tous les décors | 2,99 € |
-| Pack Complet | Les créatures et tous les décors | 4,99 € |
+Si un jour l'équipe veut gagner de l'argent, les pistes notées par la MOA restent valables : ne vendre que de l'apparence, passer par le magasin d'applis avec l'accord d'un parent, n'afficher que des réductions vraies, et faire porter le compte par un adulte.
 
-**Les jokers de série.** Une série, ce sont des jours d'affilée où les trois mesures sont au moins « correct ». Quand un jour raté casse la série, un joker le répare et la série repart. On touche la flamme (en haut à droite) pour voir sa série et ses jokers. Un joker ne répare qu'un jour récent (trois jours au plus) et seulement s'il y avait une série juste avant. On ne trouve des jokers que dans le Pack Trésor.
+### Les jokers de série
 
-**Décision du chef de projet : le Pack Trésor vend des pièces.** La MOA avait conseillé de ne vendre que de l'apparence. Le chef de projet a choisi de vendre aussi des pièces et des jokers. Conséquence à connaître : avec 10 000 pièces on achète presque toute la boutique, donc les pièces gagnées en dormant bien et en marchant comptent moins pour un joueur qui paie.
+Une série, ce sont des jours d'affilée où les trois mesures sont au moins « correct ». Quand un jour raté casse la série, un joker le répare et la série repart. On touche la flamme (en haut à droite) pour voir sa série et ses jokers.
 
-**À régler avant de vendre « Sans pub » : il n'y a aucune publicité dans FormiLife.** Vendre « plus de pub » dans un jeu qui n'en a pas, c'est vendre du vide : la fenêtre de l'offre le dit honnêtement au joueur. Il faudra soit ajouter de la publicité (la MOA le déconseille : joueurs mineurs, données de santé, et un jeu qui demande de moins regarder son écran), soit retirer cette offre.
-
-**Les réductions doivent être vraies.** Le Pack Complet affiche « −17 % » avec « 5,98 € » barré : c'est le vrai prix des deux packs qu'il contient, achetés séparément. Le chef de projet avait demandé de faire « comme s'il y avait des réductions » ; la MOA a refusé, car un faux prix barré est une pratique trompeuse, interdite en France et en Europe, et plus grave encore quand les joueurs sont mineurs. Pour une vraie promotion, il faut un vrai prix de départ, pratiqué pendant un temps, puis baissé.
-
-**Le prix de lancement.** Le chef de projet voulait une promotion sur toutes les offres. Chaque pack porte une pastille rouge avec sa réduction de lancement (de −25 % à −33 %). L'étiquette « Prix de lancement » a été retirée de chaque offre à la demande du chef de projet ; l'explication tient en une phrase en haut de la liste. À côté de chaque pourcentage est écrit « prix normal X € ». Ce prix n'est pas barré et ne s'appelle pas « ancien prix », parce qu'il n'a encore jamais été pratiqué : c'est le prix d'après le lancement. Le pourcentage est calculé par rapport au prix normal qui viendra après : il n'y a pas de faux prix barré. Les deux offres de l'écran principal portent aussi leur pastille.
-
-| Pack | Prix de lancement | Prix normal ensuite |
-|---|---|---|
-| Pack Trésor | 4,99 € | 6,99 € |
-| Sans pub | 1,99 € | 2,99 € |
-| Pack Créatures | 2,99 € | 3,99 € |
-| Pack Décors | 2,99 € | 3,99 € |
-| Pack Complet | 4,99 € | 6,99 € |
-
-**Engagement à tenir :** cette étiquette n'est honnête que si les prix montent vraiment après le lancement. Il faut choisir une date de fin (un mois, par exemple), puis passer aux prix normaux et retirer l'étiquette. Un « lancement » qui ne finit jamais redevient une fausse promotion.
-
-**Le paiement n'est pas branché.** Le bouton du prix ouvre une fenêtre qui décrit le pack et dit que les achats arriveront avec le Play Store, avec l'accord d'un parent. Un vrai paiement passe par le magasin d'applis (Google Play) : c'est lui qui encaisse, vérifie l'accord parental et garde sa part. L'administrateur a un bouton « Débloquer les packs (test) ».
-
-**Avant de vendre pour de vrai**, il faudra : un adulte titulaire du compte développeur, un statut pour déclarer l'argent, une page de confidentialité, et choisir les prix définitifs (ceux-ci sont des exemples).
+- Un joker ne répare qu'un jour récent (trois jours au plus), et seulement s'il y avait une série juste avant.
+- Les jokers se gagnent en jouant : un avec chaque cadeau des 5 étoiles, et un à chaque palier de série de 7, 14 et 30 jours.
+- Un joker répare la série, pas la santé du monstre : un jour raté lui fait quand même perdre de la vie.
 
 ### Le carnet du monstre
 
